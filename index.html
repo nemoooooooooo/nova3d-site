@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300..800&family=Pixelify+Sans:wght@400..700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:var(--bg);
+--bg:#fbf7f0;--paper:#ffffff;--ink:#221d18;--muted:#6b6152;--soft:#a09685;--line:#e8dfd2;--edge:#221d18;
+--pink:#ff9ec7;--pinkdeep:#c76a86;--yellow:#ffd23e;--mint:#a8ecc1;--lav:#c9a6ea;--codebg:#221d18;--codetx:#e8dced;
+transition:background .3s}
+body.dark{--bg:#241f2b;--paper:#2e2836;--ink:#fbeef2;--muted:#b6a9c4;--soft:#8d819c;--line:#3d3547;--edge:#15111b;
+--pink:#f4b8c8;--pinkdeep:#f4b8c8;--yellow:#ffd23e;--mint:#b9d68f;--lav:#c9a6ea;--codebg:#1a1620;--codetx:#d8cde4}
+a{color:var(--pinkdeep,#c76a86);text-decoration:none}a:hover{color:#a9536f}
+input[type=range]{accent-color:#ff9ec7}
+@keyframes nvblink{50%{opacity:0}}
+</style>
+</helmet>
+<div style="font-family:'Outfit',sans-serif;color:var(--ink);min-height:100vh">
+
+<nav data-screen-label="Nav" style="display:flex;align-items:center;justify-content:space-between;padding:15px 32px;border-bottom:1.5px solid var(--edge);position:relative;z-index:5">
+  <div style="display:flex;align-items:center;gap:9px">
+    <div style="width:20px;height:20px;background:var(--yellow);border:1.5px solid var(--edge);border-radius:6px 6px 12px 6px"></div>
+    <span style="font-weight:700;font-size:17.5px;letter-spacing:-.2px">nova3d</span>
+    <span style="font-family:'Space Mono',monospace;font-size:10px;color:var(--soft);margin-left:6px">v0.9 · open source</span>
+  </div>
+  <div style="display:flex;gap:22px;align-items:center;font-size:13.5px;font-weight:500">
+    <a href="https://discord.gg/nova3d" style="display:flex;align-items:center;gap:6px;background:color-mix(in oklab, var(--lav) 30%, var(--paper));border:1.5px solid var(--edge);border-radius:999px;padding:6px 14px;font-weight:700;font-size:12.5px;color:var(--ink);box-shadow:2px 2px 0 var(--edge)" style-hover="transform:translate(-1px,-1px);box-shadow:3px 3px 0 var(--edge)">💬 Discord</a>
+    <a href="https://app.nova3d.xyz/showcase" style="display:flex;align-items:center;gap:6px;background:color-mix(in oklab, var(--mint) 40%, var(--paper));border:1.5px solid var(--edge);border-radius:999px;padding:6px 14px;font-weight:700;font-size:12.5px;color:var(--ink);box-shadow:2px 2px 0 var(--edge)" style-hover="transform:translate(-1px,-1px);box-shadow:3px 3px 0 var(--edge)">🍌 Showcase</a>
+    <a href="https://github.com/RareSense/Nova3D" style="display:flex;align-items:center;gap:6px;background:color-mix(in oklab, var(--yellow) 35%, var(--paper));border:1.5px solid var(--edge);border-radius:999px;padding:6px 14px;font-weight:700;font-size:12.5px;color:var(--ink);box-shadow:2px 2px 0 var(--edge)" style-hover="transform:translate(-1px,-1px);box-shadow:3px 3px 0 var(--edge)">★ GitHub</a>
+    <span onClick="{{ toggleTheme }}" style="cursor:pointer;width:30px;height:30px;border:1.5px solid var(--line);border-radius:9px;display:grid;place-items:center;font-size:14px;background:var(--paper)">{{ themeIcon }}</span>
+    <a href="https://app.nova3d.xyz" style="background:var(--pink);border:1.5px solid var(--edge);border-radius:999px;padding:7px 18px;font-weight:700;color:#221d18;box-shadow:2.5px 2.5px 0 var(--edge)">Try the app →</a>
+  </div>
+</nav>
+
+<header data-screen-label="Hero" style="max-width:1240px;margin:0 auto;padding:52px 32px 30px;text-align:center">
+  <div style="font-family:'Pixelify Sans',monospace;font-size:15px;color:var(--pinkdeep);letter-spacing:2px;margin-bottom:18px">TEXT · PHOTO → STRUCTURED 3D</div>
+  <h1 style="font-weight:700;font-size:58px;line-height:1.04;letter-spacing:-1.8px;margin:0 0 16px;text-wrap:pretty">Assets that stay <span style="color:var(--pink)">alive</span> after generation.</h1>
+  <p style="font-family:'Space Mono',monospace;font-size:19px;line-height:1.4;color:var(--ink);margin:0 0 18px">Assets your <span style="background:color-mix(in oklab, var(--mint) 60%, transparent);padding:1px 7px;border-radius:7px">coding agent</span> can talk to.</p>
+  <p style="font-size:16.5px;line-height:1.6;color:var(--muted);max-width:640px;margin:0 auto 26px;text-wrap:pretty">Type a sentence. Drop a photo. Get 3D objects assembled piece by piece — parts named, hierarchy real, pivots placed, UVs unwrapped.</p>
+  <div style="display:flex;gap:12px;justify-content:center">
+    <a href="https://app.nova3d.xyz" style="background:var(--yellow);border:1.5px solid var(--edge);border-radius:12px;padding:12px 26px;font-weight:700;font-size:15px;color:#221d18;box-shadow:3px 3px 0 var(--edge)">Generate an asset</a>
+  </div>
+</header>
+
+<section data-screen-label="Studio window" style="max-width:1240px;margin:0 auto;padding:18px 32px 46px">
+  <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:14px;box-shadow:6px 6px 0 rgba(34,29,24,.14);overflow:hidden">
+    <div style="display:flex;align-items:center;gap:8px;padding:9px 14px;border-bottom:1.5px solid var(--edge);background:color-mix(in oklab, var(--pink) 16%, var(--paper))">
+      <span style="width:11px;height:11px;border-radius:50%;background:var(--pink);border:1.5px solid var(--edge)"></span>
+      <span style="width:11px;height:11px;border-radius:50%;background:var(--yellow);border:1.5px solid var(--edge)"></span>
+      <span style="width:11px;height:11px;border-radius:50%;background:var(--mint);border:1.5px solid var(--edge)"></span>
+      <span style="font-family:'Space Mono',monospace;font-size:11.5px;margin-left:6px">{{ fileLabel }}</span>
+      <div style="margin-left:auto;display:flex;gap:5px;font-size:11.5px;font-weight:600">
+        <span onClick="{{ pickKart }}" style="cursor:pointer;border:1.5px solid var(--line);border-radius:8px;padding:3px 10px;background:var(--paper)">{{ kartMark }} 🍌 kart</span>
+        <span onClick="{{ pickRabbit }}" style="cursor:pointer;border:1.5px solid var(--line);border-radius:8px;padding:3px 10px;background:var(--paper)">{{ rabbitMark }} 🐰 rabbit</span>
+        <span onClick="{{ pickCake }}" style="cursor:pointer;border:1.5px solid var(--line);border-radius:8px;padding:3px 10px;background:var(--paper)">{{ cakeMark }} 🍰 cake</span>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px;padding:6px 14px;border-bottom:1.5px solid var(--line);background:var(--bg)">
+      <div style="display:flex;gap:4px;font-family:'Pixelify Sans',monospace;font-size:13.5px">
+        <span onClick="{{ showViewer }}" style="cursor:pointer;padding:3px 12px;border:1.5px solid var(--edge);border-radius:8px;background:var(--paper)">{{ viewerMark }} viewer</span>
+        <span onClick="{{ showCode }}" style="cursor:pointer;padding:3px 12px;border:1.5px solid var(--edge);border-radius:8px;background:var(--paper)">{{ codeMark }} code</span>
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:8px;font-family:'Space Mono',monospace;font-size:10.5px;color:var(--muted)">
+        <span>explode</span>
+        <input type="range" min="0" max="100" value="{{ explodeVal }}" onChange="{{ onExplode }}" style="width:130px">
+        <span onClick="{{ onReplay }}" style="cursor:pointer;border:1.5px solid var(--line);border-radius:8px;padding:2px 10px;background:var(--paper);font-family:'Pixelify Sans',monospace;font-size:12.5px;color:var(--ink)">↻ replay</span>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:46px 1fr 216px">
+      <div style="border-right:1.5px solid var(--line);display:flex;flex-direction:column;align-items:center;gap:8px;padding-top:14px;background:var(--bg)">
+        <span onClick="{{ onWf }}" title="wireframe" style="cursor:pointer;width:29px;height:29px;background:var(--paper);border:1.5px solid var(--edge);border-radius:9px;display:grid;place-items:center;font-size:12px">{{ wfIcon }}</span>
+        <span onClick="{{ onNormals }}" title="normals" style="cursor:pointer;width:29px;height:29px;background:var(--paper);border:1.5px solid var(--edge);border-radius:9px;display:grid;place-items:center;font-size:12px">{{ normalsIcon }}</span>
+        <span onClick="{{ onLabels }}" title="labels" style="cursor:pointer;width:29px;height:29px;background:var(--paper);border:1.5px solid var(--edge);border-radius:9px;display:grid;place-items:center;font-size:11px">{{ labelsIcon }}</span>
+      </div>
+      <div style="position:relative;height:600px;background:conic-gradient(var(--paper) 90deg,var(--bg) 90deg 180deg,var(--paper) 180deg 270deg,var(--bg) 270deg) 0 0/26px 26px">
+        <x-import component-from-global-scope="nova-viewer" from="./nova-viewer.js" src="{{ glbSrc }}" wireframe="{{ wf }}" normals="{{ normalsOn }}" labels="{{ labelsOn }}" explode="{{ explodeVal }}" spin="{{ spinSecs }}" hint-size="100%,600px" style="position:absolute;inset:0"></x-import>
+        <div style="position:absolute;left:12px;bottom:10px;z-index:3;font-family:'Space Mono',monospace;font-size:10px;color:var(--soft);background:color-mix(in oklab, var(--paper) 78%, transparent);border:1.5px solid var(--line);border-radius:8px;padding:3px 10px;pointer-events:none">hover a part for its name · click to pin it</div>
+        <sc-if value="{{ isCode }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;inset:0;z-index:4;background:var(--codebg);padding:18px 26px 22px;overflow:auto;box-sizing:border-box">
+            <div style="display:flex;gap:10px;align-items:baseline;margin-bottom:12px;font-family:'Space Mono',monospace;font-size:11px;color:#a09685;position:sticky;top:0">
+              <span style="color:#e8dced;font-weight:700">{{ codeFile }}</span>
+              <span>· {{ codeLines }} lines · Blender Python, written by the model — this is the asset</span>
+              <a href="{{ codeUrl }}" target="_blank" style="margin-left:auto;color:#f4b8c8">full file ↗</a>
+            </div>
+            <pre style="margin:0;font-family:'Space Mono',monospace;font-size:12.5px;line-height:1.75;color:var(--codetx);white-space:pre">{{ codeText }}</pre>
+          </div>
+        </sc-if>
+      </div>
+      <div style="border-left:1.5px solid var(--line);padding:14px 12px;background:var(--paper);display:flex;flex-direction:column;gap:5px;overflow:auto;height:600px;box-sizing:border-box">
+        <div style="font-family:'Pixelify Sans',monospace;font-size:13px;color:var(--pinkdeep);letter-spacing:1px;margin-bottom:4px">░ SCENE GRAPH</div>
+        <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--soft);padding:0 4px 4px">▾ {{ rootName }}</div>
+        <sc-for list="{{ rows }}" as="g" hint-placeholder-count="8">
+          <div onClick="{{ g.expand }}" onMouseEnter="{{ g.over }}" onMouseLeave="{{ g.out }}" style="cursor:pointer;display:flex;justify-content:space-between;gap:6px;font-family:'Space Mono',monospace;font-size:10.5px;border-radius:7px;padding:4px 8px 4px {{ g.pad }}px;color:{{ g.color }};opacity:{{ g.dim }};background:{{ g.bg }};transition:background .25s" style-hover="background:color-mix(in oklab, var(--pink) 14%, transparent)">
+            <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ g.arrow }} {{ g.name }}</span>
+            <span style="display:flex;gap:7px;align-items:center;flex:none"><span onClick="{{ g.toggle }}" title="show / hide">{{ g.mark }}</span><span style="color:var(--soft)">{{ g.count }}</span></span>
+          </div>
+        </sc-for>
+        <div style="margin-top:auto;padding-top:10px;font-family:'Space Mono',monospace;font-size:9.5px;color:var(--soft);line-height:1.6">hover a row to light it up in 3D · ▣ hides · click a part in 3D and its group flashes here</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:18px;padding:7px 16px;border-top:1.5px solid var(--edge);background:var(--bg);font-family:'Space Mono',monospace;font-size:10.5px;color:var(--muted)">
+      <span>{{ parts }} parts · {{ groupCount }} groups{{ pickedInfo }}</span>
+      <span>pivots placed · UVs unwrapped</span>
+      <span style="margin-left:auto;color:var(--pinkdeep)"><span style="font-family:'Pixelify Sans',monospace;font-size:12px">hierarchy: real ✓</span></span>
+      <span style="color:var(--muted)">poly budget: yours</span>
+    </div>
+  </div>
+</section>
+
+<section id="hw" data-screen-label="How it works" style="max-width:1240px;margin:0 auto;padding:34px 32px 30px">
+  <div style="font-family:'Pixelify Sans',monospace;font-size:14px;color:var(--pinkdeep);letter-spacing:2px;margin-bottom:20px">HOW IT WORKS</div>
+  <div style="display:grid;grid-template-columns:1fr auto 1fr auto 1.3fr;gap:22px;align-items:start">
+    <div style="display:flex;gap:14px;align-items:flex-start">
+      <div style="flex:none;width:40px;height:40px;background:var(--yellow);border:1.5px solid var(--edge);border-radius:11px;box-shadow:2.5px 2.5px 0 var(--edge);display:grid;place-items:center;font-family:'Pixelify Sans',monospace;font-size:19px;color:#221d18;transform:rotate(-4deg)">1</div>
+      <div style="font-weight:700;font-size:21px;letter-spacing:-.4px;padding-top:6px">Type a sentence.</div>
+    </div>
+    <div style="font-size:20px;color:var(--soft);padding-top:10px">→</div>
+    <div style="display:flex;gap:14px;align-items:flex-start">
+      <div style="flex:none;width:40px;height:40px;background:var(--mint);border:1.5px solid var(--edge);border-radius:11px;box-shadow:2.5px 2.5px 0 var(--edge);display:grid;place-items:center;font-family:'Pixelify Sans',monospace;font-size:19px;color:#221d18;transform:rotate(3deg)">2</div>
+      <div style="font-weight:700;font-size:21px;letter-spacing:-.4px;padding-top:6px">…or drop a photo.</div>
+    </div>
+    <div style="font-size:20px;color:var(--soft);padding-top:10px">→</div>
+    <div style="display:flex;gap:14px;align-items:flex-start">
+      <div style="flex:none;width:40px;height:40px;background:var(--pink);border:1.5px solid var(--edge);border-radius:11px;box-shadow:2.5px 2.5px 0 var(--edge);display:grid;place-items:center;font-family:'Pixelify Sans',monospace;font-size:19px;color:#221d18;transform:rotate(-3deg)">3</div>
+      <div style="padding-top:6px">
+        <div style="font-weight:700;font-size:21px;letter-spacing:-.4px;margin-bottom:6px">Get 3D objects, assembled piece by piece.</div>
+        <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);line-height:1.7">parts named · hierarchy real · pivots placed · UVs unwrapped</div>
+      </div>
+    </div>
+  </div>
+  <div style="font-family:'Space Mono',monospace;font-size:12px;color:var(--muted);margin:30px 0 14px">then — <span style="color:var(--ink);font-weight:700">texture in full PBR</span>, and keep going:</div>
+  <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px">
+    <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;padding:16px 14px;box-shadow:3px 3px 0 rgba(34,29,24,.1)"><div style="font-size:18px;margin-bottom:8px">🎨</div><div style="font-weight:700;font-size:15.5px;margin-bottom:4px">PBR textures</div><div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--soft);line-height:1.5">base · normal · rough · metal</div></div>
+    <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;padding:16px 14px;box-shadow:3px 3px 0 rgba(34,29,24,.1)"><div style="font-size:18px;margin-bottom:8px">🧩</div><div style="font-weight:700;font-size:15.5px;margin-bottom:4px">Edit per part</div><div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--soft);line-height:1.5">swap one part, keep the rest</div></div>
+    <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;padding:16px 14px;box-shadow:3px 3px 0 rgba(34,29,24,.1)"><div style="font-size:18px;margin-bottom:8px">🦾</div><div style="font-weight:700;font-size:15.5px;margin-bottom:4px">Articulate</div><div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--soft);line-height:1.5">pivots placed, joints ready</div></div>
+    <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;padding:16px 14px;box-shadow:3px 3px 0 rgba(34,29,24,.1)"><div style="font-size:18px;margin-bottom:8px">🎬</div><div style="font-weight:700;font-size:15.5px;margin-bottom:4px">Animation-ready</div><div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--soft);line-height:1.5">named nodes + real pivots — no rigging pass</div></div>
+    <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;padding:16px 14px;box-shadow:3px 3px 0 rgba(34,29,24,.1)"><div style="font-size:18px;margin-bottom:8px">✨</div><div style="font-weight:700;font-size:15.5px;margin-bottom:4px">Restyle</div><div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--soft);line-height:1.5">new look, same structure</div></div>
+    <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;padding:16px 14px;box-shadow:3px 3px 0 rgba(34,29,24,.1)"><div style="font-size:18px;margin-bottom:8px">📐</div><div style="font-weight:700;font-size:15.5px;margin-bottom:4px">Rescale</div><div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--soft);line-height:1.5">proportions, not distortion</div></div>
+  </div>
+</section>
+
+<section id="showcase" data-screen-label="Showcase" style="max-width:1240px;margin:0 auto;padding:34px 32px 40px">
+  <div style="display:flex;align-items:baseline;gap:16px;margin-bottom:6px">
+    <div style="font-family:'Pixelify Sans',monospace;font-size:14px;color:var(--pinkdeep);letter-spacing:2px">FROM THE SHOWCASE</div>
+    <span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--soft)">real outputs, straight from the pipeline — generations, then the UV and texture passes run on them.</span>
+  </div>
+  <div style="display:flex;gap:6px;margin:14px 0 18px;font-family:'Pixelify Sans',monospace;font-size:13px">
+    <span onClick="{{ catGen }}" style="cursor:pointer;border:1.5px solid var(--edge);border-radius:8px;padding:3px 12px;background:{{ genBg }};color:{{ genCol }}">{{ genMark }} generations</span>
+    <span onClick="{{ catUv }}" style="cursor:pointer;border:1.5px solid var(--edge);border-radius:8px;padding:3px 12px;background:{{ uvBg }};color:{{ uvCol }}">{{ uvMark }} uv maps</span>
+    <span onClick="{{ catTex }}" style="cursor:pointer;border:1.5px solid var(--edge);border-radius:8px;padding:3px 12px;background:{{ texBg }};color:{{ texCol }}">{{ texMark }} textures</span>
+    <span style="border:1.5px solid var(--line);border-radius:8px;padding:3px 12px;color:var(--soft)">○ articulation — soon</span>
+    <span style="border:1.5px solid var(--line);border-radius:8px;padding:3px 12px;color:var(--soft)">○ animation — soon</span>
+  </div>
+  <sc-if value="{{ isGen }}" hint-placeholder-val="{{ true }}">
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px">
+    <a href="https://app.nova3d.xyz/showcase" target="_blank" style="display:block;background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;overflow:hidden;box-shadow:3px 3px 0 rgba(34,29,24,.1);color:var(--ink)" style-hover="transform:translate(-1.5px,-1.5px);box-shadow:4.5px 4.5px 0 rgba(34,29,24,.14)">
+      <div style="aspect-ratio:4/3;background:#fff;overflow:hidden"><img loading="lazy" src="./assets/showcase/gen_duck.webp" style="width:100%;height:100%;object-fit:cover;display:block"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 11px;border-top:1.5px solid var(--edge)">
+        <span style="font-weight:700;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Duck Excavator</span>
+        <span style="font-family:'Space Mono',monospace;font-size:9.5px;color:var(--soft);flex:none">ref → 3D</span>
+      </div>
+    </a>
+    <a href="https://app.nova3d.xyz/showcase" target="_blank" style="display:block;background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;overflow:hidden;box-shadow:3px 3px 0 rgba(34,29,24,.1);color:var(--ink)" style-hover="transform:translate(-1.5px,-1.5px);box-shadow:4.5px 4.5px 0 rgba(34,29,24,.14)">
+      <div style="aspect-ratio:4/3;background:#fff;overflow:hidden"><img loading="lazy" src="./assets/showcase/gen_raygun.webp" style="width:100%;height:100%;object-fit:cover;display:block"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 11px;border-top:1.5px solid var(--edge)">
+        <span style="font-weight:700;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Retro Sci-Fi Raygun</span>
+        <span style="font-family:'Space Mono',monospace;font-size:9.5px;color:var(--soft);flex:none">ref → 3D</span>
+      </div>
+    </a>
+    <a href="https://app.nova3d.xyz/showcase" target="_blank" style="display:block;background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;overflow:hidden;box-shadow:3px 3px 0 rgba(34,29,24,.1);color:var(--ink)" style-hover="transform:translate(-1.5px,-1.5px);box-shadow:4.5px 4.5px 0 rgba(34,29,24,.14)">
+      <div style="aspect-ratio:4/3;background:#fff;overflow:hidden"><img loading="lazy" src="./assets/showcase/gen_gary.webp" style="width:100%;height:100%;object-fit:cover;display:block"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 11px;border-top:1.5px solid var(--edge)">
+        <span style="font-weight:700;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Cartoon snail (Gary)</span>
+        <span style="font-family:'Space Mono',monospace;font-size:9.5px;color:var(--soft);flex:none">ref → 3D</span>
+      </div>
+    </a>
+    <a href="https://app.nova3d.xyz/showcase" target="_blank" style="display:block;background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;overflow:hidden;box-shadow:3px 3px 0 rgba(34,29,24,.1);color:var(--ink)" style-hover="transform:translate(-1.5px,-1.5px);box-shadow:4.5px 4.5px 0 rgba(34,29,24,.14)">
+      <div style="aspect-ratio:4/3;background:#fff;overflow:hidden"><img loading="lazy" src="./assets/showcase/gen_hand.webp" style="width:100%;height:100%;object-fit:cover;display:block"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 11px;border-top:1.5px solid var(--edge)">
+        <span style="font-weight:700;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Robotic mechanical hand</span>
+        <span style="font-family:'Space Mono',monospace;font-size:9.5px;color:var(--soft);flex:none">ref → 3D</span>
+      </div>
+    </a>
+    <a href="https://app.nova3d.xyz/showcase" target="_blank" style="display:block;background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;overflow:hidden;box-shadow:3px 3px 0 rgba(34,29,24,.1);color:var(--ink)" style-hover="transform:translate(-1.5px,-1.5px);box-shadow:4.5px 4.5px 0 rgba(34,29,24,.14)">
+      <div style="aspect-ratio:4/3;background:#fff;overflow:hidden"><img loading="lazy" src="./assets/showcase/gen_bicycle.webp" style="width:100%;height:100%;object-fit:cover;display:block"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 11px;border-top:1.5px solid var(--edge)">
+        <span style="font-weight:700;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Bicycle</span>
+        <span style="font-family:'Space Mono',monospace;font-size:9.5px;color:var(--soft);flex:none">ref → 3D</span>
+      </div>
+    </a>
+    <a href="https://app.nova3d.xyz/showcase" target="_blank" style="display:block;background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;overflow:hidden;box-shadow:3px 3px 0 rgba(34,29,24,.1);color:var(--ink)" style-hover="transform:translate(-1.5px,-1.5px);box-shadow:4.5px 4.5px 0 rgba(34,29,24,.14)">
+      <div style="aspect-ratio:4/3;background:#fff;overflow:hidden"><img loading="lazy" src="./assets/showcase/gen_drone.webp" style="width:100%;height:100%;object-fit:cover;display:block"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 11px;border-top:1.5px solid var(--edge)">
+        <span style="font-weight:700;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">quadcopter drone</span>
+        <span style="font-family:'Space Mono',monospace;font-size:9.5px;color:var(--soft);flex:none">ref → 3D</span>
+      </div>
+    </a>
+    <a href="https://app.nova3d.xyz/showcase" target="_blank" style="display:block;background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;overflow:hidden;box-shadow:3px 3px 0 rgba(34,29,24,.1);color:var(--ink)" style-hover="transform:translate(-1.5px,-1.5px);box-shadow:4.5px 4.5px 0 rgba(34,29,24,.14)">
+      <div style="aspect-ratio:4/3;background:#fff;overflow:hidden"><img loading="lazy" src="./assets/showcase/gen_shopfront.webp" style="width:100%;height:100%;object-fit:cover;display:block"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 11px;border-top:1.5px solid var(--edge)">
+        <span style="font-weight:700;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Shopfront facade</span>
+        <span style="font-family:'Space Mono',monospace;font-size:9.5px;color:var(--soft);flex:none">ref → 3D</span>
+      </div>
+    </a>
+    <a href="https://app.nova3d.xyz/showcase" target="_blank" style="display:block;background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;overflow:hidden;box-shadow:3px 3px 0 rgba(34,29,24,.1);color:var(--ink)" style-hover="transform:translate(-1.5px,-1.5px);box-shadow:4.5px 4.5px 0 rgba(34,29,24,.14)">
+      <div style="aspect-ratio:4/3;background:#fff;overflow:hidden"><img loading="lazy" src="./assets/showcase/gen_cherry.webp" style="width:100%;height:100%;object-fit:cover;display:block"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 11px;border-top:1.5px solid var(--edge)">
+        <span style="font-weight:700;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Cherry lounge chair</span>
+        <span style="font-family:'Space Mono',monospace;font-size:9.5px;color:var(--soft);flex:none">ref → 3D</span>
+      </div>
+    </a>
+  </div>
+  <div style="margin-top:16px;font-family:'Space Mono',monospace;font-size:11.5px"><a href="https://app.nova3d.xyz/showcase" target="_blank">browse all 73 — live 3D, with the code that built each one ↗</a></div>
+  </sc-if>
+  <sc-if value="{{ isUv }}" hint-placeholder-val="{{ false }}">
+  <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);margin:0 0 14px">generated by the same unwrap pass that ships in the app — exterior/interior split → per-group area budgets → one global smart-project → per-group packing. checker = density QA. click a card to spin the real GLB.</div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+    <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;overflow:hidden;box-shadow:3px 3px 0 rgba(34,29,24,.1)">
+      <div style="aspect-ratio:4/3;position:relative;overflow:hidden;background:conic-gradient(var(--paper) 90deg,var(--bg) 90deg 180deg,var(--paper) 180deg 270deg,var(--bg) 270deg) 0 0/22px 22px">
+        <sc-if value="{{ uIdle0 }}" hint-placeholder-val="{{ true }}">
+          <div onClick="{{ goU0 }}" style="position:absolute;inset:0;cursor:pointer;display:grid;place-items:center">
+            <img loading="lazy" src="./assets/showcase/uv_kart.webp" style="max-width:92%;max-height:92%;object-fit:contain">
+            <span style="position:absolute;left:10px;bottom:10px;font-family:'Pixelify Sans',monospace;font-size:12px;background:var(--yellow);color:#221d18;border:1.5px solid var(--edge);border-radius:8px;padding:2px 10px;box-shadow:2px 2px 0 var(--edge)">▶ spin it · 3.1 MB</span>
+          </div>
+        </sc-if>
+        <sc-if value="{{ uLive0 }}" hint-placeholder-val="{{ false }}">
+          <x-import component-from-global-scope="nova-viewer" from="./nova-viewer.js" src="assets/live/uv_kart.glb" labels="false" explode="30" spin="2" rot="0.55" min-h="0" hint-size="100%,100%" style="position:absolute;inset:0"></x-import>
+        </sc-if>
+      </div>
+      <div style="padding:7px 11px;border-top:1.5px solid var(--edge)">
+        <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-weight:700;font-size:12.5px">banana kart</span><span style="font-family:'Space Mono',monospace;font-size:9.5px;color:var(--soft);flex:none">232 parts → 5 atlases · 70,344 tris</span></div>
+      </div>
+    </div>
+    <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;overflow:hidden;box-shadow:3px 3px 0 rgba(34,29,24,.1)">
+      <div style="aspect-ratio:4/3;position:relative;overflow:hidden;background:conic-gradient(var(--paper) 90deg,var(--bg) 90deg 180deg,var(--paper) 180deg 270deg,var(--bg) 270deg) 0 0/22px 22px">
+        <sc-if value="{{ uIdle1 }}" hint-placeholder-val="{{ true }}">
+          <div onClick="{{ goU1 }}" style="position:absolute;inset:0;cursor:pointer;display:grid;place-items:center">
+            <img loading="lazy" src="./assets/showcase/uv_rabbit.webp" style="max-width:92%;max-height:92%;object-fit:contain">
+            <span style="position:absolute;left:10px;bottom:10px;font-family:'Pixelify Sans',monospace;font-size:12px;background:var(--yellow);color:#221d18;border:1.5px solid var(--edge);border-radius:8px;padding:2px 10px;box-shadow:2px 2px 0 var(--edge)">▶ spin it · 1.5 MB</span>
+          </div>
+        </sc-if>
+        <sc-if value="{{ uLive1 }}" hint-placeholder-val="{{ false }}">
+          <x-import component-from-global-scope="nova-viewer" from="./nova-viewer.js" src="assets/live/uv_rabbit.glb" labels="false" explode="30" spin="2" rot="0.55" min-h="0" hint-size="100%,100%" style="position:absolute;inset:0"></x-import>
+        </sc-if>
+      </div>
+      <div style="padding:7px 11px;border-top:1.5px solid var(--edge)">
+        <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-weight:700;font-size:12.5px">robot rabbit</span><span style="font-family:'Space Mono',monospace;font-size:9.5px;color:var(--soft);flex:none">112 parts → 2 atlases</span></div>
+      </div>
+    </div>
+    <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;overflow:hidden;box-shadow:3px 3px 0 rgba(34,29,24,.1)">
+      <div style="aspect-ratio:4/3;position:relative;overflow:hidden;background:conic-gradient(var(--paper) 90deg,var(--bg) 90deg 180deg,var(--paper) 180deg 270deg,var(--bg) 270deg) 0 0/22px 22px">
+        <sc-if value="{{ uIdle2 }}" hint-placeholder-val="{{ true }}">
+          <div onClick="{{ goU2 }}" style="position:absolute;inset:0;cursor:pointer;display:grid;place-items:center">
+            <img loading="lazy" src="./assets/showcase/uv_cake.webp" style="max-width:92%;max-height:92%;object-fit:contain">
+            <span style="position:absolute;left:10px;bottom:10px;font-family:'Pixelify Sans',monospace;font-size:12px;background:var(--yellow);color:#221d18;border:1.5px solid var(--edge);border-radius:8px;padding:2px 10px;box-shadow:2px 2px 0 var(--edge)">▶ spin it · 2.2 MB</span>
+          </div>
+        </sc-if>
+        <sc-if value="{{ uLive2 }}" hint-placeholder-val="{{ false }}">
+          <x-import component-from-global-scope="nova-viewer" from="./nova-viewer.js" src="assets/live/uv_cake.glb" labels="false" explode="30" spin="2" rot="0.55" min-h="0" hint-size="100%,100%" style="position:absolute;inset:0"></x-import>
+        </sc-if>
+      </div>
+      <div style="padding:7px 11px;border-top:1.5px solid var(--edge)">
+        <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-weight:700;font-size:12.5px">blueberry cheesecake</span><span style="font-family:'Space Mono',monospace;font-size:9.5px;color:var(--soft);flex:none">8 parts → 2 atlases</span></div>
+      </div>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:14px">
+    <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;overflow:hidden;box-shadow:3px 3px 0 rgba(34,29,24,.1)"><img loading="lazy" src="./assets/showcase/atlas_kart.webp" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block"><div style="display:flex;justify-content:space-between;padding:7px 11px;border-top:1.5px solid var(--edge)"><span style="font-weight:700;font-size:12.5px">kart — atlas sheet</span><span style="font-family:'Space Mono',monospace;font-size:9.5px;color:var(--soft)">per-island wireframes</span></div></div>
+    <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;overflow:hidden;box-shadow:3px 3px 0 rgba(34,29,24,.1)"><img loading="lazy" src="./assets/showcase/atlas_rabbit.webp" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block"><div style="display:flex;justify-content:space-between;padding:7px 11px;border-top:1.5px solid var(--edge)"><span style="font-weight:700;font-size:12.5px">rabbit — atlas sheet</span><span style="font-family:'Space Mono',monospace;font-size:9.5px;color:var(--soft)">area-budgeted islands</span></div></div>
+    <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;overflow:hidden;box-shadow:3px 3px 0 rgba(34,29,24,.1)"><img loading="lazy" src="./assets/showcase/atlas_cake.webp" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block"><div style="display:flex;justify-content:space-between;padding:7px 11px;border-top:1.5px solid var(--edge)"><span style="font-weight:700;font-size:12.5px">cheesecake — atlas sheet</span><span style="font-family:'Space Mono',monospace;font-size:9.5px;color:var(--soft)">exterior faces only</span></div></div>
+  </div>
+  </sc-if>
+  <sc-if value="{{ isTex }}" hint-placeholder-val="{{ false }}">
+  <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);margin:0 0 14px">same assets, restyled by prompt — structure survives texturing because the parts never merge. full PBR at 2K: albedo · normal · roughness · metallic · ao · height, zipped with every asset. click a card to spin the real textured GLB.</div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+    <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;overflow:hidden;box-shadow:3px 3px 0 rgba(34,29,24,.1)">
+      <div style="aspect-ratio:4/3;position:relative;overflow:hidden;background:var(--codebg)">
+        <sc-if value="{{ tIdle0 }}" hint-placeholder-val="{{ true }}">
+          <div onClick="{{ goT0 }}" style="position:absolute;inset:0;cursor:pointer;display:grid;place-items:center">
+            <img loading="lazy" src="./assets/showcase/tex_handpaint.webp" style="max-width:92%;max-height:92%;object-fit:contain">
+            <span style="position:absolute;left:10px;bottom:10px;font-family:'Pixelify Sans',monospace;font-size:12px;background:var(--yellow);color:#221d18;border:1.5px solid var(--edge);border-radius:8px;padding:2px 10px;box-shadow:2px 2px 0 var(--edge)">▶ spin it · 15 MB</span>
+          </div>
+        </sc-if>
+        <sc-if value="{{ tLive0 }}" hint-placeholder-val="{{ false }}">
+          <x-import component-from-global-scope="nova-viewer" from="./nova-viewer.js" src="https://nova3dshowcase.blob.core.windows.net/showcase/tex-a-hand-painted-stylized-and-worn-off-finish-1784050995/model.glb" labels="false" explode="0" spin="2" rot="0.55" min-h="0" hint-size="100%,100%" style="position:absolute;inset:0"></x-import>
+        </sc-if>
+      </div>
+      <div style="padding:7px 11px;border-top:1.5px solid var(--edge)">
+        <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-weight:700;font-size:12.5px">the raygun, repainted</span><span style="font-family:'Space Mono',monospace;font-size:9.5px;color:var(--soft);flex:none">“hand-painted, worn-off finish”</span></div>
+        <div style="display:flex;gap:5px;margin-top:7px"><div style="flex:1;min-width:0"><img loading="lazy" src="./assets/showcase/map_handpaint_albedo.webp" style="width:100%;aspect-ratio:1;object-fit:cover;border:1.5px solid var(--line);border-radius:6px;display:block"><div style="font-family:'Space Mono',monospace;font-size:8px;color:var(--soft);text-align:center;margin-top:2px">albed</div></div><div style="flex:1;min-width:0"><img loading="lazy" src="./assets/showcase/map_handpaint_normal.webp" style="width:100%;aspect-ratio:1;object-fit:cover;border:1.5px solid var(--line);border-radius:6px;display:block"><div style="font-family:'Space Mono',monospace;font-size:8px;color:var(--soft);text-align:center;margin-top:2px">norma</div></div><div style="flex:1;min-width:0"><img loading="lazy" src="./assets/showcase/map_handpaint_roughness.webp" style="width:100%;aspect-ratio:1;object-fit:cover;border:1.5px solid var(--line);border-radius:6px;display:block"><div style="font-family:'Space Mono',monospace;font-size:8px;color:var(--soft);text-align:center;margin-top:2px">rough</div></div><div style="flex:1;min-width:0"><img loading="lazy" src="./assets/showcase/map_handpaint_metallic.webp" style="width:100%;aspect-ratio:1;object-fit:cover;border:1.5px solid var(--line);border-radius:6px;display:block"><div style="font-family:'Space Mono',monospace;font-size:8px;color:var(--soft);text-align:center;margin-top:2px">metal</div></div><div style="flex:1;min-width:0"><img loading="lazy" src="./assets/showcase/map_handpaint_ao.webp" style="width:100%;aspect-ratio:1;object-fit:cover;border:1.5px solid var(--line);border-radius:6px;display:block"><div style="font-family:'Space Mono',monospace;font-size:8px;color:var(--soft);text-align:center;margin-top:2px">ao</div></div><div style="flex:1;min-width:0"><img loading="lazy" src="./assets/showcase/map_handpaint_height.webp" style="width:100%;aspect-ratio:1;object-fit:cover;border:1.5px solid var(--line);border-radius:6px;display:block"><div style="font-family:'Space Mono',monospace;font-size:8px;color:var(--soft);text-align:center;margin-top:2px">heigh</div></div></div>
+      </div>
+    </div>
+    <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;overflow:hidden;box-shadow:3px 3px 0 rgba(34,29,24,.1)">
+      <div style="aspect-ratio:4/3;position:relative;overflow:hidden;background:var(--codebg)">
+        <sc-if value="{{ tIdle1 }}" hint-placeholder-val="{{ true }}">
+          <div onClick="{{ goT1 }}" style="position:absolute;inset:0;cursor:pointer;display:grid;place-items:center">
+            <img loading="lazy" src="./assets/showcase/tex_mossy.webp" style="max-width:92%;max-height:92%;object-fit:contain">
+            <span style="position:absolute;left:10px;bottom:10px;font-family:'Pixelify Sans',monospace;font-size:12px;background:var(--yellow);color:#221d18;border:1.5px solid var(--edge);border-radius:8px;padding:2px 10px;box-shadow:2px 2px 0 var(--edge)">▶ spin it · 13 MB</span>
+          </div>
+        </sc-if>
+        <sc-if value="{{ tLive1 }}" hint-placeholder-val="{{ false }}">
+          <x-import component-from-global-scope="nova-viewer" from="./nova-viewer.js" src="https://nova3dshowcase.blob.core.windows.net/showcase/tex-a-worn-mossy-stone-shell-with-glowing-cracks-1784051191/model.glb" labels="false" explode="0" spin="2" rot="0.55" min-h="0" hint-size="100%,100%" style="position:absolute;inset:0"></x-import>
+        </sc-if>
+      </div>
+      <div style="padding:7px 11px;border-top:1.5px solid var(--edge)">
+        <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-weight:700;font-size:12.5px">the snail, petrified</span><span style="font-family:'Space Mono',monospace;font-size:9.5px;color:var(--soft);flex:none">“mossy stone, glowing cracks”</span></div>
+        <div style="display:flex;gap:5px;margin-top:7px"><div style="flex:1;min-width:0"><img loading="lazy" src="./assets/showcase/map_mossy_albedo.webp" style="width:100%;aspect-ratio:1;object-fit:cover;border:1.5px solid var(--line);border-radius:6px;display:block"><div style="font-family:'Space Mono',monospace;font-size:8px;color:var(--soft);text-align:center;margin-top:2px">albed</div></div><div style="flex:1;min-width:0"><img loading="lazy" src="./assets/showcase/map_mossy_normal.webp" style="width:100%;aspect-ratio:1;object-fit:cover;border:1.5px solid var(--line);border-radius:6px;display:block"><div style="font-family:'Space Mono',monospace;font-size:8px;color:var(--soft);text-align:center;margin-top:2px">norma</div></div><div style="flex:1;min-width:0"><img loading="lazy" src="./assets/showcase/map_mossy_roughness.webp" style="width:100%;aspect-ratio:1;object-fit:cover;border:1.5px solid var(--line);border-radius:6px;display:block"><div style="font-family:'Space Mono',monospace;font-size:8px;color:var(--soft);text-align:center;margin-top:2px">rough</div></div><div style="flex:1;min-width:0"><img loading="lazy" src="./assets/showcase/map_mossy_metallic.webp" style="width:100%;aspect-ratio:1;object-fit:cover;border:1.5px solid var(--line);border-radius:6px;display:block"><div style="font-family:'Space Mono',monospace;font-size:8px;color:var(--soft);text-align:center;margin-top:2px">metal</div></div><div style="flex:1;min-width:0"><img loading="lazy" src="./assets/showcase/map_mossy_ao.webp" style="width:100%;aspect-ratio:1;object-fit:cover;border:1.5px solid var(--line);border-radius:6px;display:block"><div style="font-family:'Space Mono',monospace;font-size:8px;color:var(--soft);text-align:center;margin-top:2px">ao</div></div><div style="flex:1;min-width:0"><img loading="lazy" src="./assets/showcase/map_mossy_height.webp" style="width:100%;aspect-ratio:1;object-fit:cover;border:1.5px solid var(--line);border-radius:6px;display:block"><div style="font-family:'Space Mono',monospace;font-size:8px;color:var(--soft);text-align:center;margin-top:2px">heigh</div></div></div>
+      </div>
+    </div>
+    <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;overflow:hidden;box-shadow:3px 3px 0 rgba(34,29,24,.1)">
+      <div style="aspect-ratio:4/3;position:relative;overflow:hidden;background:var(--codebg)">
+        <sc-if value="{{ tIdle2 }}" hint-placeholder-val="{{ true }}">
+          <div onClick="{{ goT2 }}" style="position:absolute;inset:0;cursor:pointer;display:grid;place-items:center">
+            <img loading="lazy" src="./assets/showcase/tex_procreate.webp" style="max-width:92%;max-height:92%;object-fit:contain">
+            <span style="position:absolute;left:10px;bottom:10px;font-family:'Pixelify Sans',monospace;font-size:12px;background:var(--yellow);color:#221d18;border:1.5px solid var(--edge);border-radius:8px;padding:2px 10px;box-shadow:2px 2px 0 var(--edge)">▶ spin it · 10 MB</span>
+          </div>
+        </sc-if>
+        <sc-if value="{{ tLive2 }}" hint-placeholder-val="{{ false }}">
+          <x-import component-from-global-scope="nova-viewer" from="./nova-viewer.js" src="https://nova3dshowcase.blob.core.windows.net/showcase/tex-procreate-oil-painting-style-cheesecake-1784051991/model.glb" labels="false" explode="0" spin="2" rot="0.55" min-h="0" hint-size="100%,100%" style="position:absolute;inset:0"></x-import>
+        </sc-if>
+      </div>
+      <div style="padding:7px 11px;border-top:1.5px solid var(--edge)">
+        <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-weight:700;font-size:12.5px">the cheesecake, oil-painted</span><span style="font-family:'Space Mono',monospace;font-size:9.5px;color:var(--soft);flex:none">“Procreate oil painting style”</span></div>
+        <div style="display:flex;gap:5px;margin-top:7px"><div style="flex:1;min-width:0"><img loading="lazy" src="./assets/showcase/map_procreate_albedo.webp" style="width:100%;aspect-ratio:1;object-fit:cover;border:1.5px solid var(--line);border-radius:6px;display:block"><div style="font-family:'Space Mono',monospace;font-size:8px;color:var(--soft);text-align:center;margin-top:2px">albed</div></div><div style="flex:1;min-width:0"><img loading="lazy" src="./assets/showcase/map_procreate_normal.webp" style="width:100%;aspect-ratio:1;object-fit:cover;border:1.5px solid var(--line);border-radius:6px;display:block"><div style="font-family:'Space Mono',monospace;font-size:8px;color:var(--soft);text-align:center;margin-top:2px">norma</div></div><div style="flex:1;min-width:0"><img loading="lazy" src="./assets/showcase/map_procreate_roughness.webp" style="width:100%;aspect-ratio:1;object-fit:cover;border:1.5px solid var(--line);border-radius:6px;display:block"><div style="font-family:'Space Mono',monospace;font-size:8px;color:var(--soft);text-align:center;margin-top:2px">rough</div></div><div style="flex:1;min-width:0"><img loading="lazy" src="./assets/showcase/map_procreate_metallic.webp" style="width:100%;aspect-ratio:1;object-fit:cover;border:1.5px solid var(--line);border-radius:6px;display:block"><div style="font-family:'Space Mono',monospace;font-size:8px;color:var(--soft);text-align:center;margin-top:2px">metal</div></div><div style="flex:1;min-width:0"><img loading="lazy" src="./assets/showcase/map_procreate_ao.webp" style="width:100%;aspect-ratio:1;object-fit:cover;border:1.5px solid var(--line);border-radius:6px;display:block"><div style="font-family:'Space Mono',monospace;font-size:8px;color:var(--soft);text-align:center;margin-top:2px">ao</div></div><div style="flex:1;min-width:0"><img loading="lazy" src="./assets/showcase/map_procreate_height.webp" style="width:100%;aspect-ratio:1;object-fit:cover;border:1.5px solid var(--line);border-radius:6px;display:block"><div style="font-family:'Space Mono',monospace;font-size:8px;color:var(--soft);text-align:center;margin-top:2px">heigh</div></div></div>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+</section>
+
+<section id="agents" data-screen-label="Agents and export" style="max-width:1240px;margin:0 auto;padding:26px 32px 46px">
+  <div style="display:grid;grid-template-columns:1fr 1.1fr;gap:34px;align-items:center">
+    <div>
+      <div style="font-family:'Pixelify Sans',monospace;font-size:14px;color:var(--pinkdeep);letter-spacing:2px;margin-bottom:8px">SHIP IT</div>
+      <h2 style="font-weight:700;font-size:30px;letter-spacing:-.8px;margin:0 0 14px;text-wrap:pretty">The structural work arrives done.</h2>
+      <p style="font-size:16px;line-height:1.65;color:var(--muted);margin:0 0 18px;text-wrap:pretty">Poly budget stays yours — because the asset is a program, density is a parameter, not fate. Export to your engine, keep editing in Blender, or automate the whole loop from your coding agent over MCP.</p>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;font-family:'Space Mono',monospace;font-size:10.5px;color:var(--muted)">
+        <span style="border:1.5px solid var(--line);border-radius:999px;padding:3px 11px;background:var(--paper)">.glb</span>
+        <span style="border:1.5px solid var(--line);border-radius:999px;padding:3px 11px;background:var(--paper)">Unity · Unreal · Godot</span>
+        <span style="border:1.5px solid var(--line);border-radius:999px;padding:3px 11px;background:var(--paper)">Blender</span>
+        <span style="border:1.5px solid var(--line);border-radius:999px;padding:3px 11px;background:var(--paper)">MCP + API</span>
+      </div>
+    </div>
+    <div style="background:var(--codebg);border:1.5px solid var(--edge);border-radius:14px;padding:20px 24px;box-shadow:4px 4px 0 rgba(34,29,24,.14)">
+      <div style="display:flex;gap:6px;margin-bottom:14px">
+        <span style="width:9px;height:9px;border-radius:50%;background:#f47fb0"></span>
+        <span style="width:9px;height:9px;border-radius:50%;background:#ffd23e"></span>
+        <span style="width:9px;height:9px;border-radius:50%;background:#7fcf96"></span>
+      </div>
+      <pre style="margin:0;font-family:'Space Mono',monospace;font-size:12px;line-height:1.8;color:#e8dced;white-space:pre-wrap">$ claude mcp add nova3d -e NOVA3D_TOKEN=n3d_… -- uvx nova3d-mcp
+<span style="color:#7fcf96">✓</span> connected · tools: generate_3d · regenerate_part · add_part · articulate_model
+
+&gt; "a banana go-kart with off-road wheels"
+<span style="color:#7fcf96">→</span> generate_3d … banana_kart.glb <span style="color:#a09685">— 232 parts · 7 groups · hierarchy intact</span>
+
+&gt; "chunkier rear wheels"
+<span style="color:#7fcf96">→</span> regenerate_part("Wheels_Group") <span style="color:#a09685">— WHEEL_R_REAR 0.30 → 0.36 · the other 6 groups: untouched</span></pre>
+    </div>
+  </div>
+</section>
+
+<section id="useful" data-screen-label="Where it's useful" style="border-top:1.5px solid var(--edge);background:color-mix(in oklab, var(--mint) 10%, var(--bg));padding:44px 32px 50px">
+  <div style="max-width:1240px;margin:0 auto">
+    <div style="font-family:'Pixelify Sans',monospace;font-size:14px;color:var(--pinkdeep);letter-spacing:2px;margin-bottom:20px">WHERE IT'S USEFUL</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px">
+      <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;padding:18px 16px;box-shadow:3px 3px 0 rgba(34,29,24,.1)">
+        <div style="font-size:20px;margin-bottom:10px">🎮</div>
+        <div style="font-weight:700;font-size:16.5px;margin-bottom:6px">Game dev</div>
+        <div style="font-size:12.5px;line-height:1.6;color:var(--muted)">Drop the GLB into Unity, Unreal or Godot. Named nodes and real pivots mean wheels that spin and doors that hinge — no rigging pass first.</div>
+      </div>
+      <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;padding:18px 16px;box-shadow:3px 3px 0 rgba(34,29,24,.1)">
+        <div style="font-size:20px;margin-bottom:10px">🥽</div>
+        <div style="font-weight:700;font-size:16.5px;margin-bottom:6px">XR &amp; VR</div>
+        <div style="font-size:12.5px;line-height:1.6;color:var(--muted)">Hierarchy makes parts grabbable; pivots make them hinge. Built in real metres, so scale is right the moment it loads.</div>
+      </div>
+      <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;padding:18px 16px;box-shadow:3px 3px 0 rgba(34,29,24,.1)">
+        <div style="font-size:20px;margin-bottom:10px">💍</div>
+        <div style="font-weight:700;font-size:16.5px;margin-bottom:6px">Product &amp; jewelry</div>
+        <div style="font-size:12.5px;line-height:1.6;color:var(--muted)">Verticals tune the same core: a ring-specialised pipeline runs in production today, with its own <a href="https://app.nova3d.xyz/showcase/rings" target="_blank">showcase</a> and publish-ready materials.</div>
+      </div>
+      <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;padding:18px 16px;box-shadow:3px 3px 0 rgba(34,29,24,.1)">
+        <div style="font-size:20px;margin-bottom:10px">🤖</div>
+        <div style="font-weight:700;font-size:16.5px;margin-bottom:6px">Agent pipelines</div>
+        <div style="font-size:12.5px;line-height:1.6;color:var(--muted)">Assets as code means automation can touch them: regenerate one part, restyle a batch, or wire generation into your own tools over MCP + API.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-screen-label="Roadmap" style="border-top:1.5px solid var(--edge);background:color-mix(in oklab, var(--pink) 9%, var(--bg));padding:64px 32px;text-align:center">
+  <div style="font-family:'Pixelify Sans',monospace;font-size:14px;color:var(--pinkdeep);letter-spacing:2px;margin-bottom:14px">ROADMAP</div>
+  <h2 style="font-weight:700;font-size:40px;letter-spacing:-1.2px;max-width:760px;margin:0 auto 26px;text-wrap:pretty">One asset today; a programmable world <span style="color:var(--pinkdeep)">tomorrow</span>.</h2>
+  <div style="max-width:760px;margin:0 auto 30px;background:var(--paper);border:1.5px solid var(--edge);border-radius:14px;box-shadow:6px 6px 0 rgba(34,29,24,.14);overflow:hidden;text-align:left">
+    <div style="display:flex;align-items:center;gap:8px;padding:9px 14px;border-bottom:1.5px solid var(--edge);background:color-mix(in oklab, var(--yellow) 22%, var(--paper))">
+      <span style="width:11px;height:11px;border-radius:50%;background:var(--pink);border:1.5px solid var(--edge)"></span>
+      <span style="width:11px;height:11px;border-radius:50%;background:var(--yellow);border:1.5px solid var(--edge)"></span>
+      <span style="width:11px;height:11px;border-radius:50%;background:var(--mint);border:1.5px solid var(--edge)"></span>
+      <span style="font-family:'Space Mono',monospace;font-size:11.5px;margin-left:6px">world_experiment.webm — field recording</span>
+      <span style="margin-left:auto;font-family:'Pixelify Sans',monospace;font-size:12px;color:var(--pinkdeep)">● rec</span>
+    </div>
+    <video id="wt-vid" src="./assets/world-teaser.webm" muted loop playsinline preload="none" style="display:block;width:100%;aspect-ratio:16/9;background:#dfeef2"></video>
+    <div style="display:flex;justify-content:space-between;padding:7px 14px;border-top:1.5px solid var(--edge);background:var(--bg);font-family:'Space Mono',monospace;font-size:10.5px;color:var(--muted)">
+      <span>somewhere in the lab, generated assets are already driving around a world of their own</span>
+      <span style="color:var(--pinkdeep)">every part named · every pivot live</span>
+    </div>
+  </div>
+  <div style="display:flex;gap:12px;justify-content:center">
+    <a href="https://app.nova3d.xyz" style="background:var(--yellow);border:1.5px solid var(--edge);border-radius:12px;padding:12px 26px;font-weight:700;font-size:15px;color:#221d18;box-shadow:3px 3px 0 var(--edge)">Try the app →</a>
+    <a href="https://discord.gg/nova3d" style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;padding:12px 26px;font-weight:700;font-size:15px;color:var(--ink)">Join the Discord</a>
+  </div>
+</section>
+
+<footer data-screen-label="Footer" style="border-top:1.5px solid var(--edge);padding:18px 32px;display:flex;align-items:center;justify-content:space-between;font-family:'Space Mono',monospace;font-size:10.5px;color:var(--soft)">
+  <div style="display:flex;align-items:center;gap:8px">
+    <div style="width:14px;height:14px;background:var(--yellow);border:1.5px solid var(--edge);border-radius:4px 4px 8px 4px"></div>
+    <span>nova3d</span>
+  </div>
+  <span>no waitlist · no key request</span>
+  <span>© 2026 Nova3D · Rare Sense Inc.</span>
+</footer>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;defaultAsset&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;kart&quot;,&quot;rabbit&quot;,&quot;cake&quot;],&quot;default&quot;:&quot;kart&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Viewer&quot;},&quot;spinSeconds&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:2.8,&quot;min&quot;:1,&quot;max&quot;:6,&quot;step&quot;:0.5,&quot;unit&quot;:&quot;s&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Viewer&quot;},&quot;explodeAmount&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:42,&quot;min&quot;:0,&quot;max&quot;:100,&quot;step&quot;:1,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Viewer&quot;}}">
+const CODE = {"kart": {"file": "code.py", "lines": 822, "url": "https://nova3dshowcase.blob.core.windows.net/showcase/banana-kart-1784198724/code.py", "text": "# Banana kart: cartoon off-road go-kart whose body is a giant ripe banana\n# (brown speckles, dark stem rising at the rear, dark nose tip at the front),\n# open cockpit recess with padded seat + headrest + steering wheel, four chunky\n# blue-grey off-road tires with tread blocks and wire-laced spokes, orange\n# coil-over shock absorbers at each corner, a side-mounted cylindrical muffler\n# fed by curved exhaust headers, and workshop props on the ground (open blue\n# toolbox, wrenches, screwdriver, washers, spray can, melted banana puddle).\n# Scale: real-world metres. Kart ~2.0m long, ~1.2m tall at the stem.\n# ⋯\n# hierarchy machinery — parenting keeps world pos; pivots become origins\ndef parent_to(child, parent):\n    bpy.context.view_layer.update()\n    m = child.matrix_world.copy()\n    child.parent = parent\n    child.matrix_world = m\n\ndef set_pivot(obj, pivot_world):\n    obj.data.transform(Matrix.Translation(-Vector(pivot_world)))\n    obj.location = Vector(pivot_world)\n\n# ⋯\n# ═══ DIMENSION CONSTANTS (metres) ═════════════════════════════════════\nGROUND_Z = 0.0\n\n# Wheels — chunky off-road, rears slightly larger than fronts\nWHEEL_R_REAR  = 0.30\nWHEEL_R_FRONT = 0.26\nWHEEL_W_REAR  = 0.22\nWHEEL_W_FRONT = 0.19\nTRACK_REAR    = 0.60          # |x| of rear wheel centres\n# ⋯\ndef build_wheel(col, MAT, parent, center, R, W, side, rear):\n    # ⋯ tire, tread blocks, rim, laced spokes — origin ON the axle\n# ⋯\ndef build():\n    col = bpy.data.collections.new(\"Model\")\n    bpy.context.scene.collection.children.link(col)\n    MAT = setup_materials()\n\n    root = make_empty(col, \"BananaKart_Root\")\n    g_body = make_empty(col, \"Body_Group\", parent=root)\n    g_cockpit = make_empty(col, \"Cockpit_Group\", parent=root)\n    g_chassis = make_empty(col, \"Chassis_Group\", parent=root)\n    g_wheels = make_empty(col, \"Wheels_Group\", parent=root)\n    g_susp = make_empty(col, \"Suspension_Group\", parent=root)\n    g_engine = make_empty(col, \"Engine_Group\", parent=root)\n    g_props = make_empty(col, \"Accessories_Group\", parent=root)\n\n    build_banana_shell(col, MAT, g_body)\n    build_stem(col, MAT, g_body)\n    build_nose_tip(col, MAT, g_body)\n    build_cockpit(col, MAT, g_cockpit)\n    build_chassis(col, MAT, g_chassis)\n\n    # ⋯ + suspension, engine, wheels ×4, workshop props …"}, "rabbit": {"file": "code.py", "lines": 622, "url": "https://nova3dshowcase.blob.core.windows.net/showcase/robot-rabbit-companion-bot-1784260572/code.py", "text": "# Robot rabbit companion bot: floating spherical body/head with riveted\n# yellow + pale-blue armor panels, a bolted porthole face with glowing cyan\n# pixel eyes behind dark glass, a rust-red gasket ring sealing the face dome,\n# two big paddle rabbit ears (yellow, dark tips) on ringed pipe mounts, dark\n# flexible tube arms from stacked-gasket shoulder cuffs ending in capsule\n# forearms (blue wrist caps) with spread claw fingers, and a teal bow tie.\n# ⋯\ndef build():\n    col = bpy.data.collections.new(\"Model\")\n    bpy.context.scene.collection.children.link(col)\n    MAT = setup_materials()\n\n    root = make_empty(col, \"RobotRabbit_Root\")\n    g_body = make_empty(col, \"Body_Group\", parent=root)\n    g_face = make_empty(col, \"Face_Group\", parent=root)\n    g_ears = make_empty(col, \"Ears_Group\", parent=root)\n    g_arms = make_empty(col, \"Arms_Group\", parent=root)\n\n    build_body(col, MAT, g_body)\n    build_bow_tie(col, MAT, g_body)\n    build_face(col, MAT, g_face)\n\n    # Viewer-left (+X) ear more upright; viewer-right (-X) ear tilted wide.\n    # Mounts sit near the crown; the lean axis splays further outward.\n    build_ear(col, MAT, g_ears, (0.18, -0.04, 0.98), (0.30, -0.08, 0.95), \"L\")\n    build_ear(col, MAT, g_ears, (-0.36, 0.06, 0.93), (-0.70, 0.16, 0.68), \"R\")\n\n    build_arm(col, MAT, g_arms, SIDE_HANG, raised=False)\n    build_arm(col, MAT, g_arms, SIDE_RAISED, raised=True)\n    # ⋯"}, "cake": {"file": "code.py", "lines": 446, "url": "https://nova3dshowcase.blob.core.windows.net/showcase/blueberry-cheesecake-1783746042/code.py", "text": "# Stylized blueberry cheesecake slice, standard prop scale, volumetric icing and garnishes.\n# ⋯\ndef build():\n    col = bpy.data.collections.new(\"Model\")\n    bpy.context.scene.collection.children.link(col)\n    MAT = setup_materials()\n\n    # 1. Hierarchy Empties\n    root = make_empty(col, \"Cheesecake_Root\")\n    g_body = make_empty(col, \"Cake_Body\", parent=root)\n    g_garnish = make_empty(col, \"Garnish\", parent=root)\n    \n    # 2. Build Wedge\n    crust = build_crust(col, MAT)\n    parent_to(crust, g_body)\n    \n    cheese = build_cheese(col, MAT)\n    parent_to(cheese, g_body)\n    \n    icing = build_icing(col, MAT)\n    parent_to(icing, g_body)\n    \n    # 3. Build Garnishes (placed embedded slightly into the soft icing)\n    # Z coordinate is TOTAL_H + ~icing_thickness - small_sink_amount\n    # ⋯ blueberries placed by golden-angle ring, each its own mesh"}};
+class Component extends DCLogic {
+  state = { asset: null, tab: 'viewer', cat: 'generations', live: {}, wf: false, normals: false, labels: true, explode: null, groups: [], parts: 0, hidden: {}, expanded: {}, rootName: '', dark: false, flash: null, picked: null };
+  files = {
+    kart: ['assets/banana-kart.glb', 'banana_kart.glb'],
+    rabbit: ['assets/robot-rabbit.glb', 'robot_rabbit.glb'],
+    cake: ['assets/cheesecake.glb', 'blueberry_cheesecake.glb']
+  };
+  componentDidMount() {
+    this._studioSrc = () => this.files[this.state.asset ?? (this.props.defaultAsset ?? 'kart')][0];
+    this._ready = (e) => { if (e.detail.src !== this._studioSrc()) return; this.setState({ groups: e.detail.groups, parts: e.detail.parts, rootName: e.detail.root, hidden: {}, expanded: {}, flash: null, picked: null }); };
+    document.addEventListener('nova-ready', this._ready);
+    // a 3D click pins the part label AND flashes its group row in the scene graph
+    this._picked = (e) => {
+      if (e.detail.src !== this._studioSrc()) return;
+      const g = e.detail.group;
+      const x = { ...this.state.expanded }; if (g) x[g] = true;
+      this.setState({ picked: e.detail.name, flash: g, expanded: x });
+      clearTimeout(this._flashT);
+      this._flashT = setTimeout(() => this.setState({ flash: null }), 1600);
+    };
+    document.addEventListener('nova-pick', this._picked);
+    this._act = Date.now();
+    this._bump = () => { this._act = Date.now(); };
+    document.addEventListener('nova-interact', this._bump);
+    document.addEventListener('pointerdown', this._bump, true);
+    this._inView = true;
+    this._io = new IntersectionObserver((es) => es.forEach((x) => { this._inView = x.isIntersecting; }));
+    setTimeout(() => { const v = this.el(); if (v) this._io.observe(v); }, 1200);
+    setTimeout(() => {
+      const vid = document.getElementById('wt-vid');
+      if (!vid) return;
+      this._vio = new IntersectionObserver((es) => es.forEach((x) => {
+        if (x.isIntersecting) { vid.play().catch(() => {}); } else { vid.pause(); }
+      }), { threshold: 0.25 });
+      this._vio.observe(vid);
+    }, 800);
+    this._cyc = setInterval(() => {
+      if (document.visibilityState !== 'visible' || !this._inView || this.state.tab !== 'viewer') return;
+      if (Date.now() - this._act < 15000) return;
+      const order = ['kart', 'rabbit', 'cake'];
+      const cur = this.state.asset ?? (this.props.defaultAsset ?? 'kart');
+      const nx = order[(order.indexOf(cur) + 1) % 3];
+      this._act = Date.now();
+      this.setState({ asset: nx, groups: [], parts: 0, hidden: {}, expanded: {}, flash: null, picked: null });
+    }, 1000);
+  }
+  componentWillUnmount() {
+    document.removeEventListener('nova-ready', this._ready);
+    document.removeEventListener('nova-pick', this._picked);
+    document.removeEventListener('nova-interact', this._bump);
+    document.removeEventListener('pointerdown', this._bump, true);
+    clearInterval(this._cyc);
+    clearTimeout(this._flashT);
+    if (this._io) this._io.disconnect();
+    if (this._vio) this._vio.disconnect();
+  }
+  el() { return document.querySelector('nova-viewer'); }
+  renderVals() {
+    const s = this.state;
+    const asset = s.asset ?? (this.props.defaultAsset ?? 'kart');
+    const explodeVal = s.explode ?? (this.props.explodeAmount ?? 42);
+    const [glbSrc, fileLabel] = this.files[asset];
+    const meta = CODE[asset];
+    const pick = (k) => () => this.setState({ asset: k, groups: [], parts: 0, hidden: {}, flash: null, picked: null });
+    const mkToggle = (name, off) => (e) => {
+      if (e && e.stopPropagation) e.stopPropagation();
+      const h = { ...this.state.hidden }; h[name] = !off; this.setState({ hidden: h });
+      const v = this.el(); if (v) v.toggleGroup(name, off);
+    };
+    const noop = () => {};
+    const rows = [];
+    const walk = (node, depth) => {
+      const off = !!s.hidden[node.name];
+      const open = !!s.expanded[node.name];
+      const hasKids = (node.children || []).length > 0;
+      rows.push({
+        name: node.name, count: node.count, pad: 6 + depth * 13,
+        color: depth === 0 ? 'var(--ink)' : 'var(--muted)',
+        arrow: hasKids ? (open ? '▾' : '▸') : '·',
+        mark: off ? '▢' : '▣', dim: off ? 0.4 : 1,
+        bg: s.flash === node.name ? 'color-mix(in oklab, var(--yellow) 45%, transparent)' : 'transparent',
+        expand: hasKids ? () => { const x = { ...s.expanded }; x[node.name] = !open; this.setState({ expanded: x }); } : noop,
+        toggle: mkToggle(node.name, off),
+        over: () => { const v = this.el(); if (v) v.highlightNode(node.name, true); },
+        out: () => { const v = this.el(); if (v) v.highlightNode(node.name, false); }
+      });
+      if (open) (node.children || []).forEach((k) => walk(k, depth + 1));
+    };
+    s.groups.forEach((g) => walk(g, 0));
+    const codeText = meta.text + '\n\n# ⋯ excerpt — the full ' + meta.lines + '-line program IS the asset.\n# GLB is just its compilation target.';
+    return {
+      themeIcon: s.dark ? '☀' : '☾',
+      toggleTheme: () => { document.body.classList.toggle('dark', !s.dark); this.setState({ dark: !s.dark }); },
+      fileLabel, glbSrc,
+      spinSecs: this.props.spinSeconds ?? 2.8,
+      kartMark: asset === 'kart' ? '♥' : '', rabbitMark: asset === 'rabbit' ? '♥' : '', cakeMark: asset === 'cake' ? '♥' : '',
+      pickKart: pick('kart'), pickRabbit: pick('rabbit'), pickCake: pick('cake'),
+      isCode: s.tab === 'code',
+      viewerMark: s.tab === 'viewer' ? '●' : '○', codeMark: s.tab === 'code' ? '●' : '○',
+      showViewer: () => this.setState({ tab: 'viewer' }),
+      showCode: () => this.setState({ tab: 'code' }),
+      wf: s.wf, normalsOn: s.normals, labelsOn: s.labels,
+      wfIcon: s.wf ? '◈' : '◇', normalsIcon: s.normals ? '✦' : '✧', labelsIcon: s.labels ? '🏷' : '—',
+      onWf: () => this.setState({ wf: !s.wf }),
+      onNormals: () => this.setState({ normals: !s.normals }),
+      onLabels: () => this.setState({ labels: !s.labels }),
+      explodeVal,
+      onExplode: (e) => this.setState({ explode: +e.target.value }),
+      onReplay: () => { const v = this.el(); if (v) v.replay(); },
+      isGen: s.cat === 'generations', isUv: s.cat === 'uv', isTex: s.cat === 'textures',
+      uIdle0: !s.live.u0, uLive0: !!s.live.u0, goU0: () => this.setState({ live: { ...s.live, u0: true } }),
+      uIdle1: !s.live.u1, uLive1: !!s.live.u1, goU1: () => this.setState({ live: { ...s.live, u1: true } }),
+      uIdle2: !s.live.u2, uLive2: !!s.live.u2, goU2: () => this.setState({ live: { ...s.live, u2: true } }),
+      tIdle0: !s.live.t0, tLive0: !!s.live.t0, goT0: () => this.setState({ live: { ...s.live, t0: true } }),
+      tIdle1: !s.live.t1, tLive1: !!s.live.t1, goT1: () => this.setState({ live: { ...s.live, t1: true } }),
+      tIdle2: !s.live.t2, tLive2: !!s.live.t2, goT2: () => this.setState({ live: { ...s.live, t2: true } }),
+      catGen: () => this.setState({ cat: 'generations' }),
+      catUv: () => this.setState({ cat: 'uv' }),
+      catTex: () => this.setState({ cat: 'textures' }),
+      genMark: s.cat === 'generations' ? '●' : '○', uvMark: s.cat === 'uv' ? '●' : '○', texMark: s.cat === 'textures' ? '●' : '○',
+      genBg: s.cat === 'generations' ? 'var(--yellow)' : 'var(--paper)', genCol: s.cat === 'generations' ? '#221d18' : 'var(--muted)',
+      uvBg: s.cat === 'uv' ? 'var(--yellow)' : 'var(--paper)', uvCol: s.cat === 'uv' ? '#221d18' : 'var(--muted)',
+      texBg: s.cat === 'textures' ? 'var(--yellow)' : 'var(--paper)', texCol: s.cat === 'textures' ? '#221d18' : 'var(--muted)',
+      rows, parts: s.parts || '…', groupCount: s.groups.length || '…', rootName: s.rootName || 'root',
+      pickedInfo: s.picked ? ' · selected: ' + s.picked : '',
+      codeText, codeFile: fileLabel.replace('.glb', '') + '/' + meta.file, codeLines: meta.lines, codeUrl: meta.url
+    };
+  }
+}
+</script>
+</body>
+</html>
