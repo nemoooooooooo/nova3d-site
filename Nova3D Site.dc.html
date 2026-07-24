@@ -13,10 +13,10 @@
 <style>
 body{margin:0;background:var(--bg);
 --bg:#fbf7f0;--paper:#ffffff;--ink:#221d18;--muted:#6b6152;--soft:#a09685;--line:#e8dfd2;--edge:#221d18;
---pink:#ff9ec7;--pinkdeep:#c76a86;--yellow:#ffd23e;--mint:#a8ecc1;--lav:#c9a6ea;--codebg:#221d18;--codetx:#e8dced;
+--pink:#ff9ec7;--pinkdeep:#c76a86;--yellow:#ffd23e;--mint:#a8ecc1;--green:#3f9a46;--lav:#c9a6ea;--codebg:#221d18;--codetx:#e8dced;
 transition:background .3s}
 body.dark{--bg:#241f2b;--paper:#2e2836;--ink:#fbeef2;--muted:#b6a9c4;--soft:#8d819c;--line:#3d3547;--edge:#15111b;
---pink:#f4b8c8;--pinkdeep:#f4b8c8;--yellow:#ffd23e;--mint:#b9d68f;--lav:#c9a6ea;--codebg:#1a1620;--codetx:#d8cde4}
+--pink:#f4b8c8;--pinkdeep:#f4b8c8;--yellow:#ffd23e;--mint:#b9d68f;--green:#8ed48f;--lav:#c9a6ea;--codebg:#1a1620;--codetx:#d8cde4}
 a{color:var(--pinkdeep,#c76a86);text-decoration:none}a:hover{color:#a9536f}
 input[type=range]{accent-color:#ff9ec7}
 @keyframes nvblink{50%{opacity:0}}
@@ -26,7 +26,7 @@ input[type=range]{accent-color:#ff9ec7}
 
 <nav data-screen-label="Nav" style="display:flex;align-items:center;justify-content:space-between;padding:15px 32px;border-bottom:1.5px solid var(--edge);position:relative;z-index:5">
   <div style="display:flex;align-items:center;gap:9px">
-    <div style="width:20px;height:20px;background:var(--yellow);border:1.5px solid var(--edge);border-radius:6px 6px 12px 6px"></div>
+    <svg width="18" height="24" viewBox="-1 -1 58 78" aria-label="Nova3D" style="display:block"><polygon points="0,10 10,10 14,14 4,14" fill="#1E3A1A"/><polygon points="10,0 14,4 14,14 10,10" fill="#3D6B38"/><rect x="0" y="0" width="10" height="10" fill="#7DB87A"/><polygon points="40,10 50,10 54,14 44,14" fill="#1E3A1A"/><polygon points="50,0 54,4 54,14 50,10" fill="#3D6B38"/><rect x="40" y="0" width="10" height="10" fill="#7DB87A"/><polygon points="0,20 10,20 14,24 4,24" fill="#1E3A1A"/><polygon points="10,10 14,14 14,24 10,20" fill="#3D6B38"/><rect x="0" y="10" width="10" height="10" fill="#7DB87A"/><polygon points="10,20 20,20 24,24 14,24" fill="#1E3A1A"/><polygon points="20,10 24,14 24,24 20,20" fill="#3D6B38"/><rect x="10" y="10" width="10" height="10" fill="#7DB87A"/><polygon points="40,20 50,20 54,24 44,24" fill="#1E3A1A"/><polygon points="50,10 54,14 54,24 50,20" fill="#3D6B38"/><rect x="40" y="10" width="10" height="10" fill="#7DB87A"/><polygon points="0,30 10,30 14,34 4,34" fill="#1E3A1A"/><polygon points="10,20 14,24 14,34 10,30" fill="#3D6B38"/><rect x="0" y="20" width="10" height="10" fill="#7DB87A"/><polygon points="20,30 30,30 34,34 24,34" fill="#1E3A1A"/><polygon points="30,20 34,24 34,34 30,30" fill="#3D6B38"/><rect x="20" y="20" width="10" height="10" fill="#7DB87A"/><polygon points="40,30 50,30 54,34 44,34" fill="#1E3A1A"/><polygon points="50,20 54,24 54,34 50,30" fill="#3D6B38"/><rect x="40" y="20" width="10" height="10" fill="#7DB87A"/><polygon points="0,40 10,40 14,44 4,44" fill="#1E3A1A"/><polygon points="10,30 14,34 14,44 10,40" fill="#3D6B38"/><rect x="0" y="30" width="10" height="10" fill="#7DB87A"/><polygon points="20,40 30,40 34,44 24,44" fill="#1E3A1A"/><polygon points="30,30 34,34 34,44 30,40" fill="#3D6B38"/><rect x="20" y="30" width="10" height="10" fill="#7DB87A"/><polygon points="40,40 50,40 54,44 44,44" fill="#1E3A1A"/><polygon points="50,30 54,34 54,44 50,40" fill="#3D6B38"/><rect x="40" y="30" width="10" height="10" fill="#7DB87A"/><polygon points="0,50 10,50 14,54 4,54" fill="#1E3A1A"/><polygon points="10,40 14,44 14,54 10,50" fill="#3D6B38"/><rect x="0" y="40" width="10" height="10" fill="#7DB87A"/><polygon points="30,50 40,50 44,54 34,54" fill="#1E3A1A"/><polygon points="40,40 44,44 44,54 40,50" fill="#3D6B38"/><rect x="30" y="40" width="10" height="10" fill="#7DB87A"/><polygon points="40,50 50,50 54,54 44,54" fill="#1E3A1A"/><polygon points="50,40 54,44 54,54 50,50" fill="#3D6B38"/><rect x="40" y="40" width="10" height="10" fill="#7DB87A"/><polygon points="0,60 10,60 14,64 4,64" fill="#1E3A1A"/><polygon points="10,50 14,54 14,64 10,60" fill="#3D6B38"/><rect x="0" y="50" width="10" height="10" fill="#7DB87A"/><polygon points="40,60 50,60 54,64 44,64" fill="#1E3A1A"/><polygon points="50,50 54,54 54,64 50,60" fill="#3D6B38"/><rect x="40" y="50" width="10" height="10" fill="#7DB87A"/><polygon points="0,70 10,70 14,74 4,74" fill="#1E3A1A"/><polygon points="10,60 14,64 14,74 10,70" fill="#3D6B38"/><rect x="0" y="60" width="10" height="10" fill="#7DB87A"/><polygon points="40,70 50,70 54,74 44,74" fill="#1E3A1A"/><polygon points="50,60 54,64 54,74 50,70" fill="#3D6B38"/><rect x="40" y="60" width="10" height="10" fill="#7DB87A"/><rect x="0" y="0" width="10" height="1.5" fill="#1A1A1C"/><rect x="0" y="0" width="1.5" height="10" fill="#1A1A1C"/><rect x="8.5" y="0" width="1.5" height="10" fill="#1A1A1C"/><rect x="40" y="0" width="10" height="1.5" fill="#1A1A1C"/><rect x="40" y="0" width="1.5" height="10" fill="#1A1A1C"/><rect x="48.5" y="0" width="1.5" height="10" fill="#1A1A1C"/><rect x="0" y="10" width="1.5" height="10" fill="#1A1A1C"/><rect x="10" y="10" width="10" height="1.5" fill="#1A1A1C"/><rect x="10" y="18.5" width="10" height="1.5" fill="#1A1A1C"/><rect x="18.5" y="10" width="1.5" height="10" fill="#1A1A1C"/><rect x="40" y="10" width="1.5" height="10" fill="#1A1A1C"/><rect x="48.5" y="10" width="1.5" height="10" fill="#1A1A1C"/><rect x="0" y="20" width="1.5" height="10" fill="#1A1A1C"/><rect x="8.5" y="20" width="1.5" height="10" fill="#1A1A1C"/><rect x="20" y="20" width="10" height="1.5" fill="#1A1A1C"/><rect x="20" y="20" width="1.5" height="10" fill="#1A1A1C"/><rect x="28.5" y="20" width="1.5" height="10" fill="#1A1A1C"/><rect x="40" y="20" width="1.5" height="10" fill="#1A1A1C"/><rect x="48.5" y="20" width="1.5" height="10" fill="#1A1A1C"/><rect x="0" y="30" width="1.5" height="10" fill="#1A1A1C"/><rect x="8.5" y="30" width="1.5" height="10" fill="#1A1A1C"/><rect x="20" y="38.5" width="10" height="1.5" fill="#1A1A1C"/><rect x="20" y="30" width="1.5" height="10" fill="#1A1A1C"/><rect x="28.5" y="30" width="1.5" height="10" fill="#1A1A1C"/><rect x="40" y="30" width="1.5" height="10" fill="#1A1A1C"/><rect x="48.5" y="30" width="1.5" height="10" fill="#1A1A1C"/><rect x="0" y="40" width="1.5" height="10" fill="#1A1A1C"/><rect x="8.5" y="40" width="1.5" height="10" fill="#1A1A1C"/><rect x="30" y="40" width="10" height="1.5" fill="#1A1A1C"/><rect x="30" y="48.5" width="10" height="1.5" fill="#1A1A1C"/><rect x="30" y="40" width="1.5" height="10" fill="#1A1A1C"/><rect x="48.5" y="40" width="1.5" height="10" fill="#1A1A1C"/><rect x="0" y="50" width="1.5" height="10" fill="#1A1A1C"/><rect x="8.5" y="50" width="1.5" height="10" fill="#1A1A1C"/><rect x="40" y="50" width="1.5" height="10" fill="#1A1A1C"/><rect x="48.5" y="50" width="1.5" height="10" fill="#1A1A1C"/><rect x="0" y="68.5" width="10" height="1.5" fill="#1A1A1C"/><rect x="0" y="60" width="1.5" height="10" fill="#1A1A1C"/><rect x="8.5" y="60" width="1.5" height="10" fill="#1A1A1C"/><rect x="40" y="68.5" width="10" height="1.5" fill="#1A1A1C"/><rect x="40" y="60" width="1.5" height="10" fill="#1A1A1C"/><rect x="48.5" y="60" width="1.5" height="10" fill="#1A1A1C"/></svg>
     <span style="font-weight:700;font-size:17.5px;letter-spacing:-.2px">nova3d</span>
     <span style="font-family:'Space Mono',monospace;font-size:10px;color:var(--soft);margin-left:6px">v0.9 · open source</span>
   </div>
@@ -41,7 +41,7 @@ input[type=range]{accent-color:#ff9ec7}
 
 <header data-screen-label="Hero" style="max-width:1240px;margin:0 auto;padding:52px 32px 30px;text-align:center">
   <div style="font-family:'Pixelify Sans',monospace;font-size:15px;color:var(--pinkdeep);letter-spacing:2px;margin-bottom:18px">TEXT · PHOTO → STRUCTURED 3D</div>
-  <h1 style="font-weight:700;font-size:58px;line-height:1.04;letter-spacing:-1.8px;margin:0 0 16px;text-wrap:pretty">Assets that stay <span style="color:var(--pink)">alive</span> after generation.</h1>
+  <h1 style="font-weight:700;font-size:58px;line-height:1.04;letter-spacing:-1.8px;margin:0 0 16px;text-wrap:pretty"><span style="color:var(--green)">Game</span> assets that stay <span style="color:var(--pink)">alive</span> after generation.</h1>
   <p style="font-family:'Space Mono',monospace;font-size:19px;line-height:1.4;color:var(--ink);margin:0 0 18px">Assets your <span style="background:color-mix(in oklab, var(--mint) 60%, transparent);padding:1px 7px;border-radius:7px">coding agent</span> can talk to.</p>
   <p style="font-size:16.5px;line-height:1.6;color:var(--muted);max-width:640px;margin:0 auto 26px;text-wrap:pretty">Type a sentence. Drop a photo. Get 3D objects assembled piece by piece — parts named, hierarchy real, pivots placed, UVs unwrapped.</p>
   <div style="display:flex;gap:12px;justify-content:center">
@@ -135,92 +135,25 @@ input[type=range]{accent-color:#ff9ec7}
       </div>
     </div>
   </div>
-  <div style="font-family:'Space Mono',monospace;font-size:12px;color:var(--muted);margin:30px 0 14px">then — <span style="color:var(--ink);font-weight:700">texture in full PBR</span>, and keep going:</div>
-  <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px">
-    <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;padding:16px 14px;box-shadow:3px 3px 0 rgba(34,29,24,.1)"><div style="font-size:18px;margin-bottom:8px">🎨</div><div style="font-weight:700;font-size:15.5px;margin-bottom:4px">PBR textures</div><div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--soft);line-height:1.5">base · normal · rough · metal</div></div>
-    <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;padding:16px 14px;box-shadow:3px 3px 0 rgba(34,29,24,.1)"><div style="font-size:18px;margin-bottom:8px">🧩</div><div style="font-weight:700;font-size:15.5px;margin-bottom:4px">Edit per part</div><div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--soft);line-height:1.5">swap one part, keep the rest</div></div>
-    <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;padding:16px 14px;box-shadow:3px 3px 0 rgba(34,29,24,.1)"><div style="font-size:18px;margin-bottom:8px">🦾</div><div style="font-weight:700;font-size:15.5px;margin-bottom:4px">Articulate</div><div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--soft);line-height:1.5">pivots placed, joints ready</div></div>
-    <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;padding:16px 14px;box-shadow:3px 3px 0 rgba(34,29,24,.1)"><div style="font-size:18px;margin-bottom:8px">🎬</div><div style="font-weight:700;font-size:15.5px;margin-bottom:4px">Animation-ready</div><div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--soft);line-height:1.5">named nodes + real pivots — no rigging pass</div></div>
-    <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;padding:16px 14px;box-shadow:3px 3px 0 rgba(34,29,24,.1)"><div style="font-size:18px;margin-bottom:8px">✨</div><div style="font-weight:700;font-size:15.5px;margin-bottom:4px">Restyle</div><div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--soft);line-height:1.5">new look, same structure</div></div>
-    <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;padding:16px 14px;box-shadow:3px 3px 0 rgba(34,29,24,.1)"><div style="font-size:18px;margin-bottom:8px">📐</div><div style="font-weight:700;font-size:15.5px;margin-bottom:4px">Rescale</div><div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--soft);line-height:1.5">proportions, not distortion</div></div>
-  </div>
-</section>
-
-<section id="showcase" data-screen-label="Showcase" style="max-width:1240px;margin:0 auto;padding:34px 32px 40px">
-  <div style="display:flex;align-items:baseline;gap:16px;margin-bottom:6px">
-    <div style="font-family:'Pixelify Sans',monospace;font-size:14px;color:var(--pinkdeep);letter-spacing:2px">FROM THE SHOWCASE</div>
-    <span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--soft)">real outputs, straight from the pipeline — generations, then the UV and texture passes run on them.</span>
-  </div>
-  <div style="display:flex;gap:6px;margin:14px 0 18px;font-family:'Pixelify Sans',monospace;font-size:13px">
-    <span onClick="{{ catGen }}" style="cursor:pointer;border:1.5px solid var(--edge);border-radius:8px;padding:3px 12px;background:{{ genBg }};color:{{ genCol }}">{{ genMark }} generations</span>
-    <span onClick="{{ catUv }}" style="cursor:pointer;border:1.5px solid var(--edge);border-radius:8px;padding:3px 12px;background:{{ uvBg }};color:{{ uvCol }}">{{ uvMark }} uv maps</span>
-    <span onClick="{{ catTex }}" style="cursor:pointer;border:1.5px solid var(--edge);border-radius:8px;padding:3px 12px;background:{{ texBg }};color:{{ texCol }}">{{ texMark }} textures</span>
-    <span style="border:1.5px solid var(--line);border-radius:8px;padding:3px 12px;color:var(--soft)">○ articulation — soon</span>
-    <span style="border:1.5px solid var(--line);border-radius:8px;padding:3px 12px;color:var(--soft)">○ animation — soon</span>
-  </div>
-  <sc-if value="{{ isGen }}" hint-placeholder-val="{{ true }}">
-  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px">
-    <a href="https://app.nova3d.xyz/showcase" target="_blank" style="display:block;background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;overflow:hidden;box-shadow:3px 3px 0 rgba(34,29,24,.1);color:var(--ink)" style-hover="transform:translate(-1.5px,-1.5px);box-shadow:4.5px 4.5px 0 rgba(34,29,24,.14)">
-      <div style="aspect-ratio:4/3;background:#fff;overflow:hidden"><img loading="lazy" src="./assets/showcase/gen_duck.webp" style="width:100%;height:100%;object-fit:cover;display:block"></div>
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 11px;border-top:1.5px solid var(--edge)">
-        <span style="font-weight:700;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Duck Excavator</span>
-        <span style="font-family:'Space Mono',monospace;font-size:9.5px;color:var(--soft);flex:none">ref → 3D</span>
-      </div>
-    </a>
-    <a href="https://app.nova3d.xyz/showcase" target="_blank" style="display:block;background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;overflow:hidden;box-shadow:3px 3px 0 rgba(34,29,24,.1);color:var(--ink)" style-hover="transform:translate(-1.5px,-1.5px);box-shadow:4.5px 4.5px 0 rgba(34,29,24,.14)">
-      <div style="aspect-ratio:4/3;background:#fff;overflow:hidden"><img loading="lazy" src="./assets/showcase/gen_raygun.webp" style="width:100%;height:100%;object-fit:cover;display:block"></div>
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 11px;border-top:1.5px solid var(--edge)">
-        <span style="font-weight:700;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Retro Sci-Fi Raygun</span>
-        <span style="font-family:'Space Mono',monospace;font-size:9.5px;color:var(--soft);flex:none">ref → 3D</span>
-      </div>
-    </a>
-    <a href="https://app.nova3d.xyz/showcase" target="_blank" style="display:block;background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;overflow:hidden;box-shadow:3px 3px 0 rgba(34,29,24,.1);color:var(--ink)" style-hover="transform:translate(-1.5px,-1.5px);box-shadow:4.5px 4.5px 0 rgba(34,29,24,.14)">
-      <div style="aspect-ratio:4/3;background:#fff;overflow:hidden"><img loading="lazy" src="./assets/showcase/gen_gary.webp" style="width:100%;height:100%;object-fit:cover;display:block"></div>
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 11px;border-top:1.5px solid var(--edge)">
-        <span style="font-weight:700;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Cartoon snail (Gary)</span>
-        <span style="font-family:'Space Mono',monospace;font-size:9.5px;color:var(--soft);flex:none">ref → 3D</span>
-      </div>
-    </a>
-    <a href="https://app.nova3d.xyz/showcase" target="_blank" style="display:block;background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;overflow:hidden;box-shadow:3px 3px 0 rgba(34,29,24,.1);color:var(--ink)" style-hover="transform:translate(-1.5px,-1.5px);box-shadow:4.5px 4.5px 0 rgba(34,29,24,.14)">
-      <div style="aspect-ratio:4/3;background:#fff;overflow:hidden"><img loading="lazy" src="./assets/showcase/gen_hand.webp" style="width:100%;height:100%;object-fit:cover;display:block"></div>
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 11px;border-top:1.5px solid var(--edge)">
-        <span style="font-weight:700;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Robotic mechanical hand</span>
-        <span style="font-family:'Space Mono',monospace;font-size:9.5px;color:var(--soft);flex:none">ref → 3D</span>
-      </div>
-    </a>
-    <a href="https://app.nova3d.xyz/showcase" target="_blank" style="display:block;background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;overflow:hidden;box-shadow:3px 3px 0 rgba(34,29,24,.1);color:var(--ink)" style-hover="transform:translate(-1.5px,-1.5px);box-shadow:4.5px 4.5px 0 rgba(34,29,24,.14)">
-      <div style="aspect-ratio:4/3;background:#fff;overflow:hidden"><img loading="lazy" src="./assets/showcase/gen_bicycle.webp" style="width:100%;height:100%;object-fit:cover;display:block"></div>
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 11px;border-top:1.5px solid var(--edge)">
-        <span style="font-weight:700;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Bicycle</span>
-        <span style="font-family:'Space Mono',monospace;font-size:9.5px;color:var(--soft);flex:none">ref → 3D</span>
-      </div>
-    </a>
-    <a href="https://app.nova3d.xyz/showcase" target="_blank" style="display:block;background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;overflow:hidden;box-shadow:3px 3px 0 rgba(34,29,24,.1);color:var(--ink)" style-hover="transform:translate(-1.5px,-1.5px);box-shadow:4.5px 4.5px 0 rgba(34,29,24,.14)">
-      <div style="aspect-ratio:4/3;background:#fff;overflow:hidden"><img loading="lazy" src="./assets/showcase/gen_drone.webp" style="width:100%;height:100%;object-fit:cover;display:block"></div>
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 11px;border-top:1.5px solid var(--edge)">
-        <span style="font-weight:700;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">quadcopter drone</span>
-        <span style="font-family:'Space Mono',monospace;font-size:9.5px;color:var(--soft);flex:none">ref → 3D</span>
-      </div>
-    </a>
-    <a href="https://app.nova3d.xyz/showcase" target="_blank" style="display:block;background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;overflow:hidden;box-shadow:3px 3px 0 rgba(34,29,24,.1);color:var(--ink)" style-hover="transform:translate(-1.5px,-1.5px);box-shadow:4.5px 4.5px 0 rgba(34,29,24,.14)">
-      <div style="aspect-ratio:4/3;background:#fff;overflow:hidden"><img loading="lazy" src="./assets/showcase/gen_shopfront.webp" style="width:100%;height:100%;object-fit:cover;display:block"></div>
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 11px;border-top:1.5px solid var(--edge)">
-        <span style="font-weight:700;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Shopfront facade</span>
-        <span style="font-family:'Space Mono',monospace;font-size:9.5px;color:var(--soft);flex:none">ref → 3D</span>
-      </div>
-    </a>
-    <a href="https://app.nova3d.xyz/showcase" target="_blank" style="display:block;background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;overflow:hidden;box-shadow:3px 3px 0 rgba(34,29,24,.1);color:var(--ink)" style-hover="transform:translate(-1.5px,-1.5px);box-shadow:4.5px 4.5px 0 rgba(34,29,24,.14)">
-      <div style="aspect-ratio:4/3;background:#fff;overflow:hidden"><img loading="lazy" src="./assets/showcase/gen_cherry.webp" style="width:100%;height:100%;object-fit:cover;display:block"></div>
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 11px;border-top:1.5px solid var(--edge)">
-        <span style="font-weight:700;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Cherry lounge chair</span>
-        <span style="font-family:'Space Mono',monospace;font-size:9.5px;color:var(--soft);flex:none">ref → 3D</span>
-      </div>
-    </a>
-  </div>
-  <div style="margin-top:16px;font-family:'Space Mono',monospace;font-size:11.5px"><a href="https://app.nova3d.xyz/showcase" target="_blank">browse all 73 — live 3D, with the code that built each one ↗</a></div>
-  </sc-if>
-  <sc-if value="{{ isUv }}" hint-placeholder-val="{{ false }}">
-  <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);margin:0 0 14px">generated by the same unwrap pass that ships in the app — exterior/interior split → per-group area budgets → one global smart-project → per-group packing. checker = density QA. click a card to spin the real GLB.</div>
+  <div style="font-family:'Space Mono',monospace;font-size:12px;color:var(--muted);margin:30px 0 16px">then — <span style="color:var(--ink);font-weight:700">texture in full PBR, up to 4K</span>, and keep going:</div>
+  <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;box-shadow:6px 6px 0 rgba(34,29,24,.14);overflow:hidden">
+    <div style="display:flex;align-items:center;gap:8px;padding:8px 13px;border-bottom:1.5px solid var(--edge);background:color-mix(in oklab, var(--lav) 20%, var(--paper))">
+      <span style="width:11px;height:11px;border-radius:50%;background:var(--pink);border:1.5px solid var(--edge)"></span>
+      <span style="width:11px;height:11px;border-radius:50%;background:var(--yellow);border:1.5px solid var(--edge)"></span>
+      <span style="width:11px;height:11px;border-radius:50%;background:var(--mint);border:1.5px solid var(--edge)"></span>
+      <span style="font-family:'Space Mono',monospace;font-size:11.5px;margin-left:6px">🗂 asset_tools</span>
+      <span style="margin-left:auto;font-family:'Space Mono',monospace;font-size:11px;color:var(--soft);letter-spacing:3px">▁ ▢ ✕</span>
+    </div>
+    <div style="display:flex;gap:4px;padding:9px 10px 0;background:var(--bg);border-bottom:1.5px solid var(--edge);overflow-x:auto">
+      <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="7">
+        <span onClick="{{ t.go }}" style="cursor:pointer;display:flex;align-items:center;gap:6px;font-family:'Pixelify Sans',monospace;font-size:12.5px;border:1.5px solid var(--edge);border-bottom:none;border-radius:8px 8px 0 0;padding:7px 13px 9px;margin-bottom:-1.5px;background:{{ t.bg }};color:{{ t.col }};box-shadow:{{ t.sh }};transform:translateY({{ t.ty }});white-space:nowrap;flex:none">
+          <span style="font-size:13px">{{ t.icon }}</span>{{ t.label }}<span style="color:var(--soft);font-size:10.5px">{{ t.soon }}</span>
+        </span>
+      </sc-for>
+    </div>
+    <div style="background:var(--paper);padding:20px">
+    <sc-if value="{{ isFeatUv }}" hint-placeholder-val="{{ false }}">
+  <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);margin:0 0 14px">Every asset arrives UV-unwrapped and ready to paint — parts packed into clean, non-overlapping atlases with even texel density. The checkerboard is just there to show that. Click a card to spin the real GLB.</div>
   <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
     <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;overflow:hidden;box-shadow:3px 3px 0 rgba(34,29,24,.1)">
       <div style="aspect-ratio:4/3;position:relative;overflow:hidden;background:conic-gradient(var(--paper) 90deg,var(--bg) 90deg 180deg,var(--paper) 180deg 270deg,var(--bg) 270deg) 0 0/22px 22px">
@@ -276,9 +209,9 @@ input[type=range]{accent-color:#ff9ec7}
     <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;overflow:hidden;box-shadow:3px 3px 0 rgba(34,29,24,.1)"><img loading="lazy" src="./assets/showcase/atlas_rabbit.webp" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block"><div style="display:flex;justify-content:space-between;padding:7px 11px;border-top:1.5px solid var(--edge)"><span style="font-weight:700;font-size:12.5px">rabbit — atlas sheet</span><span style="font-family:'Space Mono',monospace;font-size:9.5px;color:var(--soft)">area-budgeted islands</span></div></div>
     <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;overflow:hidden;box-shadow:3px 3px 0 rgba(34,29,24,.1)"><img loading="lazy" src="./assets/showcase/atlas_cake.webp" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block"><div style="display:flex;justify-content:space-between;padding:7px 11px;border-top:1.5px solid var(--edge)"><span style="font-weight:700;font-size:12.5px">cheesecake — atlas sheet</span><span style="font-family:'Space Mono',monospace;font-size:9.5px;color:var(--soft)">exterior faces only</span></div></div>
   </div>
-  </sc-if>
-  <sc-if value="{{ isTex }}" hint-placeholder-val="{{ false }}">
-  <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);margin:0 0 14px">same assets, restyled by prompt — structure survives texturing because the parts never merge. full PBR at 2K: albedo · normal · roughness · metallic · ao · height, zipped with every asset. click a card to spin the real textured GLB.</div>
+    </sc-if>
+    <sc-if value="{{ isFeatPbr }}" hint-placeholder-val="{{ true }}">
+  <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);margin:0 0 14px">Restyle from a prompt — the geometry stays put and only the surface changes, because the parts never merge. Full PBR up to 4K (albedo, normal, roughness, metallic, AO, height), packed with every asset. Click a card to spin the real textured GLB.</div>
   <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
     <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;overflow:hidden;box-shadow:3px 3px 0 rgba(34,29,24,.1)">
       <div style="aspect-ratio:4/3;position:relative;overflow:hidden;background:var(--codebg)">
@@ -332,7 +265,50 @@ input[type=range]{accent-color:#ff9ec7}
       </div>
     </div>
   </div>
-  </sc-if>
+    </sc-if>
+    <sc-if value="{{ isFeatEdit }}" hint-placeholder-val="{{ false }}">
+      <div style="text-align:center;padding:52px 20px">
+        <div style="font-size:40px">🧩</div>
+        <div style="font-family:'Pixelify Sans',monospace;font-size:22px;margin-top:12px">Edit per part <span style="color:var(--pinkdeep)">— coming soon</span></div>
+        <div style="font-family:'Space Mono',monospace;font-size:12px;color:var(--muted);margin:9px auto 0;max-width:540px;line-height:1.65">swap or regenerate one named part while the rest stays byte-for-byte identical — because every part is its own mesh in code.</div>
+        <div style="display:inline-block;margin-top:16px;font-family:'Pixelify Sans',monospace;font-size:12px;background:color-mix(in oklab, var(--lav) 30%, var(--paper));border:1.5px solid var(--edge);border-radius:999px;padding:5px 14px;box-shadow:2px 2px 0 var(--edge)">✦ in the app today via regenerate_part</div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ isFeatArtic }}" hint-placeholder-val="{{ false }}">
+      <div style="text-align:center;padding:52px 20px">
+        <div style="font-size:40px">🦾</div>
+        <div style="font-family:'Pixelify Sans',monospace;font-size:22px;margin-top:12px">Articulate <span style="color:var(--pinkdeep)">— coming soon</span></div>
+        <div style="font-family:'Space Mono',monospace;font-size:12px;color:var(--muted);margin:9px auto 0;max-width:540px;line-height:1.65">pivots already sit on the real joints — turn the parented hierarchy into articulated, grabbable parts with no manual rigging.</div>
+        <div style="display:inline-block;margin-top:16px;font-family:'Pixelify Sans',monospace;font-size:12px;background:color-mix(in oklab, var(--lav) 30%, var(--paper));border:1.5px solid var(--edge);border-radius:999px;padding:5px 14px;box-shadow:2px 2px 0 var(--edge)">articulation pipeline — soon</div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ isFeatAnim }}" hint-placeholder-val="{{ false }}">
+      <div style="text-align:center;padding:52px 20px">
+        <div style="font-size:40px">🎬</div>
+        <div style="font-family:'Pixelify Sans',monospace;font-size:22px;margin-top:12px">Animation-ready <span style="color:var(--pinkdeep)">— coming soon</span></div>
+        <div style="font-family:'Space Mono',monospace;font-size:12px;color:var(--muted);margin:9px auto 0;max-width:540px;line-height:1.65">named nodes + placed pivots mean no rigging pass — drop the GLB straight onto an animation timeline.</div>
+        <div style="display:inline-block;margin-top:16px;font-family:'Pixelify Sans',monospace;font-size:12px;background:color-mix(in oklab, var(--lav) 30%, var(--paper));border:1.5px solid var(--edge);border-radius:999px;padding:5px 14px;box-shadow:2px 2px 0 var(--edge)">animation demo — soon</div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ isFeatRestyle }}" hint-placeholder-val="{{ false }}">
+      <div style="text-align:center;padding:52px 20px">
+        <div style="font-size:40px">✨</div>
+        <div style="font-family:'Pixelify Sans',monospace;font-size:22px;margin-top:12px">Restyle <span style="color:var(--pinkdeep)">— coming soon</span></div>
+        <div style="font-family:'Space Mono',monospace;font-size:12px;color:var(--muted);margin:9px auto 0;max-width:540px;line-height:1.65">same geometry, a new material story from one prompt — structure survives because the parts never merge.</div>
+        <div style="display:inline-block;margin-top:16px;font-family:'Pixelify Sans',monospace;font-size:12px;background:color-mix(in oklab, var(--lav) 30%, var(--paper));border:1.5px solid var(--edge);border-radius:999px;padding:5px 14px;box-shadow:2px 2px 0 var(--edge)">live restyle demo — soon</div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ isFeatRescale }}" hint-placeholder-val="{{ false }}">
+      <div style="text-align:center;padding:52px 20px">
+        <div style="font-size:40px">📐</div>
+        <div style="font-family:'Pixelify Sans',monospace;font-size:22px;margin-top:12px">Rescale <span style="color:var(--pinkdeep)">— coming soon</span></div>
+        <div style="font-family:'Space Mono',monospace;font-size:12px;color:var(--muted);margin:9px auto 0;max-width:540px;line-height:1.65">proportions are parameters in code — rescale by real-world metres without distorting a single part.</div>
+        <div style="display:inline-block;margin-top:16px;font-family:'Pixelify Sans',monospace;font-size:12px;background:color-mix(in oklab, var(--lav) 30%, var(--paper));border:1.5px solid var(--edge);border-radius:999px;padding:5px 14px;box-shadow:2px 2px 0 var(--edge)">rescale demo — soon</div>
+      </div>
+    </sc-if>
+    <div style="margin-top:18px;padding-top:14px;border-top:1.5px solid var(--line);font-family:'Space Mono',monospace;font-size:11.5px"><a href="https://app.nova3d.xyz/showcase" target="_blank">browse all 73 generations — live 3D, with the code that built each one ↗</a></div>
+    </div>
+  </div>
 </section>
 
 <section id="agents" data-screen-label="Agents and export" style="max-width:1240px;margin:0 auto;padding:26px 32px 46px">
@@ -402,10 +378,10 @@ input[type=range]{accent-color:#ff9ec7}
       <span style="width:11px;height:11px;border-radius:50%;background:var(--pink);border:1.5px solid var(--edge)"></span>
       <span style="width:11px;height:11px;border-radius:50%;background:var(--yellow);border:1.5px solid var(--edge)"></span>
       <span style="width:11px;height:11px;border-radius:50%;background:var(--mint);border:1.5px solid var(--edge)"></span>
-      <span style="font-family:'Space Mono',monospace;font-size:11.5px;margin-left:6px">world_experiment.webm — field recording</span>
+      <span style="font-family:'Space Mono',monospace;font-size:11.5px;margin-left:6px">world_experiment.mp4 — field recording</span>
       <span style="margin-left:auto;font-family:'Pixelify Sans',monospace;font-size:12px;color:var(--pinkdeep)">● rec</span>
     </div>
-    <video id="wt-vid" src="./assets/world-teaser.webm" muted loop playsinline preload="none" style="display:block;width:100%;aspect-ratio:16/9;background:#dfeef2"></video>
+    <video id="wt-vid" src="./assets/world-teaser.mp4" muted loop playsinline preload="none" style="display:block;width:100%;aspect-ratio:16/9;object-fit:cover;background:#dfeef2"></video>
     <div style="display:flex;justify-content:space-between;padding:7px 14px;border-top:1.5px solid var(--edge);background:var(--bg);font-family:'Space Mono',monospace;font-size:10.5px;color:var(--muted)">
       <span>somewhere in the lab, generated assets are already driving around a world of their own</span>
       <span style="color:var(--pinkdeep)">every part named · every pivot live</span>
@@ -432,7 +408,7 @@ input[type=range]{accent-color:#ff9ec7}
 <script type="text/x-dc" data-dc-script data-props="{&quot;defaultAsset&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;kart&quot;,&quot;rabbit&quot;,&quot;cake&quot;],&quot;default&quot;:&quot;kart&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Viewer&quot;},&quot;spinSeconds&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:2.8,&quot;min&quot;:1,&quot;max&quot;:6,&quot;step&quot;:0.5,&quot;unit&quot;:&quot;s&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Viewer&quot;},&quot;explodeAmount&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:42,&quot;min&quot;:0,&quot;max&quot;:100,&quot;step&quot;:1,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Viewer&quot;}}">
 const CODE = {"kart": {"file": "code.py", "lines": 822, "url": "https://nova3dshowcase.blob.core.windows.net/showcase/banana-kart-1784198724/code.py", "text": "# Banana kart: cartoon off-road go-kart whose body is a giant ripe banana\n# (brown speckles, dark stem rising at the rear, dark nose tip at the front),\n# open cockpit recess with padded seat + headrest + steering wheel, four chunky\n# blue-grey off-road tires with tread blocks and wire-laced spokes, orange\n# coil-over shock absorbers at each corner, a side-mounted cylindrical muffler\n# fed by curved exhaust headers, and workshop props on the ground (open blue\n# toolbox, wrenches, screwdriver, washers, spray can, melted banana puddle).\n# Scale: real-world metres. Kart ~2.0m long, ~1.2m tall at the stem.\n# ⋯\n# hierarchy machinery — parenting keeps world pos; pivots become origins\ndef parent_to(child, parent):\n    bpy.context.view_layer.update()\n    m = child.matrix_world.copy()\n    child.parent = parent\n    child.matrix_world = m\n\ndef set_pivot(obj, pivot_world):\n    obj.data.transform(Matrix.Translation(-Vector(pivot_world)))\n    obj.location = Vector(pivot_world)\n\n# ⋯\n# ═══ DIMENSION CONSTANTS (metres) ═════════════════════════════════════\nGROUND_Z = 0.0\n\n# Wheels — chunky off-road, rears slightly larger than fronts\nWHEEL_R_REAR  = 0.30\nWHEEL_R_FRONT = 0.26\nWHEEL_W_REAR  = 0.22\nWHEEL_W_FRONT = 0.19\nTRACK_REAR    = 0.60          # |x| of rear wheel centres\n# ⋯\ndef build_wheel(col, MAT, parent, center, R, W, side, rear):\n    # ⋯ tire, tread blocks, rim, laced spokes — origin ON the axle\n# ⋯\ndef build():\n    col = bpy.data.collections.new(\"Model\")\n    bpy.context.scene.collection.children.link(col)\n    MAT = setup_materials()\n\n    root = make_empty(col, \"BananaKart_Root\")\n    g_body = make_empty(col, \"Body_Group\", parent=root)\n    g_cockpit = make_empty(col, \"Cockpit_Group\", parent=root)\n    g_chassis = make_empty(col, \"Chassis_Group\", parent=root)\n    g_wheels = make_empty(col, \"Wheels_Group\", parent=root)\n    g_susp = make_empty(col, \"Suspension_Group\", parent=root)\n    g_engine = make_empty(col, \"Engine_Group\", parent=root)\n    g_props = make_empty(col, \"Accessories_Group\", parent=root)\n\n    build_banana_shell(col, MAT, g_body)\n    build_stem(col, MAT, g_body)\n    build_nose_tip(col, MAT, g_body)\n    build_cockpit(col, MAT, g_cockpit)\n    build_chassis(col, MAT, g_chassis)\n\n    # ⋯ + suspension, engine, wheels ×4, workshop props …"}, "rabbit": {"file": "code.py", "lines": 622, "url": "https://nova3dshowcase.blob.core.windows.net/showcase/robot-rabbit-companion-bot-1784260572/code.py", "text": "# Robot rabbit companion bot: floating spherical body/head with riveted\n# yellow + pale-blue armor panels, a bolted porthole face with glowing cyan\n# pixel eyes behind dark glass, a rust-red gasket ring sealing the face dome,\n# two big paddle rabbit ears (yellow, dark tips) on ringed pipe mounts, dark\n# flexible tube arms from stacked-gasket shoulder cuffs ending in capsule\n# forearms (blue wrist caps) with spread claw fingers, and a teal bow tie.\n# ⋯\ndef build():\n    col = bpy.data.collections.new(\"Model\")\n    bpy.context.scene.collection.children.link(col)\n    MAT = setup_materials()\n\n    root = make_empty(col, \"RobotRabbit_Root\")\n    g_body = make_empty(col, \"Body_Group\", parent=root)\n    g_face = make_empty(col, \"Face_Group\", parent=root)\n    g_ears = make_empty(col, \"Ears_Group\", parent=root)\n    g_arms = make_empty(col, \"Arms_Group\", parent=root)\n\n    build_body(col, MAT, g_body)\n    build_bow_tie(col, MAT, g_body)\n    build_face(col, MAT, g_face)\n\n    # Viewer-left (+X) ear more upright; viewer-right (-X) ear tilted wide.\n    # Mounts sit near the crown; the lean axis splays further outward.\n    build_ear(col, MAT, g_ears, (0.18, -0.04, 0.98), (0.30, -0.08, 0.95), \"L\")\n    build_ear(col, MAT, g_ears, (-0.36, 0.06, 0.93), (-0.70, 0.16, 0.68), \"R\")\n\n    build_arm(col, MAT, g_arms, SIDE_HANG, raised=False)\n    build_arm(col, MAT, g_arms, SIDE_RAISED, raised=True)\n    # ⋯"}, "cake": {"file": "code.py", "lines": 446, "url": "https://nova3dshowcase.blob.core.windows.net/showcase/blueberry-cheesecake-1783746042/code.py", "text": "# Stylized blueberry cheesecake slice, standard prop scale, volumetric icing and garnishes.\n# ⋯\ndef build():\n    col = bpy.data.collections.new(\"Model\")\n    bpy.context.scene.collection.children.link(col)\n    MAT = setup_materials()\n\n    # 1. Hierarchy Empties\n    root = make_empty(col, \"Cheesecake_Root\")\n    g_body = make_empty(col, \"Cake_Body\", parent=root)\n    g_garnish = make_empty(col, \"Garnish\", parent=root)\n    \n    # 2. Build Wedge\n    crust = build_crust(col, MAT)\n    parent_to(crust, g_body)\n    \n    cheese = build_cheese(col, MAT)\n    parent_to(cheese, g_body)\n    \n    icing = build_icing(col, MAT)\n    parent_to(icing, g_body)\n    \n    # 3. Build Garnishes (placed embedded slightly into the soft icing)\n    # Z coordinate is TOTAL_H + ~icing_thickness - small_sink_amount\n    # ⋯ blueberries placed by golden-angle ring, each its own mesh"}};
 class Component extends DCLogic {
-  state = { asset: null, tab: 'viewer', cat: 'generations', live: {}, wf: false, normals: false, labels: true, explode: null, groups: [], parts: 0, hidden: {}, expanded: {}, rootName: '', dark: false, flash: null, picked: null };
+  state = { asset: null, tab: 'viewer', feat: 'pbr', live: {}, wf: false, normals: false, labels: true, explode: null, groups: [], parts: 0, hidden: {}, expanded: {}, rootName: '', dark: false, flash: null, picked: null };
   files = {
     kart: ['assets/banana-kart.glb', 'banana_kart.glb'],
     rabbit: ['assets/robot-rabbit.glb', 'robot_rabbit.glb'],
@@ -521,6 +497,8 @@ class Component extends DCLogic {
     };
     s.groups.forEach((g) => walk(g, 0));
     const codeText = meta.text + '\n\n# ⋯ excerpt — the full ' + meta.lines + '-line program IS the asset.\n# GLB is just its compilation target.';
+    const FEATS = [{id:'pbr',icon:'🎨',label:'PBR textures'},{id:'uv',icon:'🗺',label:'UV maps'},{id:'edit',icon:'🧩',label:'Edit per part',soon:1},{id:'artic',icon:'🦾',label:'Articulate',soon:1},{id:'anim',icon:'🎬',label:'Animation-ready',soon:1},{id:'restyle',icon:'✨',label:'Restyle',soon:1},{id:'rescale',icon:'📐',label:'Rescale',soon:1}];
+    const tabs = FEATS.map((fd) => { const on = s.feat === fd.id; return { label: fd.label, icon: fd.icon, soon: fd.soon ? ' · soon' : '', go: () => this.setState({ feat: fd.id }), bg: on ? 'var(--paper)' : 'color-mix(in oklab, var(--mint) 22%, var(--bg))', col: on ? 'var(--ink)' : 'var(--muted)', ty: on ? '0' : '3px', sh: on ? 'inset 0 3px 0 var(--yellow)' : 'none' }; });
     return {
       themeIcon: s.dark ? '☀' : '☾',
       toggleTheme: () => { document.body.classList.toggle('dark', !s.dark); this.setState({ dark: !s.dark }); },
@@ -540,20 +518,14 @@ class Component extends DCLogic {
       explodeVal,
       onExplode: (e) => this.setState({ explode: +e.target.value }),
       onReplay: () => { const v = this.el(); if (v) v.replay(); },
-      isGen: s.cat === 'generations', isUv: s.cat === 'uv', isTex: s.cat === 'textures',
+      isFeatUv: s.feat === 'uv', isFeatPbr: s.feat === 'pbr', isFeatEdit: s.feat === 'edit', isFeatArtic: s.feat === 'artic', isFeatAnim: s.feat === 'anim', isFeatRestyle: s.feat === 'restyle', isFeatRescale: s.feat === 'rescale',
+      tabs,
       uIdle0: !s.live.u0, uLive0: !!s.live.u0, goU0: () => this.setState({ live: { ...s.live, u0: true } }),
       uIdle1: !s.live.u1, uLive1: !!s.live.u1, goU1: () => this.setState({ live: { ...s.live, u1: true } }),
       uIdle2: !s.live.u2, uLive2: !!s.live.u2, goU2: () => this.setState({ live: { ...s.live, u2: true } }),
       tIdle0: !s.live.t0, tLive0: !!s.live.t0, goT0: () => this.setState({ live: { ...s.live, t0: true } }),
       tIdle1: !s.live.t1, tLive1: !!s.live.t1, goT1: () => this.setState({ live: { ...s.live, t1: true } }),
       tIdle2: !s.live.t2, tLive2: !!s.live.t2, goT2: () => this.setState({ live: { ...s.live, t2: true } }),
-      catGen: () => this.setState({ cat: 'generations' }),
-      catUv: () => this.setState({ cat: 'uv' }),
-      catTex: () => this.setState({ cat: 'textures' }),
-      genMark: s.cat === 'generations' ? '●' : '○', uvMark: s.cat === 'uv' ? '●' : '○', texMark: s.cat === 'textures' ? '●' : '○',
-      genBg: s.cat === 'generations' ? 'var(--yellow)' : 'var(--paper)', genCol: s.cat === 'generations' ? '#221d18' : 'var(--muted)',
-      uvBg: s.cat === 'uv' ? 'var(--yellow)' : 'var(--paper)', uvCol: s.cat === 'uv' ? '#221d18' : 'var(--muted)',
-      texBg: s.cat === 'textures' ? 'var(--yellow)' : 'var(--paper)', texCol: s.cat === 'textures' ? '#221d18' : 'var(--muted)',
       rows, parts: s.parts || '…', groupCount: s.groups.length || '…', rootName: s.rootName || 'root',
       pickedInfo: s.picked ? ' · selected: ' + s.picked : '',
       codeText, codeFile: fileLabel.replace('.glb', '') + '/' + meta.file, codeLines: meta.lines, codeUrl: meta.url

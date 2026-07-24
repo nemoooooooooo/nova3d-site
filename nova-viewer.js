@@ -69,6 +69,9 @@ class NovaViewer extends HTMLElement{
   this._hovMat=new T.MeshBasicMaterial({color:0xffd23e});
   this._pickMat=new T.MeshBasicMaterial({color:0xf47fb0});
   this._ro=new ResizeObserver(()=>this._resize());this._ro.observe(this);
+  this._onScreen=true;
+  this._vis=new IntersectionObserver((es)=>{es.forEach((x)=>{this._onScreen=x.isIntersecting;});},{rootMargin:'150px'});
+  this._vis.observe(this);
   this._resize();
   this._startLoop();
   if(this.getAttribute('src'))this._loadSrc(this.getAttribute('src'));
@@ -181,6 +184,7 @@ class NovaViewer extends HTMLElement{
  _setExplode(f){this._f=f;this._movers.forEach(m=>{m.obj.position.copy(m.base).addScaledVector(m.dir,f*m.dist)})}
  _tick(){
   if(!this.renderer)return;
+  if(!this._onScreen||document.hidden){this._lastT=performance.now();return;}
   const now=performance.now();
   const dt=Math.min(0.05,(now-(this._lastT||now))/1000);this._lastT=now;
   this.controls.update();
@@ -329,7 +333,7 @@ class NovaViewer extends HTMLElement{
  }
  highlightGroup(name,on){this.highlightNode(name,on);}
  replay(){if(this._root){this._manual=false;this._root.rotation.y=this._baseRot||0;this._t0=performance.now();this._introDone=false;}}
- disconnectedCallback(){this._looping=false;cancelAnimationFrame(this._raf);if(this._ro)this._ro.disconnect();}
+ disconnectedCallback(){this._looping=false;cancelAnimationFrame(this._raf);if(this._ro)this._ro.disconnect();if(this._vis)this._vis.disconnect();}
 }
 customElements.define('nova-viewer',NovaViewer);
 })();
