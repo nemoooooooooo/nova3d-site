@@ -617,19 +617,13 @@ body.scale.set(1-k*.6, 1+k, 1-k*.6)
             <span style="width:10px;height:10px;border-radius:50%;background:var(--yellow);border:1.5px solid var(--edge)"></span>
             <span style="width:10px;height:10px;border-radius:50%;background:var(--mint);border:1.5px solid var(--edge)"></span>
             <span style="font-family:'Space Mono',monospace;font-size:11px;margin-left:4px">🤖 retro_eye_robot.glb · {{ robotClipCount }} baked clips</span>
-            <span style="margin-left:auto;font-family:'Pixelify Sans',monospace;font-size:11.5px;color:var(--ink);background:color-mix(in oklab, var(--mint) 55%, var(--paper));border:1.5px solid var(--edge);border-radius:999px;padding:1px 10px;white-space:nowrap">▶ {{ rigClipName }}</span>
+            <span style="margin-left:auto;font-family:'Pixelify Sans',monospace;font-size:11.5px;color:var(--ink);background:color-mix(in oklab, var(--mint) 55%, var(--paper));border:1.5px solid var(--edge);border-radius:999px;padding:1px 10px;white-space:nowrap">▶ Showreel · 6 clips in the file</span>
           </div>
           <div class="rig-viewer" style="position:relative;height:430px;background:conic-gradient(var(--paper) 90deg,var(--bg) 90deg 180deg,var(--paper) 180deg 270deg,var(--bg) 270deg) 0 0/24px 24px">
             <x-import component-from-global-scope="nova-viewer" from="./nova-viewer.js" src="assets/eye-robot.glb" clip="{{ rigClipName }}" joints="{{ rigJointsJson }}" labels="false" explode="0" spin="0.01" rot="0" cam-yaw="0.4" cam-pitch="0.18" fit="1" min-h="0" hint-size="100%,430px" style="position:absolute;inset:0"></x-import>
             <div style="position:absolute;left:12px;bottom:10px;z-index:3;font-family:'Space Mono',monospace;font-size:10px;color:var(--soft);background:color-mix(in oklab, var(--paper) 78%, transparent);border:1.5px solid var(--line);border-radius:8px;padding:3px 10px;pointer-events:none"><span class="hv">hover a part for its name · drag to orbit</span><span class="tp">tap a part to name it · drag to orbit</span></div>
           </div>
-          <div class="rig-bar" style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:9px 14px;border-top:1.5px solid var(--edge);background:var(--bg)">
-            <span style="font-family:'Space Mono',monospace;font-size:10.5px;color:var(--muted);flex:none">clip</span>
-            <sc-for list="{{ clipBtns }}" as="c" hint-placeholder-count="6">
-              <span onClick="{{ c.go }}" style="cursor:pointer;border:1.5px solid var(--edge);border-radius:8px;padding:2px 10px;background:{{ c.bg }};color:{{ c.col }};font-family:'Pixelify Sans',monospace;font-size:12px;box-shadow:{{ c.sh }};white-space:nowrap">{{ c.name }}</span>
-            </sc-for>
-          </div>
-          <div class="rig-bar" style="display:flex;align-items:center;gap:13px;flex-wrap:wrap;padding:10px 14px;border-top:1.5px solid var(--line);background:var(--bg)">
+          <div class="rig-bar" style="display:flex;align-items:center;gap:13px;flex-wrap:wrap;padding:10px 14px;border-top:1.5px solid var(--edge);background:var(--bg)">
             <sc-for list="{{ jointRows }}" as="j" hint-placeholder-count="4">
               <span title="{{ j.purpose }}" style="display:flex;align-items:center;gap:6px;font-family:'Space Mono',monospace;font-size:10.5px;color:var(--muted)">{{ j.label }}
                 <input type="range" min="{{ j.min }}" max="{{ j.max }}" step="0.5" value="{{ j.val }}" onChange="{{ j.set }}" style="width:88px;vertical-align:middle">
@@ -771,6 +765,13 @@ class Component extends DCLogic {
   // Keep this the single source of truth: the render and the auto-cycler both
   // resolve the opening asset through it, and if they ever disagree the
   // rotation starts from a different model than the one on screen.
+  // Which articulated asset the tab opens on. Picked once per page load so the
+  // kart is not always first, then the pair alternates on its own.
+  _initialRig() {
+    if (!this._rig0) this._rig0 = Math.random() < 0.5 ? 'kart' : 'robot';
+    return this._rig0;
+  }
+
   _initialAsset() {
     return this.props.defaultAsset ?? 'kart';
   }
@@ -851,6 +852,7 @@ class Component extends DCLogic {
     // overwrites these as soon as the model is actually on screen.
     this._studioReady = Date.now();
     this._editReady = Date.now();
+    this._rigSince = Date.now();
     this._bump = () => { this._act = Date.now(); this._exAct = Date.now(); };
     document.addEventListener('nova-interact', this._bump);
     document.addEventListener('pointerdown', this._bump, true);
@@ -899,6 +901,13 @@ class Component extends DCLogic {
       // which put the rig download straight back in the hero kart's way.
       const tools = document.getElementById('tools');
       if (tools) {
+        // Live visibility of the tools window itself. The rig hand-over used to
+        // gate on _hwView, but "how it works" sits ABOVE this window and scrolls
+        // out of view exactly when the visitor scrolls the rig tab into it — so
+        // the two assets never swapped while anyone was actually looking.
+        this._toolsView = false;
+        this._toolVis = new IntersectionObserver((es) => es.forEach((x) => { this._toolsView = x.isIntersecting; }), { rootMargin: '80px' });
+        this._toolVis.observe(tools);
         this._toolIo = new IntersectionObserver((es) => es.forEach((x) => {
           if (x.isIntersecting && !this.state.rigArmed) {
             this.setState({ rigArmed: true });
@@ -936,6 +945,16 @@ class Component extends DCLogic {
       this._editReady = Date.now();
       this.setState({ editEx: nxEx });
     }, 1000);
+    // The two articulated assets hand over to each other while nobody is
+    // touching them, the same way the studio rotates its models.
+    this._rigCyc = setInterval(() => {
+      if (document.visibilityState !== 'visible' || !this._toolsView) return;
+      if (this.state.feat !== 'rig') { this._rigSince = Date.now(); return; }
+      if (Date.now() - (this._rigSince || 0) < 6000) return;
+      if (Date.now() - this._act < INTERACT_GRACE_MS) return;
+      this._rigSince = Date.now();
+      this.setState({ rigEx: (this.state.rigEx || this._initialRig()) === 'kart' ? 'robot' : 'kart' });
+    }, 1000);
     this._cyc = setInterval(() => {
       if (document.visibilityState !== 'visible' || !this._inView || this.state.tab !== 'viewer') return;
       // hand over once THIS model has spun, exploded and collapsed once —
@@ -960,6 +979,8 @@ class Component extends DCLogic {
     document.removeEventListener('nova-interact', this._bump);
     document.removeEventListener('pointerdown', this._bump, true);
     clearInterval(this._cyc);
+    clearInterval(this._rigCyc);
+    if (this._toolVis) this._toolVis.disconnect();
     clearInterval(this._exCyc);
     clearTimeout(this._flashT);
     if (this._io) this._io.disconnect();
@@ -1070,35 +1091,37 @@ class Component extends DCLogic {
     // robot ships six baked clips plus CTRL_* joints that declare their own axis
     // and limits, so the clip picker and every slider range below are read out
     // of the GLB — nothing about this robot is written into the page.
-    const rigEx = s.rigEx || 'kart';
-    const rigClipName = s.rigClip || (s.rigClips && s.rigClips[0]) || 'Showreel';
+    const rigEx = s.rigEx || this._initialRig();
+    const rigClipName = 'Showreel';   // the reel is the demo; the other clips live in the file
     // Joints a visitor can take without needing IK to keep the feet planted;
     // the legs are solved against foot targets and are left to the clip.
-    const FREE_JOINTS = ['CTRL_Eye_Aim', 'CTRL_Antenna_Hinge', 'CTRL_Body_Tilt', 'CTRL_Body_Yaw'];
-    const setJoint = (name) => (e) => {
+    // The controls the asset's own driver exposes: the expressive joints one at
+    // a time, the four hips and the four knees as groups, body height solved
+    // through IK so the feet stay planted, and the fan sweep. Every range below
+    // comes from the file — `extras` for the joints, the IK's own travel for
+    // height — so this list describes the rig rather than defining it.
+    const byName = {}; (s.rigCtrls || []).forEach((c) => { byName[c.name] = c; });
+    const jointRows = [];
+    const setJoint = (key) => (e) => {
       this._act = Date.now();
       const j = { ...(this.state.rigJoints || {}) };
-      j[name] = +e.target.value;
+      j[key] = +e.target.value;
       this.setState({ rigJoints: j });
     };
-    const jointRows = (s.rigCtrls || [])
-      .filter((c) => FREE_JOINTS.indexOf(c.name) >= 0)
-      .map((c) => {
-        const v = (s.rigJoints || {})[c.name] ?? 0;
-        return {
-          label: c.name.replace('CTRL_', '').replace(/_/g, ' ').toLowerCase(),
-          purpose: c.purpose || '', min: c.min ?? -180, max: c.max ?? 180,
-          val: v, txt: Math.round(v) + '°', set: setJoint(c.name),
-        };
-      });
-    const clipBtns = (s.rigClips || []).map((n) => {
-      const on = n === rigClipName;
-      return { name: n, on,
-        go: () => { this._act = Date.now(); this.setState({ rigClip: n }); },
-        bg: on ? 'var(--yellow)' : 'var(--paper)',
-        col: on ? '#221d18' : 'var(--muted)',
-        sh: on ? 'inset 0 -2px 0 rgba(34,29,24,.25)' : '2px 2px 0 var(--edge)' };
-    });
+    const addRow = (key, label, min, max, purpose) => {
+      if (min == null || max == null) return;
+      const v = (s.rigJoints || {})[key] ?? 0;
+      jointRows.push({ key, label, min, max, purpose, val: v,
+        txt: Math.round(v) + (key === '@height' ? 'cm' : '°'), set: setJoint(key) });
+    };
+    const c = (n) => byName[n] || {};
+    addRow('CTRL_Eye_Aim', 'eye aim', c('CTRL_Eye_Aim').min, c('CTRL_Eye_Aim').max, c('CTRL_Eye_Aim').purpose);
+    addRow('CTRL_Body_Tilt', 'head tilt', c('CTRL_Body_Tilt').min, c('CTRL_Body_Tilt').max, c('CTRL_Body_Tilt').purpose);
+    addRow('CTRL_Antenna_Hinge', 'antenna fold', c('CTRL_Antenna_Hinge').min, c('CTRL_Antenna_Hinge').max, c('CTRL_Antenna_Hinge').purpose);
+    addRow('CTRL_Leg_*_Hip', 'legs — hip', c('CTRL_Leg_FL_Hip').min, c('CTRL_Leg_FL_Hip').max, 'all four hips together, limits from the file');
+    addRow('CTRL_Leg_*_Knee', 'legs — knee', c('CTRL_Leg_FL_Knee').min, c('CTRL_Leg_FL_Knee').max, 'all four knees together, limits from the file');
+    if (byName['CTRL_Leg_FL_Hip']) addRow('@height', 'body height', -42, 22, 'two-link IK solved live — the feet stay on the floor');
+    if (byName['CTRL_Body_Yaw']) addRow('@fan', 'fan sweep', 0, 360, 'legs whirl, casing counter-rotates and stays put');
     const FEATS = [{id:'rig',icon:'🦾',label:'Articulate / animate'},{id:'pbr',icon:'🎨',label:'PBR textures'},{id:'edit',icon:'🧩',label:'Edit per part'},{id:'uv',icon:'🗺',label:'UV maps'}];
     // Unselected tabs carry `tabhint`, which ripples them until the first click
     // marks the strip `tabs-touched` and the CSS kills the animation for good.
@@ -1139,9 +1162,9 @@ class Component extends DCLogic {
       rigKartMark: rigEx !== 'robot' ? '♥' : '', rigRobotMark: rigEx === 'robot' ? '♥' : '',
       rigKartCls: rigEx !== 'robot' ? 'chip' : 'chip chiphint',
       rigRobotCls: rigEx === 'robot' ? 'chip' : 'chip chiphint',
-      pickRigKart: () => { this._act = Date.now(); this.setState({ rigEx: 'kart', chipsTouched: true }); },
-      pickRigRobot: () => { this._act = Date.now(); this.setState({ rigEx: 'robot', chipsTouched: true }); },
-      rigClipName, clipBtns, jointRows,
+      pickRigKart: () => { this._act = Date.now(); this._rigSince = Date.now(); this.setState({ rigEx: 'kart', chipsTouched: true }); },
+      pickRigRobot: () => { this._act = Date.now(); this._rigSince = Date.now(); this.setState({ rigEx: 'robot', chipsTouched: true }); },
+      rigClipName, jointRows,
       robotClipCount: (s.rigClips && s.rigClips.length) || 6,
       rigJointsJson: JSON.stringify(s.rigJoints || {}),
       onRobotAuto: () => { this._act = Date.now(); this.setState({ rigJoints: {} }); },

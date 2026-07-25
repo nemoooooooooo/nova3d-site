@@ -11,6 +11,58 @@ const libs=()=>libsP||(libsP=Promise.all([
 const PAL=['#e8b73a','#6fbf8b','#f47fb0','#a986e0','#5fa8e6','#f0925e','#b8b34e','#54c4ba'];
 const SVGNS='http://www.w3.org/2000/svg';
 const easeIO=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+// 2-link leg IK, ported from the asset's own drive.js. Link lengths are
+// measured off the loaded meshes and the sign convention is auto-calibrated by
+// requiring that solving for the REST foot returns the REST angles — so this
+// works off whatever the file says rather than numbers written here.
+class LegIK{
+ constructor(T,root,label){
+  this.T=T;
+  this.hip=root.getObjectByName('CTRL_Leg_'+label+'_Hip');
+  this.knee=root.getObjectByName('CTRL_Leg_'+label+'_Knee');
+  const boot=root.getObjectByName('Leg_'+label+'_Boot');
+  if(!this.hip||!this.knee||!boot)throw new Error('no leg '+label);
+  root.updateWorldMatrix(true,true);
+  const inv=new T.Matrix4().copy(this.hip.matrixWorld).invert();
+  const K=this.knee.getWorldPosition(new T.Vector3()).applyMatrix4(inv);
+  const bb=new T.Box3().setFromObject(boot);
+  const F=new T.Vector3((bb.min.x+bb.max.x)/2,bb.min.y,(bb.min.z+bb.max.z)/2).applyMatrix4(inv);
+  this.K=new T.Vector2(K.x,K.y);this.F=new T.Vector2(F.x,F.y);
+  this.L1=this.K.length();this.L2=this.F.clone().sub(this.K).length();
+  // world up inside the hip's own frame: the hips carry a baked azimuth, so
+  // local +Y is NOT world up
+  const q=this.hip.getWorldQuaternion(new T.Quaternion()).invert();
+  const up=new T.Vector3(0,1,0).applyQuaternion(q);
+  this.up2=new T.Vector2(up.x,up.y).normalize();
+  this.fwd2=new T.Vector2(this.up2.y,-this.up2.x);
+  for(const sg of [1,-1]){
+   this.s=sg;
+   this.a1r=Math.atan2(sg*this.K.y,this.K.x);
+   this.a2r=Math.atan2(sg*(this.F.y-this.K.y),this.F.x-this.K.x);
+   const phiR=Math.atan2(sg*this.F.y,this.F.x);
+   this.branch=(this.a1r-phiR)>=0?1:-1;
+   const r=this.solve(this.F.x,this.F.y);
+   this.residual=Math.max(Math.abs(r[0]),Math.abs(r[1]));
+   if(this.residual<0.05)break;
+  }
+ }
+ solve(x,y){
+  const T=this.T,s=this.s;
+  let r=Math.hypot(x,y);
+  r=Math.min(Math.max(r,Math.abs(this.L1-this.L2)+1e-4),this.L1+this.L2-1e-4);
+  const phi=Math.atan2(s*y,x);
+  const cl=(v)=>Math.max(-1,Math.min(1,v));
+  const ca=cl((r*r+this.L1*this.L1-this.L2*this.L2)/(2*r*this.L1));
+  const cb=cl((this.L1*this.L1+this.L2*this.L2-r*r)/(2*this.L1*this.L2));
+  const a1=phi+this.branch*Math.acos(ca);
+  const a2=a1-this.branch*(Math.PI-Math.acos(cb));
+  return [(a1-this.a1r)*180/Math.PI,((a2-a1)-(this.a2r-this.a1r))*180/Math.PI];
+ }
+ forBodyY(dy){
+  const u=this.up2,pv=this.fwd2;
+  return this.solve(this.F.x+u.x*(-dy)+pv.x*0,this.F.y+u.y*(-dy)+pv.y*0);
+ }
+}
 class NovaViewer extends HTMLElement{
  static get observedAttributes(){return['src','wireframe','normals','labels','explode','spin','rig','clip','joints']}
  constructor(){super();this._movers=[];this._labels=[];this._meshes=[];this._orig=new Map();this._mgroup=new Map();this._hl=null;this._hlSet=null;this._loadId=0;this._f=0;this._manual=false;this._hover=null;this._pickObj=null;this._introDone=false;}
@@ -300,10 +352,18 @@ class NovaViewer extends HTMLElement{
   root.traverse(o=>{
    const ex=o.userData||{};
    if(!ex.joint_type)return;
-   const m=AXIS[ex.rotation_axis]||{axis:'z',sign:-1};
-   this._ctrl[o.name]={node:o,axis:m.axis,sign:m.sign,rest:o.rotation[m.axis],
+   // A ball joint declares a compound axis ("local X/Z"); drive the first one.
+   const first=String(ex.rotation_axis||'').replace(/^(local\s+[XYZ]).*$/,'$1');
+   const m=AXIS[ex.rotation_axis]||AXIS[first]||{axis:'z',sign:-1};
+   const sign=/^CTRL_Leg_.*_(Hip|Knee)$/.test(o.name)?1:m.sign;   // asset-specific, as in its own driver
+   this._ctrl[o.name]={node:o,axis:m.axis,sign:sign,rest:o.rotation[m.axis],
                        min:ex.minimum_degrees,max:ex.maximum_degrees,purpose:ex.purpose||''};
   });
+  // Legs get IK so the feet stay planted when the body height changes.
+  this._legIK=null;this._modelRoot=root;this._baseY=root.position.y;
+  if(this._ctrl['CTRL_Leg_FL_Hip']){
+   try{this._legIK=['FL','FR','BR','BL'].map(l=>new LegIK(T,root,l));}catch(e){this._legIK=null;}
+  }
   const controls=Object.keys(this._ctrl).map(k=>({name:k,min:this._ctrl[k].min,max:this._ctrl[k].max,purpose:this._ctrl[k].purpose}));
   this.dispatchEvent(new CustomEvent('nova-ready',{bubbles:true,composed:true,detail:{src,root:gr.name||'root',parts:this._meshes.length,groups:this._counts,clips:this._clips,controls}}));
  }
@@ -522,7 +582,6 @@ class NovaViewer extends HTMLElement{
   this.controls.update();
   // clip first, then live joint overrides write on top of it
   if(this._mixer)this._mixer.update(dt);
-  if(this._ctrl)this._applyJoints();
   if(this._wipeMode&&this._wipeAuto){
    const HOLD=1.5,SWEEP=1.15,LO=0.2,HI=0.8,PER=HOLD+SWEEP+HOLD+SWEEP;
    if(this._wipeT0==null)this._wipeT0=now;
@@ -565,6 +624,7 @@ class NovaViewer extends HTMLElement{
    this._setExplode(f);
    if(this._rig)this._rigTick(dt,now);
   }
+  if(this._ctrl)this._applyJoints();   // live joints win over clip AND turntable
   this._procHover();
   this._updateLabels();
   this.renderer.render(this.scene,this.camera);
@@ -586,17 +646,67 @@ class NovaViewer extends HTMLElement{
  // Values are degrees, clamped to the range the asset itself declares.
  _applyJoints(){
   if(!this._ctrl)return;
-  let spec=this._jointSpec;
-  if(spec===undefined){
-   try{spec=JSON.parse(this._attr('joints')||'{}')}catch(e){spec={}}
-   this._jointSpec=spec;
+  const now=performance.now()/1000;
+  if(this._jointSpec===undefined){
+   try{this._jointSpec=JSON.parse(this._attr('joints')||'{}')}catch(e){this._jointSpec={}}
   }
+  const spec=this._jointSpec;
+  this._jstate=this._jstate||{};
+  // Track each control the visitor has touched. A range input gives no
+  // "released" signal, so a control that has not changed for 0.5s counts as
+  // let go — and from then on it sweeps 0 <-> the value they left it at, on a
+  // random phase so several of them never march in lockstep. That is what
+  // makes the asset feel alive rather than parked, exactly as the kart does.
   for(const k in spec){
-   const c=this._ctrl[k];if(!c)continue;
-   const lo=(c.min==null?-180:c.min),hi=(c.max==null?180:c.max);
-   const deg=Math.max(lo,Math.min(hi,+spec[k]||0));
-   c.node.rotation[c.axis]=c.rest+c.sign*deg*Math.PI/180;
+   let o=this._jstate[k];
+   if(!o){o={target:+spec[k]||0,t0:now,phase:Math.random()*Math.PI*2,held:true,last:now};this._jstate[k]=o;}
+   else if(o.target!==(+spec[k]||0)){o.target=+spec[k]||0;o.held=true;o.last=now;}
   }
+  for(const k in this._jstate)if(!(k in spec))delete this._jstate[k];
+  const SWEEP=2.4;
+  for(const k in this._jstate){
+   const o=this._jstate[k];
+   if(o.held&&now-o.last>0.5){o.held=false;o.t0=now;}
+   const v=o.held?o.target:o.target*(0.5-0.5*Math.cos((now-o.t0)*2*Math.PI/SWEEP+o.phase));
+   if(k==='@height'){this._applyHeight(v);continue;}
+   if(k==='@fan'){this._applyFan(v);continue;}
+   if(k.indexOf('*')>=0){
+    const re=new RegExp('^'+k.split('*').map(x=>x.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('.*')+'$');
+    for(const nm in this._ctrl)if(re.test(nm))this._setJoint(this._ctrl[nm],v);
+    continue;
+   }
+   const c=this._ctrl[k];if(c)this._setJoint(c,v);
+  }
+ }
+ _setJoint(c,deg){
+  const lo=(c.min==null?-180:c.min),hi=(c.max==null?180:c.max);
+  const d=Math.max(lo,Math.min(hi,deg));
+  c.node.rotation[c.axis]=c.rest+c.sign*d*Math.PI/180;
+ }
+ // Body height with the feet staying on the floor: hip and knee angles come
+ // from the 2-link IK measured off the asset, not from keyframes.
+ _applyHeight(cm){
+  if(!this._legIK||!this._modelRoot)return;
+  // dy is in the asset's own metres, which is what the IK solves in. The
+  // viewer scales the model to fit its box, so the same movement in PARENT
+  // space is dy*scale — mixing the two is what let the feet drift.
+  const dy=cm/100,sc=this._modelRoot.scale.x||1;
+  this._modelRoot.position.y=this._baseY+dy*sc;
+  const L=['FL','FR','BR','BL'];
+  for(let i=0;i<this._legIK.length;i++){
+   const a=this._legIK[i].forBodyY(dy);
+   const ch=this._ctrl['CTRL_Leg_'+L[i]+'_Hip'],ck=this._ctrl['CTRL_Leg_'+L[i]+'_Knee'];
+   if(ch)ch.node.rotation[ch.axis]=ch.rest+ch.sign*a[0]*Math.PI/180;
+   if(ck)ck.node.rotation[ck.axis]=ck.rest+ck.sign*a[1]*Math.PI/180;
+  }
+ }
+ // Legs whirl while the casing stays world-fixed: the root spins and the body
+ // yaw counter-rotates by the same amount.
+ _applyFan(deg){
+  if(!this._modelRoot)return;
+  this._modelRoot.rotation.y=deg*Math.PI/180;
+  const by=this._ctrl['CTRL_Body_Yaw'];
+  if(by)by.node.rotation[by.axis]=by.rest+by.sign*(-deg)*Math.PI/180;
  }
  _ndc(e){
   const rect=this.renderer.domElement.getBoundingClientRect();
