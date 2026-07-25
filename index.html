@@ -745,7 +745,18 @@ class Component extends DCLogic {
       this._flashT = setTimeout(() => this.setState({ flash: null }), 1600);
     };
     document.addEventListener('nova-pick', this._picked);
-    this._act = Date.now();
+    // These are INTERACTION clocks — a page load is not an interaction. Seeding
+    // them with Date.now() made the very first hand-over wait out the full 15s
+    // grace, so the first model sat there roughly twice as long as every model
+    // after it. Starting at 0 lets the first turn run on the same cycle.
+    this._act = 0;
+    this._exAct = 0;
+    // The CYCLE clocks do start at mount: left undefined they read as 0, the
+    // "has this model finished performing?" guard passes on the very first tick
+    // and the opening model is swapped out a second in. The real nova-ready
+    // overwrites these as soon as the model is actually on screen.
+    this._studioReady = Date.now();
+    this._editReady = Date.now();
     this._bump = () => { this._act = Date.now(); this._exAct = Date.now(); };
     document.addEventListener('nova-interact', this._bump);
     document.addEventListener('pointerdown', this._bump, true);
@@ -783,7 +794,6 @@ class Component extends DCLogic {
     }, 600);
     // Edit tab: cycle through the worked examples (pig car / cheesecake) the
     // same way the studio viewer cycles assets — paused by any interaction.
-    this._exAct = Date.now();
     this._hwView = true;
     setTimeout(() => {
       const hw = document.getElementById('hw');
@@ -818,7 +828,10 @@ class Component extends DCLogic {
     const INTERACT_GRACE_MS = 15000;
     this._exCyc = setInterval(() => {
       if (document.visibilityState !== 'visible' || !this._hwView) return;
-      if (this.state.feat !== 'edit') { this._exAct = Date.now(); return; }
+      // Off-tab: hold the CYCLE clock, not the interaction clock, so arriving on
+      // the tab starts a fresh turn (rather than inheriting a 15s interaction
+      // grace and sitting on the first example twice as long as the others).
+      if (this.state.feat !== 'edit') { this._editReady = Date.now(); return; }
       // one full wipe after the pair loaded, and a longer beat after a touch
       if (Date.now() - (this._editReady || 0) < EDIT_CYCLE_MS) return;
       if (Date.now() - this._exAct < INTERACT_GRACE_MS) return;
@@ -961,7 +974,7 @@ class Component extends DCLogic {
     const FEATS = [{id:'rig',icon:'🦾',label:'Articulate / animate'},{id:'pbr',icon:'🎨',label:'PBR textures'},{id:'edit',icon:'🧩',label:'Edit per part'},{id:'uv',icon:'🗺',label:'UV maps'}];
     // Unselected tabs carry `tabhint`, which ripples them until the first click
     // marks the strip `tabs-touched` and the CSS kills the animation for good.
-    const tabs = FEATS.map((fd) => { const on = s.feat === fd.id; return { label: fd.label, icon: fd.icon, soon: fd.soon ? ' · soon' : '', cls: on ? '' : 'tabhint', go: () => { this._exAct = Date.now(); this.setState({ feat: fd.id, tabsTouched: true }); }, bg: on ? 'var(--paper)' : 'color-mix(in oklab, var(--mint) 22%, var(--bg))', col: on ? 'var(--ink)' : 'var(--muted)', ty: on ? '0' : '3px', sh: on ? 'inset 0 3px 0 var(--yellow)' : '2.5px 2.5px 0 var(--edge)' }; });
+    const tabs = FEATS.map((fd) => { const on = s.feat === fd.id; return { label: fd.label, icon: fd.icon, soon: fd.soon ? ' · soon' : '', cls: on ? '' : 'tabhint', go: () => { this._editReady = Date.now(); this.setState({ feat: fd.id, tabsTouched: true }); }, bg: on ? 'var(--paper)' : 'color-mix(in oklab, var(--mint) 22%, var(--bg))', col: on ? 'var(--ink)' : 'var(--muted)', ty: on ? '0' : '3px', sh: on ? 'inset 0 3px 0 var(--yellow)' : '2.5px 2.5px 0 var(--edge)' }; });
     return {
       themeIcon: s.dark ? '☀' : '☾',
       toggleTheme: () => { document.body.classList.toggle('dark', !s.dark); this.setState({ dark: !s.dark }); },
