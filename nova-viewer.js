@@ -194,7 +194,25 @@ class NovaViewer extends HTMLElement{
   let gr=null;root.traverse(n=>{if(!gr&&/_root$/i.test(n.name||''))gr=n;});
   if(!gr){gr=root;while(gr.children.length===1)gr=gr.children[0];}
   const hasMesh=o=>{let f=false;o.traverse(x=>{if(x.isMesh)f=true});return f;};
-  const groups=gr.children.filter(hasMesh);
+  // Choose the level to explode (and to list in the scene graph) at. Some
+  // models hang everything off one or two big assemblies — the DSLR gun is
+  // Camera_Body_Root + Weapon_Frame_Root, the cheesecake is Cake_Body +
+  // Garnish — so exploding the root's own children pulls 183 parts into two
+  // lumps and says nothing about how the thing is built. Step down into the
+  // busiest group until there are enough pieces to read as a structure, while
+  // stopping well short of turning the model into a parts bin.
+  // MIN is 4 deliberately: the robot rabbit already has exactly four groups
+  // (Arms/Body/Ears/Face) and must be left exactly as it is.
+  const MIN_G=4,MAX_G=14;
+  let groups=gr.children.filter(hasMesh);
+  for(let guard=0;guard<8&&groups.length<MIN_G;guard++){
+   const cand=groups
+    .map((g,i)=>({i,kids:g.children.filter(hasMesh)}))
+    .filter(c=>c.kids.length&&groups.length-1+c.kids.length<=MAX_G)
+    .sort((a,b)=>b.kids.length-a.kids.length)[0];
+   if(!cand)break;
+   groups=[...groups.slice(0,cand.i),...cand.kids,...groups.slice(cand.i+1)];
+  }
   root.traverse(o=>{if(o.isMesh){this._meshes.push(o);this._orig.set(o,o.material);}});
   groups.forEach(g=>g.traverse(o=>{if(o.isMesh)this._mgroup.set(o,g.name)}));
   const worldC=o=>new T.Box3().setFromObject(o).getCenter(new T.Vector3());
@@ -213,7 +231,8 @@ class NovaViewer extends HTMLElement{
     else mkMover(g,new T.Vector3(0,1,0),0.4);
    }
    const el=document.createElement('div');
-   el.innerHTML='<span style="opacity:.45">0'+(i+1)+'</span>&nbsp;'+g.name;
+   // ('0'+n) alone printed "011" once a model had more than nine groups
+   el.innerHTML='<span style="opacity:.45">'+('0'+(i+1)).slice(-2)+'</span>&nbsp;'+g.name;
    el.style.cssText='position:absolute;left:0;top:0;font-family:"Space Mono",monospace;font-size:10.5px;letter-spacing:.3px;color:var(--ink,#221d18);white-space:nowrap;opacity:0;transition:opacity .35s';
    this._lab.appendChild(el);
    const line=document.createElementNS(SVGNS,'polyline');
