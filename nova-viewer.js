@@ -12,7 +12,7 @@ const PAL=['#e8b73a','#6fbf8b','#f47fb0','#a986e0','#5fa8e6','#f0925e','#b8b34e'
 const SVGNS='http://www.w3.org/2000/svg';
 const easeIO=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
 class NovaViewer extends HTMLElement{
- static get observedAttributes(){return['src','wireframe','normals','labels','explode','spin','rig']}
+ static get observedAttributes(){return['src','wireframe','normals','labels','explode','spin','rig','clip','joints']}
  constructor(){super();this._movers=[];this._labels=[];this._meshes=[];this._orig=new Map();this._mgroup=new Map();this._hl=null;this._hlSet=null;this._loadId=0;this._f=0;this._manual=false;this._hover=null;this._pickObj=null;this._introDone=false;}
  _on(n){const v=this.getAttribute(n);return v!=null&&v!=='false'&&v!=='0'}
  _num(n,d){const v=parseFloat(this.getAttribute(n));return isNaN(v)?d:v}
@@ -150,6 +150,8 @@ class NovaViewer extends HTMLElement{
   if(o===v)return;
   // still waiting to come into view: swap the pending src, don't fetch yet
   if(n==='src'&&this.renderer&&v){if(this._near)this._pendingSrc=v;else this._loadSrc(v);}
+  if(n==='clip'&&v)this._playClip(v);
+  if(n==='joints'){this._jointSpec=undefined;}
   if((n==='wireframe'||n==='normals')&&this.renderer)this._applyMats();
   if(n==='explode'&&this._root&&o!=null)this._manual=true;
  }
@@ -158,7 +160,7 @@ class NovaViewer extends HTMLElement{
   this._load.style.opacity='1';this._load.style.display='';
   const {T,GLTFLoader}=await libs();
   if(this._root){this.scene.remove(this._root);this._root.traverse(o=>{if(o.geometry)o.geometry.dispose()});this._root=null;}
-  this._movers=[];this._meshes=[];this._orig=new Map();this._mgroup=new Map();this._hl=null;this._hlSet=null;this._manual=false;this._introDone=false;this._pinMode=false;this._compareRoots=null;this._cmpT0=null;this._pinSpec=null;this._fade=null;this._cmpMats=null;this._rig=null;this._rigLean=null;this._clearPick();this._setHover(null);
+  this._movers=[];this._meshes=[];this._orig=new Map();this._mgroup=new Map();this._hl=null;this._hlSet=null;this._manual=false;this._introDone=false;this._pinMode=false;this._compareRoots=null;this._cmpT0=null;this._pinSpec=null;this._fade=null;this._cmpMats=null;this._rig=null;this._rigLean=null;this._mixer=null;this._action=null;this._byClip=null;this._clips=null;this._ctrl=null;this._jointSpec=undefined;this._clearPick();this._setHover(null);
   this._labels.forEach(L=>{L.el.remove();L.line.remove();L.dot.remove()});this._labels=[];
   if(this._cmpBadge){this._cmpBadge.remove();this._cmpBadge=null;}
   ['_divLine','_divHandle','_tagA','_tagB'].forEach(k=>{if(this[k]){this[k].remove();this[k]=null;}});
@@ -279,7 +281,31 @@ class NovaViewer extends HTMLElement{
   // _frame() fits target+distance to the new model; _applyCamAngle() then locks
   // the orbit angle back to the front, so every (re)load starts front-facing.
   this._frame();this._applyCamAngle();
-  this.dispatchEvent(new CustomEvent('nova-ready',{bubbles:true,composed:true,detail:{src,root:gr.name||'root',parts:this._meshes.length,groups:this._counts}}));
+  // ── Baked clips + a live joint rig ──────────────────────────────────────
+  // An articulated asset carries its own animation and its own joint contract:
+  // the generator writes joint_type / rotation_axis / min / max / purpose into
+  // each control node's glTF `extras`, which GLTFLoader hands back as userData.
+  // Nothing here is hard-coded per model — the clip list and every slider range
+  // are read off the file.
+  this._clips=(gltf.animations||[]).map(a=>a.name);
+  if(gltf.animations&&gltf.animations.length){
+   this._mixer=new T.AnimationMixer(root);
+   this._byClip={};gltf.animations.forEach(a=>{this._byClip[a.name]=a});
+   this._playClip(this._attr('clip')||gltf.animations[0].name);
+  }
+  // Blender is Z-up and glTF is Y-up, so a joint declared "local Y" in the rig
+  // metadata is a rotation about local Z here, with the sign flipped.
+  const AXIS={'local Y':{axis:'z',sign:-1},'local Z':{axis:'y',sign:1},'local X':{axis:'x',sign:1}};
+  this._ctrl={};
+  root.traverse(o=>{
+   const ex=o.userData||{};
+   if(!ex.joint_type)return;
+   const m=AXIS[ex.rotation_axis]||{axis:'z',sign:-1};
+   this._ctrl[o.name]={node:o,axis:m.axis,sign:m.sign,rest:o.rotation[m.axis],
+                       min:ex.minimum_degrees,max:ex.maximum_degrees,purpose:ex.purpose||''};
+  });
+  const controls=Object.keys(this._ctrl).map(k=>({name:k,min:this._ctrl[k].min,max:this._ctrl[k].max,purpose:this._ctrl[k].purpose}));
+  this.dispatchEvent(new CustomEvent('nova-ready',{bubbles:true,composed:true,detail:{src,root:gr.name||'root',parts:this._meshes.length,groups:this._counts,clips:this._clips,controls}}));
  }
  // Normalize a model for the view. With `body-match`, scale/center by the bbox
  // of meshes whose name contains that string (e.g. "Pig_Body_Shell") so two
@@ -494,6 +520,9 @@ class NovaViewer extends HTMLElement{
   const now=performance.now();
   const dt=Math.min(0.05,(now-(this._lastT||now))/1000);this._lastT=now;
   this.controls.update();
+  // clip first, then live joint overrides write on top of it
+  if(this._mixer)this._mixer.update(dt);
+  if(this._ctrl)this._applyJoints();
   if(this._wipeMode&&this._wipeAuto){
    const HOLD=1.5,SWEEP=1.15,LO=0.2,HI=0.8,PER=HOLD+SWEEP+HOLD+SWEEP;
    if(this._wipeT0==null)this._wipeT0=now;
@@ -541,6 +570,34 @@ class NovaViewer extends HTMLElement{
   this.renderer.render(this.scene,this.camera);
  }
  _emitAct(){this.dispatchEvent(new CustomEvent('nova-interact',{bubbles:true,composed:true}))}
+ // Crossfade to a named clip. Unknown names are ignored so a stale attribute
+ // can never leave the asset frozen on no animation at all.
+ _playClip(name){
+  if(!this._mixer||!this._byClip)return;
+  const clip=this._byClip[name];if(!clip)return;
+  const next=this._mixer.clipAction(clip);
+  if(this._action===next){next.paused=false;return;}
+  next.reset().setLoop(this.T.LoopRepeat,Infinity).play();
+  if(this._action)this._action.crossFadeTo(next,0.35,false);else next.fadeIn(0.25);
+  this._action=next;
+ }
+ // Live joint overrides, applied AFTER mixer.update() so a control the visitor
+ // is holding wins over the clip while every other joint keeps animating.
+ // Values are degrees, clamped to the range the asset itself declares.
+ _applyJoints(){
+  if(!this._ctrl)return;
+  let spec=this._jointSpec;
+  if(spec===undefined){
+   try{spec=JSON.parse(this._attr('joints')||'{}')}catch(e){spec={}}
+   this._jointSpec=spec;
+  }
+  for(const k in spec){
+   const c=this._ctrl[k];if(!c)continue;
+   const lo=(c.min==null?-180:c.min),hi=(c.max==null?180:c.max);
+   const deg=Math.max(lo,Math.min(hi,+spec[k]||0));
+   c.node.rotation[c.axis]=c.rest+c.sign*deg*Math.PI/180;
+  }
+ }
  _ndc(e){
   const rect=this.renderer.domElement.getBoundingClientRect();
   return{v:new this.T.Vector2(((e.clientX-rect.left)/rect.width)*2-1,-((e.clientY-rect.top)/rect.height)*2+1),

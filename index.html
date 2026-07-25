@@ -559,7 +559,17 @@ h1{letter-spacing:-.025em !important}
       </div>
     </sc-if>
     <sc-if value="{{ isFeatRig }}" hint-placeholder-val="{{ false }}">
-      <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);margin:0 0 14px">This is the downloadable file, moving. Nobody rigged it — the wheels turn because the kart already knows where its own axles are. <span style="color:var(--ink);font-weight:700">Grab a slider and drive it.</span></div>
+      <sc-if value="{{ isRigKart }}" hint-placeholder-val="{{ true }}">
+        <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);margin:0 0 12px">This is the downloadable file, moving. Nobody rigged it — the wheels turn because the kart already knows where its own axles are. <span style="color:var(--ink);font-weight:700">Grab a slider and drive it.</span></div>
+      </sc-if>
+      <sc-if value="{{ isRigRobot }}" hint-placeholder-val="{{ false }}">
+        <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);margin:0 0 12px">Generated, then articulated, then animated — six clips baked into the same file. The joints below aren't a control panel we wrote: the asset declares each one's axis and its limits, and this page reads them out of the file. <span style="color:var(--ink);font-weight:700">Take a joint — the rest keeps performing.</span></div>
+      </sc-if>
+      <div class="studio-chips rig-chips {{ chipsCls }}" style="display:flex;gap:6px;margin:0 0 12px;font-size:11.5px;font-weight:600">
+        <span onClick="{{ pickRigKart }}" class="{{ rigKartCls }}" style="cursor:pointer;border:1.5px solid var(--line);border-radius:8px;padding:4px 12px;background:var(--paper)">{{ rigKartMark }} 🍌 kart</span>
+        <span onClick="{{ pickRigRobot }}" class="{{ rigRobotCls }}" style="cursor:pointer;border:1.5px solid var(--line);border-radius:8px;padding:4px 12px;background:var(--paper)">{{ rigRobotMark }} 🤖 eye robot</span>
+      </div>
+      <sc-if value="{{ isRigKart }}" hint-placeholder-val="{{ true }}">
       <div class="rig-grid" style="display:grid;grid-template-columns:1fr 322px;gap:14px">
         <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;overflow:hidden;box-shadow:3px 3px 0 rgba(34,29,24,.1)">
           <div style="display:flex;align-items:center;gap:8px;padding:7px 12px;border-bottom:1.5px solid var(--edge);background:color-mix(in oklab, var(--mint) 22%, var(--paper))">
@@ -597,6 +607,53 @@ body.scale.set(1-k*.6, 1+k, 1-k*.6)
           </div>
         </div>
       </div>
+      </sc-if>
+
+      <sc-if value="{{ isRigRobot }}" hint-placeholder-val="{{ false }}">
+      <div class="rig-grid" style="display:grid;grid-template-columns:1fr 322px;gap:14px">
+        <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;overflow:hidden;box-shadow:3px 3px 0 rgba(34,29,24,.1)">
+          <div style="display:flex;align-items:center;gap:8px;padding:7px 12px;border-bottom:1.5px solid var(--edge);background:color-mix(in oklab, var(--lav) 24%, var(--paper))">
+            <span style="width:10px;height:10px;border-radius:50%;background:var(--pink);border:1.5px solid var(--edge)"></span>
+            <span style="width:10px;height:10px;border-radius:50%;background:var(--yellow);border:1.5px solid var(--edge)"></span>
+            <span style="width:10px;height:10px;border-radius:50%;background:var(--mint);border:1.5px solid var(--edge)"></span>
+            <span style="font-family:'Space Mono',monospace;font-size:11px;margin-left:4px">🤖 retro_eye_robot.glb · {{ robotClipCount }} baked clips</span>
+            <span style="margin-left:auto;font-family:'Pixelify Sans',monospace;font-size:11.5px;color:var(--ink);background:color-mix(in oklab, var(--mint) 55%, var(--paper));border:1.5px solid var(--edge);border-radius:999px;padding:1px 10px;white-space:nowrap">▶ {{ rigClipName }}</span>
+          </div>
+          <div class="rig-viewer" style="position:relative;height:430px;background:conic-gradient(var(--paper) 90deg,var(--bg) 90deg 180deg,var(--paper) 180deg 270deg,var(--bg) 270deg) 0 0/24px 24px">
+            <x-import component-from-global-scope="nova-viewer" from="./nova-viewer.js" src="assets/eye-robot.glb" clip="{{ rigClipName }}" joints="{{ rigJointsJson }}" labels="false" explode="0" spin="0.01" rot="0" cam-yaw="0.4" cam-pitch="0.18" fit="1" min-h="0" hint-size="100%,430px" style="position:absolute;inset:0"></x-import>
+            <div style="position:absolute;left:12px;bottom:10px;z-index:3;font-family:'Space Mono',monospace;font-size:10px;color:var(--soft);background:color-mix(in oklab, var(--paper) 78%, transparent);border:1.5px solid var(--line);border-radius:8px;padding:3px 10px;pointer-events:none"><span class="hv">hover a part for its name · drag to orbit</span><span class="tp">tap a part to name it · drag to orbit</span></div>
+          </div>
+          <div class="rig-bar" style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:9px 14px;border-top:1.5px solid var(--edge);background:var(--bg)">
+            <span style="font-family:'Space Mono',monospace;font-size:10.5px;color:var(--muted);flex:none">clip</span>
+            <sc-for list="{{ clipBtns }}" as="c" hint-placeholder-count="6">
+              <span onClick="{{ c.go }}" style="cursor:pointer;border:1.5px solid var(--edge);border-radius:8px;padding:2px 10px;background:{{ c.bg }};color:{{ c.col }};font-family:'Pixelify Sans',monospace;font-size:12px;box-shadow:{{ c.sh }};white-space:nowrap">{{ c.name }}</span>
+            </sc-for>
+          </div>
+          <div class="rig-bar" style="display:flex;align-items:center;gap:13px;flex-wrap:wrap;padding:10px 14px;border-top:1.5px solid var(--line);background:var(--bg)">
+            <sc-for list="{{ jointRows }}" as="j" hint-placeholder-count="4">
+              <span title="{{ j.purpose }}" style="display:flex;align-items:center;gap:6px;font-family:'Space Mono',monospace;font-size:10.5px;color:var(--muted)">{{ j.label }}
+                <input type="range" min="{{ j.min }}" max="{{ j.max }}" step="0.5" value="{{ j.val }}" onChange="{{ j.set }}" style="width:88px;vertical-align:middle">
+                <span style="color:var(--pinkdeep);font-size:9.5px;min-width:30px">{{ j.txt }}</span>
+              </span>
+            </sc-for>
+            <span onClick="{{ onRobotAuto }}" style="cursor:pointer;margin-left:auto;border:1.5px solid var(--line);border-radius:8px;padding:2px 11px;background:var(--paper);font-family:'Pixelify Sans',monospace;font-size:12.5px;color:var(--ink);flex:none">↻ auto</span>
+          </div>
+        </div>
+        <div class="rig-side" style="display:flex;flex-direction:column;gap:12px">
+          <div style="flex:1;background:var(--codebg);border:1.5px solid var(--edge);border-radius:12px;padding:13px 15px;box-shadow:3px 3px 0 rgba(34,29,24,.1)">
+            <div style="font-family:'Space Mono',monospace;font-size:10px;color:#a09685;margin-bottom:9px">the sliders are not hard-coded ↓</div>
+            <pre style="margin:0;font-family:'Space Mono',monospace;font-size:11px;line-height:1.85;color:var(--codetx);white-space:pre;overflow-x:auto">j = glb.getObjectByName(<span style="color:#ffd23e">'CTRL_Eye_Aim'</span>)
+
+j.userData.rotation_axis   <span style="color:#8d819c">// "local Z"</span>
+j.userData.minimum_degrees <span style="color:#8d819c">// -16</span>
+j.userData.maximum_degrees <span style="color:#8d819c">//  16</span>
+
+mixer.update(dt)           <span style="color:#8d819c">// clip first</span>
+j.rotation.y = rest + deg  <span style="color:#8d819c">// you, on top</span></pre>
+          </div>
+        </div>
+      </div>
+      </sc-if>
     </sc-if>
     <div style="margin-top:18px;padding-top:14px;border-top:1.5px solid var(--line);font-family:'Space Mono',monospace;font-size:11.5px"><a href="https://app.nova3d.xyz/showcase" target="_blank">browse all generations — live 3D, with the code that built each one ↗</a></div>
     </div>
@@ -703,7 +760,10 @@ body.scale.set(1-k*.6, 1+k, 1-k*.6)
 <script type="text/x-dc" data-dc-script data-props="{&quot;defaultAsset&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;kart&quot;,&quot;rabbit&quot;,&quot;cake&quot;],&quot;default&quot;:&quot;kart&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Viewer&quot;},&quot;spinSeconds&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:2.8,&quot;min&quot;:1,&quot;max&quot;:6,&quot;step&quot;:0.5,&quot;unit&quot;:&quot;s&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Viewer&quot;},&quot;explodeAmount&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:42,&quot;min&quot;:0,&quot;max&quot;:100,&quot;step&quot;:1,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Viewer&quot;}}">
 const CODE = {"gun": {"file": "code.py", "lines": 1810, "url": "https://nova3dshowcase.blob.core.windows.net/showcase/dslr-gun-1785006423/code.py", "text": "# DSLR Gun: a camera body fused to a pistol frame — lens barrel with zoom and\n# focus rings, integrated grip and trigger, mode dial and rear controls. Every\n# moving control is its own object with its origin ON its axis of motion.\n# ⋯\ndef build():\n    clear_scene()\n    asset_collection = make_collection(\"DSLR_GUN\")\n    collections = {\n        \"body\":     make_collection(\"01_CAMERA_BODY_AND_MOUNT\", asset_collection),\n        \"lens\":     make_collection(\"02_OPTICAL_LENS_ASSEMBLY\", asset_collection),\n        \"weapon\":   make_collection(\"03_INTEGRATED_PISTOL_FRAME\", asset_collection),\n        \"controls\": make_collection(\"04_CAMERA_CONTROLS_AND_REAR\", asset_collection),\n    }\n    mats = make_materials()\n    root = make_empty(\"DSLR_Gun_Root\", asset_collection)\n\n    body_root, mount_root              = build_camera_body(collections, root, mats)\n    lens_root, zoom_pivot, focus_pivot = build_lens(collections, root, mount_root, mats)\n    frame_root, trigger_pivot          = build_weapon_frame(collections, root, body_root, mats)\n    controls_root, mode_pivot          = build_controls(collections, root, body_root, mats)\n\n    # every *_pivot below is a real origin, not a label: the zoom and focus\n    # rings turn about the lens axis, the trigger pulls, the dial clicks round\n    return {\n        \"root\": root,\n        \"lens_root\": lens_root, \"zoom_pivot\": zoom_pivot, \"focus_pivot\": focus_pivot,\n        \"frame_root\": frame_root, \"trigger_pivot\": trigger_pivot,\n        \"controls_root\": controls_root, \"mode_pivot\": mode_pivot,\n    }"}, "kart": {"file": "code.py", "lines": 822, "url": "https://nova3dshowcase.blob.core.windows.net/showcase/banana-kart-1784198724/code.py", "text": "# Banana kart: cartoon off-road go-kart whose body is a giant ripe banana\n# (brown speckles, dark stem rising at the rear, dark nose tip at the front),\n# open cockpit recess with padded seat + headrest + steering wheel, four chunky\n# blue-grey off-road tires with tread blocks and wire-laced spokes, orange\n# coil-over shock absorbers at each corner, a side-mounted cylindrical muffler\n# fed by curved exhaust headers, and workshop props on the ground (open blue\n# toolbox, wrenches, screwdriver, washers, spray can, melted banana puddle).\n# Scale: real-world metres. Kart ~2.0m long, ~1.2m tall at the stem.\n# ⋯\n# hierarchy machinery — parenting keeps world pos; pivots become origins\ndef parent_to(child, parent):\n    bpy.context.view_layer.update()\n    m = child.matrix_world.copy()\n    child.parent = parent\n    child.matrix_world = m\n\ndef set_pivot(obj, pivot_world):\n    obj.data.transform(Matrix.Translation(-Vector(pivot_world)))\n    obj.location = Vector(pivot_world)\n\n# ⋯\n# ═══ DIMENSION CONSTANTS (metres) ═════════════════════════════════════\nGROUND_Z = 0.0\n\n# Wheels — chunky off-road, rears slightly larger than fronts\nWHEEL_R_REAR  = 0.30\nWHEEL_R_FRONT = 0.26\nWHEEL_W_REAR  = 0.22\nWHEEL_W_FRONT = 0.19\nTRACK_REAR    = 0.60          # |x| of rear wheel centres\n# ⋯\ndef build_wheel(col, MAT, parent, center, R, W, side, rear):\n    # ⋯ tire, tread blocks, rim, laced spokes — origin ON the axle\n# ⋯\ndef build():\n    col = bpy.data.collections.new(\"Model\")\n    bpy.context.scene.collection.children.link(col)\n    MAT = setup_materials()\n\n    root = make_empty(col, \"BananaKart_Root\")\n    g_body = make_empty(col, \"Body_Group\", parent=root)\n    g_cockpit = make_empty(col, \"Cockpit_Group\", parent=root)\n    g_chassis = make_empty(col, \"Chassis_Group\", parent=root)\n    g_wheels = make_empty(col, \"Wheels_Group\", parent=root)\n    g_susp = make_empty(col, \"Suspension_Group\", parent=root)\n    g_engine = make_empty(col, \"Engine_Group\", parent=root)\n    g_props = make_empty(col, \"Accessories_Group\", parent=root)\n\n    build_banana_shell(col, MAT, g_body)\n    build_stem(col, MAT, g_body)\n    build_nose_tip(col, MAT, g_body)\n    build_cockpit(col, MAT, g_cockpit)\n    build_chassis(col, MAT, g_chassis)\n\n    # ⋯ + suspension, engine, wheels ×4, workshop props …"}, "rabbit": {"file": "code.py", "lines": 622, "url": "https://nova3dshowcase.blob.core.windows.net/showcase/robot-rabbit-companion-bot-1784260572/code.py", "text": "# Robot rabbit companion bot: floating spherical body/head with riveted\n# yellow + pale-blue armor panels, a bolted porthole face with glowing cyan\n# pixel eyes behind dark glass, a rust-red gasket ring sealing the face dome,\n# two big paddle rabbit ears (yellow, dark tips) on ringed pipe mounts, dark\n# flexible tube arms from stacked-gasket shoulder cuffs ending in capsule\n# forearms (blue wrist caps) with spread claw fingers, and a teal bow tie.\n# ⋯\ndef build():\n    col = bpy.data.collections.new(\"Model\")\n    bpy.context.scene.collection.children.link(col)\n    MAT = setup_materials()\n\n    root = make_empty(col, \"RobotRabbit_Root\")\n    g_body = make_empty(col, \"Body_Group\", parent=root)\n    g_face = make_empty(col, \"Face_Group\", parent=root)\n    g_ears = make_empty(col, \"Ears_Group\", parent=root)\n    g_arms = make_empty(col, \"Arms_Group\", parent=root)\n\n    build_body(col, MAT, g_body)\n    build_bow_tie(col, MAT, g_body)\n    build_face(col, MAT, g_face)\n\n    # Viewer-left (+X) ear more upright; viewer-right (-X) ear tilted wide.\n    # Mounts sit near the crown; the lean axis splays further outward.\n    build_ear(col, MAT, g_ears, (0.18, -0.04, 0.98), (0.30, -0.08, 0.95), \"L\")\n    build_ear(col, MAT, g_ears, (-0.36, 0.06, 0.93), (-0.70, 0.16, 0.68), \"R\")\n\n    build_arm(col, MAT, g_arms, SIDE_HANG, raised=False)\n    build_arm(col, MAT, g_arms, SIDE_RAISED, raised=True)\n    # ⋯"}, "cake": {"file": "code.py", "lines": 446, "url": "https://nova3dshowcase.blob.core.windows.net/showcase/blueberry-cheesecake-1783746042/code.py", "text": "# Stylized blueberry cheesecake slice, standard prop scale, volumetric icing and garnishes.\n# ⋯\ndef build():\n    col = bpy.data.collections.new(\"Model\")\n    bpy.context.scene.collection.children.link(col)\n    MAT = setup_materials()\n\n    # 1. Hierarchy Empties\n    root = make_empty(col, \"Cheesecake_Root\")\n    g_body = make_empty(col, \"Cake_Body\", parent=root)\n    g_garnish = make_empty(col, \"Garnish\", parent=root)\n    \n    # 2. Build Wedge\n    crust = build_crust(col, MAT)\n    parent_to(crust, g_body)\n    \n    cheese = build_cheese(col, MAT)\n    parent_to(cheese, g_body)\n    \n    icing = build_icing(col, MAT)\n    parent_to(icing, g_body)\n    \n    # 3. Build Garnishes (placed embedded slightly into the soft icing)\n    # Z coordinate is TOTAL_H + ~icing_thickness - small_sink_amount\n    # ⋯ blueberries placed by golden-angle ring, each its own mesh"}};
 class Component extends DCLogic {
-  state = { asset: null, tab: 'viewer', feat: 'rig', live: {}, wf: false, normals: false, labels: true, explode: null, groups: [], parts: 0, hidden: {}, expanded: {}, rootName: '', dark: false, flash: null, picked: null, editEx: 'rabbit', tabsTouched: false, chipsTouched: false, rigArmed: false, rigThr: 0, rigSteer: 0, rigManual: false, rigFit: 0.72 };
+  state = { asset: null, tab: 'viewer', feat: 'rig', live: {}, wf: false, normals: false, labels: true, explode: null, groups: [], parts: 0, hidden: {}, expanded: {}, rootName: '', dark: false, flash: null, picked: null, editEx: 'rabbit', tabsTouched: false, chipsTouched: false, rigArmed: false, rigThr: 0, rigSteer: 0, rigManual: false, rigFit: 0.72,
+    // Articulate/animate tab: which asset, which baked clip, and any joints
+    // the visitor has taken over. rigCtrls/rigClips are read off the GLB.
+    rigEx: 'kart', rigClip: null, rigJoints: {}, rigCtrls: [], rigClips: [] };
   // Which asset the studio opens on before the visitor picks one. Every screen
   // size opens on the same one and walks assetOrder from there, so the preview
   // tells the same story in the same order everywhere — phones used to start on
@@ -747,6 +807,13 @@ class Component extends DCLogic {
       // ~8s, which kept shoving the edit clock forward and made its hand-over
       // land anywhere between 11s and 20s instead of after one wipe.
       if (this._isEditSrc(e.detail.src)) this._editReady = Date.now();
+      // An articulated asset reports its baked clips and its joint contract
+      // (axis + limits, straight out of the glTF extras). Keep them so the
+      // rig tab can build a clip picker and sliders whose ranges came from
+      // the file rather than from anything typed here.
+      if (e.detail.controls && e.detail.controls.length) {
+        this.setState({ rigCtrls: e.detail.controls, rigClips: e.detail.clips || [] });
+      }
       // Edit tab: once the ORIGINAL pig has actually loaded, let it spin for a
       // few turns, then swap to the edited version. Driving the swap off load
       // (not a fixed timer) means the original always visibly spins first.
@@ -998,6 +1065,40 @@ class Component extends DCLogic {
     const codeText = meta.text + '\n\n# ⋯ excerpt — the full ' + meta.lines + '-line program IS the asset.\n# GLB is just its compilation target.';
     // Edit-per-part sits ahead of UV maps: it's the one that sells "the asset
     // stays alive", where UV maps read as a technical footnote by comparison.
+    // ── Articulate / animate tab: two assets ────────────────────────────────
+    // The kart is a procedural rig (wheels derived from its own axles). The eye
+    // robot ships six baked clips plus CTRL_* joints that declare their own axis
+    // and limits, so the clip picker and every slider range below are read out
+    // of the GLB — nothing about this robot is written into the page.
+    const rigEx = s.rigEx || 'kart';
+    const rigClipName = s.rigClip || (s.rigClips && s.rigClips[0]) || 'Showreel';
+    // Joints a visitor can take without needing IK to keep the feet planted;
+    // the legs are solved against foot targets and are left to the clip.
+    const FREE_JOINTS = ['CTRL_Eye_Aim', 'CTRL_Antenna_Hinge', 'CTRL_Body_Tilt', 'CTRL_Body_Yaw'];
+    const setJoint = (name) => (e) => {
+      this._act = Date.now();
+      const j = { ...(this.state.rigJoints || {}) };
+      j[name] = +e.target.value;
+      this.setState({ rigJoints: j });
+    };
+    const jointRows = (s.rigCtrls || [])
+      .filter((c) => FREE_JOINTS.indexOf(c.name) >= 0)
+      .map((c) => {
+        const v = (s.rigJoints || {})[c.name] ?? 0;
+        return {
+          label: c.name.replace('CTRL_', '').replace(/_/g, ' ').toLowerCase(),
+          purpose: c.purpose || '', min: c.min ?? -180, max: c.max ?? 180,
+          val: v, txt: Math.round(v) + '°', set: setJoint(c.name),
+        };
+      });
+    const clipBtns = (s.rigClips || []).map((n) => {
+      const on = n === rigClipName;
+      return { name: n, on,
+        go: () => { this._act = Date.now(); this.setState({ rigClip: n }); },
+        bg: on ? 'var(--yellow)' : 'var(--paper)',
+        col: on ? '#221d18' : 'var(--muted)',
+        sh: on ? 'inset 0 -2px 0 rgba(34,29,24,.25)' : '2px 2px 0 var(--edge)' };
+    });
     const FEATS = [{id:'rig',icon:'🦾',label:'Articulate / animate'},{id:'pbr',icon:'🎨',label:'PBR textures'},{id:'edit',icon:'🧩',label:'Edit per part'},{id:'uv',icon:'🗺',label:'UV maps'}];
     // Unselected tabs carry `tabhint`, which ripples them until the first click
     // marks the strip `tabs-touched` and the CSS kills the animation for good.
@@ -1034,6 +1135,16 @@ class Component extends DCLogic {
       explodeVal,
       onExplode: (e) => this.setState({ explode: +e.target.value }),
       onReplay: () => { const v = this.el(); if (v) v.replay(); },
+      isRigKart: rigEx !== 'robot', isRigRobot: rigEx === 'robot',
+      rigKartMark: rigEx !== 'robot' ? '♥' : '', rigRobotMark: rigEx === 'robot' ? '♥' : '',
+      rigKartCls: rigEx !== 'robot' ? 'chip' : 'chip chiphint',
+      rigRobotCls: rigEx === 'robot' ? 'chip' : 'chip chiphint',
+      pickRigKart: () => { this._act = Date.now(); this.setState({ rigEx: 'kart', chipsTouched: true }); },
+      pickRigRobot: () => { this._act = Date.now(); this.setState({ rigEx: 'robot', chipsTouched: true }); },
+      rigClipName, clipBtns, jointRows,
+      robotClipCount: (s.rigClips && s.rigClips.length) || 6,
+      rigJointsJson: JSON.stringify(s.rigJoints || {}),
+      onRobotAuto: () => { this._act = Date.now(); this.setState({ rigJoints: {} }); },
       isFeatUv: s.feat === 'uv', isFeatPbr: s.feat === 'pbr', isFeatEdit: s.feat === 'edit', isFeatRig: s.feat === 'rig',
       // Withheld until the tools section nears the viewport, so the rig GLB never
       // races the hero kart on first paint (it is the landing tab now).
