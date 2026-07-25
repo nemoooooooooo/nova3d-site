@@ -58,6 +58,25 @@ input[type=range]{accent-color:#ff9ec7}
 .tabs-touched .tabhint{animation:none}
 @keyframes pointbob{0%,100%{transform:translateX(0)}50%{transform:translateX(5px)}}
 .pointbob{animation:pointbob 1.1s ease-in-out infinite}
+/* Asset chips (kart / gun / rabbit / cake, and the edit examples) get the same
+   "these are buttons" cue as the tool tabs, so it's obvious the preview holds
+   more than one model. Softer and slower than the tabs — the tabs are the
+   primary call to action and these must not compete with them. Every chip but
+   the current one ripples, left to right, and the whole set stops for good on
+   the first pick. Keyframed transform/box-shadow outrank the inline styles. */
+@keyframes chippop{
+  0%,76%,100%{transform:translateY(0);box-shadow:none;border-color:var(--line)}
+  85%{transform:translateY(-3.5px);box-shadow:0 3px 0 var(--edge);border-color:var(--edge)}
+  95%{transform:translateY(0);box-shadow:none;border-color:var(--line)}
+}
+.chiphint{animation:chippop 2.9s ease-in-out infinite}
+.chiphint:nth-of-type(2){animation-delay:.11s}
+.chiphint:nth-of-type(3){animation-delay:.22s}
+.chiphint:nth-of-type(4){animation-delay:.33s}
+.chips-touched .chiphint{animation:none}
+.chiphint:hover{animation:none;transform:translateY(-1.5px);box-shadow:0 2px 0 var(--edge);border-color:var(--edge)}
+/* the selected model reads as pressed-in rather than raised */
+.chip{transition:transform .12s,box-shadow .12s,border-color .12s}
 /* mobile: the hint sits under the tab grid and points up at it */
 @keyframes pointbobv{0%,100%{transform:rotate(90deg) translateX(0)}50%{transform:rotate(90deg) translateX(5px)}}
 /* mobile tab pills: lift clear off the hard shadow so they read as pressable */
@@ -66,7 +85,7 @@ input[type=range]{accent-color:#ff9ec7}
   80%{transform:translateY(-4px);box-shadow:3.5px 6px 0 var(--edge)}
   92%{transform:translateY(0);box-shadow:2.5px 2.5px 0 var(--edge)}
 }
-@media(prefers-reduced-motion:reduce){.tabhint,.pointbob{animation:none !important}}
+@media(prefers-reduced-motion:reduce){.tabhint,.pointbob,.chiphint{animation:none !important}}
 /* Below ~1100px a fixed 322px code column eats the stage: the viewer gets
    squeezed under 470px and the control row wraps raggedly. Stack instead —
    both panes then get the full window width. */
@@ -117,7 +136,7 @@ h2{font-size:26px !important;line-height:1.12;letter-spacing:-.02em}
 .studio-topbar{flex-wrap:wrap;padding:8px 11px !important;gap:7px !important}
 .studio-file{margin-left:4px !important;font-size:10.5px !important}
 .studio-chips{margin-left:0 !important;width:100%;justify-content:space-between;gap:6px !important}
-.studio-chips>span{flex:1;justify-content:center;text-align:center;padding:7px 4px !important;font-size:11.5px !important}
+.studio-chips>span{flex:1;justify-content:center;text-align:center;padding:7px 4px !important;font-size:11.5px !important;min-height:34px;display:flex;align-items:center}
 /* controls: mode buttons on one line, explode + replay on the next, so
    "replay" stops being pushed off the right edge (it was clipped at 435px) */
 .studio-ctrl{flex-wrap:wrap;gap:8px !important;padding:8px 11px !important}
@@ -135,8 +154,8 @@ h2{font-size:26px !important;line-height:1.12;letter-spacing:-.02em}
 /* four cramped columns -> two tidy rows */
 .studio-status{flex-wrap:wrap;gap:4px 14px !important;padding:8px 12px !important;font-size:9.5px !important;line-height:1.5}
 .studio-status>span:nth-child(3){margin-left:0 !important}
-/* (leader-line callouts are turned off for narrow screens in the state init —
-   they're drawn by the viewer with no classes to hook, so CSS can't reach them) */
+/* (the viewer lays its group callouts out itself — see _updateLabels, which
+   switches to a narrow-stage arrangement below ~520px) */
 
 /* ══ TAB STRIP → 2×2 PILL GRID ══════════════════════════════════════════
    A sideways scroller always showed two tabs sliced off at both edges, so it
@@ -260,11 +279,11 @@ h1{letter-spacing:-.025em !important}
       <span style="width:11px;height:11px;border-radius:50%;background:var(--yellow);border:1.5px solid var(--edge)"></span>
       <span style="width:11px;height:11px;border-radius:50%;background:var(--mint);border:1.5px solid var(--edge)"></span>
       <span class="studio-file" style="font-family:'Space Mono',monospace;font-size:11.5px;margin-left:6px">{{ fileLabel }}</span>
-      <div class="studio-chips" style="margin-left:auto;display:flex;gap:5px;font-size:11.5px;font-weight:600">
-        <span onClick="{{ pickKart }}" style="cursor:pointer;border:1.5px solid var(--line);border-radius:8px;padding:3px 10px;background:var(--paper)">{{ kartMark }} 🍌 kart</span>
-        <span onClick="{{ pickGun }}" style="cursor:pointer;border:1.5px solid var(--line);border-radius:8px;padding:3px 10px;background:var(--paper)">{{ gunMark }} 📷 gun</span>
-        <span onClick="{{ pickRabbit }}" style="cursor:pointer;border:1.5px solid var(--line);border-radius:8px;padding:3px 10px;background:var(--paper)">{{ rabbitMark }} 🐰 rabbit</span>
-        <span onClick="{{ pickCake }}" style="cursor:pointer;border:1.5px solid var(--line);border-radius:8px;padding:3px 10px;background:var(--paper)">{{ cakeMark }} 🍰 cake</span>
+      <div class="studio-chips {{ chipsCls }}" style="margin-left:auto;display:flex;gap:5px;font-size:11.5px;font-weight:600">
+        <span onClick="{{ pickKart }}" class="{{ kartCls }}" style="cursor:pointer;border:1.5px solid var(--line);border-radius:8px;padding:3px 10px;background:var(--paper)">{{ kartMark }} 🍌 kart</span>
+        <span onClick="{{ pickGun }}" class="{{ gunCls }}" style="cursor:pointer;border:1.5px solid var(--line);border-radius:8px;padding:3px 10px;background:var(--paper)">{{ gunMark }} 📷 gun</span>
+        <span onClick="{{ pickRabbit }}" class="{{ rabbitCls }}" style="cursor:pointer;border:1.5px solid var(--line);border-radius:8px;padding:3px 10px;background:var(--paper)">{{ rabbitMark }} 🐰 rabbit</span>
+        <span onClick="{{ pickCake }}" class="{{ cakeCls }}" style="cursor:pointer;border:1.5px solid var(--line);border-radius:8px;padding:3px 10px;background:var(--paper)">{{ cakeMark }} 🍰 cake</span>
       </div>
     </div>
     <div class="studio-ctrl" style="display:flex;align-items:center;gap:14px;padding:6px 14px;border-bottom:1.5px solid var(--line);background:var(--bg)">
@@ -483,10 +502,10 @@ h1{letter-spacing:-.025em !important}
           <span style="width:11px;height:11px;border-radius:50%;background:var(--yellow);border:1.5px solid var(--edge)"></span>
           <span style="width:11px;height:11px;border-radius:50%;background:var(--mint);border:1.5px solid var(--edge)"></span>
           <span class="edit-file" style="font-family:'Space Mono',monospace;font-size:11.5px;margin-left:5px;color:var(--muted)">{{ editFile }}</span>
-          <span class="edit-chips" style="margin-left:auto;display:flex;gap:5px;font-size:11.5px;font-weight:600">
-            <span onClick="{{ pickEditRabbit }}" style="cursor:pointer;border:1.5px solid var(--line);border-radius:8px;padding:3px 10px;background:var(--paper)">{{ rabbitEditMark }} 🐰 rabbit</span>
-            <span onClick="{{ pickEditPig }}" style="cursor:pointer;border:1.5px solid var(--line);border-radius:8px;padding:3px 10px;background:var(--paper)">{{ pigMark }} 🐷 pig car</span>
-            <span onClick="{{ pickEditCake }}" style="cursor:pointer;border:1.5px solid var(--line);border-radius:8px;padding:3px 10px;background:var(--paper)">{{ cakeEditMark }} 🍰 cheesecake</span>
+          <span class="edit-chips {{ chipsCls }}" style="margin-left:auto;display:flex;gap:5px;font-size:11.5px;font-weight:600">
+            <span onClick="{{ pickEditRabbit }}" class="{{ rabbitExCls }}" style="cursor:pointer;border:1.5px solid var(--line);border-radius:8px;padding:3px 10px;background:var(--paper)">{{ rabbitEditMark }} 🐰 rabbit</span>
+            <span onClick="{{ pickEditPig }}" class="{{ pigExCls }}" style="cursor:pointer;border:1.5px solid var(--line);border-radius:8px;padding:3px 10px;background:var(--paper)">{{ pigMark }} 🐷 pig car</span>
+            <span onClick="{{ pickEditCake }}" class="{{ cakeExCls }}" style="cursor:pointer;border:1.5px solid var(--line);border-radius:8px;padding:3px 10px;background:var(--paper)">{{ cakeEditMark }} 🍰 cheesecake</span>
           </span>
         </div>
         <div class="edit-said" style="display:flex;align-items:center;gap:11px;padding:14px 18px;border-bottom:1.5px solid var(--edge);background:color-mix(in oklab, var(--mint) 30%, var(--paper))">
@@ -654,7 +673,6 @@ body.scale.set(1-k*.6, 1+k, 1-k*.6)
     <a href="https://discord.gg/QEH8mzcwdR" style="color:var(--pinkdeep)">Discord</a>
     <a href="https://github.com/RareSense/Nova3D" style="color:var(--pinkdeep)">GitHub</a>
   </div>
-  <span>no waitlist · no key request</span>
   <span>© 2026 Nova3D · Rare Sense Inc.</span>
 </footer>
 
@@ -664,11 +682,18 @@ body.scale.set(1-k*.6, 1+k, 1-k*.6)
 <script type="text/x-dc" data-dc-script data-props="{&quot;defaultAsset&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;kart&quot;,&quot;rabbit&quot;,&quot;cake&quot;],&quot;default&quot;:&quot;kart&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Viewer&quot;},&quot;spinSeconds&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:2.8,&quot;min&quot;:1,&quot;max&quot;:6,&quot;step&quot;:0.5,&quot;unit&quot;:&quot;s&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Viewer&quot;},&quot;explodeAmount&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:42,&quot;min&quot;:0,&quot;max&quot;:100,&quot;step&quot;:1,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Viewer&quot;}}">
 const CODE = {"gun": {"file": "code.py", "lines": 1810, "url": "https://nova3dshowcase.blob.core.windows.net/showcase/dslr-gun-1785006423/code.py", "text": "# DSLR Gun: a camera body fused to a pistol frame — lens barrel with zoom and\n# focus rings, integrated grip and trigger, mode dial and rear controls. Every\n# moving control is its own object with its origin ON its axis of motion.\n# ⋯\ndef build():\n    clear_scene()\n    asset_collection = make_collection(\"DSLR_GUN\")\n    collections = {\n        \"body\":     make_collection(\"01_CAMERA_BODY_AND_MOUNT\", asset_collection),\n        \"lens\":     make_collection(\"02_OPTICAL_LENS_ASSEMBLY\", asset_collection),\n        \"weapon\":   make_collection(\"03_INTEGRATED_PISTOL_FRAME\", asset_collection),\n        \"controls\": make_collection(\"04_CAMERA_CONTROLS_AND_REAR\", asset_collection),\n    }\n    mats = make_materials()\n    root = make_empty(\"DSLR_Gun_Root\", asset_collection)\n\n    body_root, mount_root              = build_camera_body(collections, root, mats)\n    lens_root, zoom_pivot, focus_pivot = build_lens(collections, root, mount_root, mats)\n    frame_root, trigger_pivot          = build_weapon_frame(collections, root, body_root, mats)\n    controls_root, mode_pivot          = build_controls(collections, root, body_root, mats)\n\n    # every *_pivot below is a real origin, not a label: the zoom and focus\n    # rings turn about the lens axis, the trigger pulls, the dial clicks round\n    return {\n        \"root\": root,\n        \"lens_root\": lens_root, \"zoom_pivot\": zoom_pivot, \"focus_pivot\": focus_pivot,\n        \"frame_root\": frame_root, \"trigger_pivot\": trigger_pivot,\n        \"controls_root\": controls_root, \"mode_pivot\": mode_pivot,\n    }"}, "kart": {"file": "code.py", "lines": 822, "url": "https://nova3dshowcase.blob.core.windows.net/showcase/banana-kart-1784198724/code.py", "text": "# Banana kart: cartoon off-road go-kart whose body is a giant ripe banana\n# (brown speckles, dark stem rising at the rear, dark nose tip at the front),\n# open cockpit recess with padded seat + headrest + steering wheel, four chunky\n# blue-grey off-road tires with tread blocks and wire-laced spokes, orange\n# coil-over shock absorbers at each corner, a side-mounted cylindrical muffler\n# fed by curved exhaust headers, and workshop props on the ground (open blue\n# toolbox, wrenches, screwdriver, washers, spray can, melted banana puddle).\n# Scale: real-world metres. Kart ~2.0m long, ~1.2m tall at the stem.\n# ⋯\n# hierarchy machinery — parenting keeps world pos; pivots become origins\ndef parent_to(child, parent):\n    bpy.context.view_layer.update()\n    m = child.matrix_world.copy()\n    child.parent = parent\n    child.matrix_world = m\n\ndef set_pivot(obj, pivot_world):\n    obj.data.transform(Matrix.Translation(-Vector(pivot_world)))\n    obj.location = Vector(pivot_world)\n\n# ⋯\n# ═══ DIMENSION CONSTANTS (metres) ═════════════════════════════════════\nGROUND_Z = 0.0\n\n# Wheels — chunky off-road, rears slightly larger than fronts\nWHEEL_R_REAR  = 0.30\nWHEEL_R_FRONT = 0.26\nWHEEL_W_REAR  = 0.22\nWHEEL_W_FRONT = 0.19\nTRACK_REAR    = 0.60          # |x| of rear wheel centres\n# ⋯\ndef build_wheel(col, MAT, parent, center, R, W, side, rear):\n    # ⋯ tire, tread blocks, rim, laced spokes — origin ON the axle\n# ⋯\ndef build():\n    col = bpy.data.collections.new(\"Model\")\n    bpy.context.scene.collection.children.link(col)\n    MAT = setup_materials()\n\n    root = make_empty(col, \"BananaKart_Root\")\n    g_body = make_empty(col, \"Body_Group\", parent=root)\n    g_cockpit = make_empty(col, \"Cockpit_Group\", parent=root)\n    g_chassis = make_empty(col, \"Chassis_Group\", parent=root)\n    g_wheels = make_empty(col, \"Wheels_Group\", parent=root)\n    g_susp = make_empty(col, \"Suspension_Group\", parent=root)\n    g_engine = make_empty(col, \"Engine_Group\", parent=root)\n    g_props = make_empty(col, \"Accessories_Group\", parent=root)\n\n    build_banana_shell(col, MAT, g_body)\n    build_stem(col, MAT, g_body)\n    build_nose_tip(col, MAT, g_body)\n    build_cockpit(col, MAT, g_cockpit)\n    build_chassis(col, MAT, g_chassis)\n\n    # ⋯ + suspension, engine, wheels ×4, workshop props …"}, "rabbit": {"file": "code.py", "lines": 622, "url": "https://nova3dshowcase.blob.core.windows.net/showcase/robot-rabbit-companion-bot-1784260572/code.py", "text": "# Robot rabbit companion bot: floating spherical body/head with riveted\n# yellow + pale-blue armor panels, a bolted porthole face with glowing cyan\n# pixel eyes behind dark glass, a rust-red gasket ring sealing the face dome,\n# two big paddle rabbit ears (yellow, dark tips) on ringed pipe mounts, dark\n# flexible tube arms from stacked-gasket shoulder cuffs ending in capsule\n# forearms (blue wrist caps) with spread claw fingers, and a teal bow tie.\n# ⋯\ndef build():\n    col = bpy.data.collections.new(\"Model\")\n    bpy.context.scene.collection.children.link(col)\n    MAT = setup_materials()\n\n    root = make_empty(col, \"RobotRabbit_Root\")\n    g_body = make_empty(col, \"Body_Group\", parent=root)\n    g_face = make_empty(col, \"Face_Group\", parent=root)\n    g_ears = make_empty(col, \"Ears_Group\", parent=root)\n    g_arms = make_empty(col, \"Arms_Group\", parent=root)\n\n    build_body(col, MAT, g_body)\n    build_bow_tie(col, MAT, g_body)\n    build_face(col, MAT, g_face)\n\n    # Viewer-left (+X) ear more upright; viewer-right (-X) ear tilted wide.\n    # Mounts sit near the crown; the lean axis splays further outward.\n    build_ear(col, MAT, g_ears, (0.18, -0.04, 0.98), (0.30, -0.08, 0.95), \"L\")\n    build_ear(col, MAT, g_ears, (-0.36, 0.06, 0.93), (-0.70, 0.16, 0.68), \"R\")\n\n    build_arm(col, MAT, g_arms, SIDE_HANG, raised=False)\n    build_arm(col, MAT, g_arms, SIDE_RAISED, raised=True)\n    # ⋯"}, "cake": {"file": "code.py", "lines": 446, "url": "https://nova3dshowcase.blob.core.windows.net/showcase/blueberry-cheesecake-1783746042/code.py", "text": "# Stylized blueberry cheesecake slice, standard prop scale, volumetric icing and garnishes.\n# ⋯\ndef build():\n    col = bpy.data.collections.new(\"Model\")\n    bpy.context.scene.collection.children.link(col)\n    MAT = setup_materials()\n\n    # 1. Hierarchy Empties\n    root = make_empty(col, \"Cheesecake_Root\")\n    g_body = make_empty(col, \"Cake_Body\", parent=root)\n    g_garnish = make_empty(col, \"Garnish\", parent=root)\n    \n    # 2. Build Wedge\n    crust = build_crust(col, MAT)\n    parent_to(crust, g_body)\n    \n    cheese = build_cheese(col, MAT)\n    parent_to(cheese, g_body)\n    \n    icing = build_icing(col, MAT)\n    parent_to(icing, g_body)\n    \n    # 3. Build Garnishes (placed embedded slightly into the soft icing)\n    # Z coordinate is TOTAL_H + ~icing_thickness - small_sink_amount\n    # ⋯ blueberries placed by golden-angle ring, each its own mesh"}};
 class Component extends DCLogic {
-  // Group callouts are laid out for a wide stage — on a phone the leader lines
-  // cross the model and each other, so they start off there. Tap-to-name is
-  // unaffected (the pick label is drawn independently of this flag).
-  state = { asset: null, tab: 'viewer', feat: 'rig', live: {}, wf: false, normals: false,
-    labels: !(typeof window !== 'undefined' && window.matchMedia('(max-width:768px)').matches), explode: null, groups: [], parts: 0, hidden: {}, expanded: {}, rootName: '', dark: false, flash: null, picked: null, editEx: 'rabbit', tabsTouched: false, rigArmed: false, rigThr: 0, rigSteer: 0, rigManual: false, rigFit: 0.72 };
+  state = { asset: null, tab: 'viewer', feat: 'rig', live: {}, wf: false, normals: false, labels: true, explode: null, groups: [], parts: 0, hidden: {}, expanded: {}, rootName: '', dark: false, flash: null, picked: null, editEx: 'rabbit', tabsTouched: false, chipsTouched: false, rigArmed: false, rigThr: 0, rigSteer: 0, rigManual: false, rigFit: 0.72 };
+  // Which asset the studio opens on before the visitor picks one. Phones get
+  // the rabbit: 440 KB against the kart's 1.6 MB, and a tall model suits a
+  // narrow portrait stage. This MUST stay the single source of truth — the
+  // nova-ready / nova-pick handlers gate on `e.detail.src === _studioSrc()`,
+  // so if the render and that guard ever disagree about the default, every
+  // event is silently dropped and the scene graph renders empty.
+  _initialAsset() {
+    const narrow = typeof window !== 'undefined' && window.matchMedia('(max-width:768px)').matches;
+    return narrow ? 'rabbit' : (this.props.defaultAsset ?? 'kart');
+  }
+
   files = {
     kart: ['assets/banana-kart.glb', 'banana_kart.glb'],
     gun: ['assets/dslr-gun.glb', 'dslr_gun.glb'],
@@ -679,7 +704,7 @@ class Component extends DCLogic {
     cake: ['assets/cheesecake.glb', 'cheesecake.glb']
   };
   componentDidMount() {
-    this._studioSrc = () => this.files[this.state.asset ?? (this.props.defaultAsset ?? 'kart')][0];
+    this._studioSrc = () => this.files[this.state.asset ?? this._initialAsset()][0];
     this._ready = (e) => {
       // Stamp EVERY finished load (hero or edit window). The example cycler
       // measures its dwell from this, so a slow multi-MB pair is never swapped
@@ -841,18 +866,15 @@ class Component extends DCLogic {
       this._pf[k] = 1;
       try { fetch(LIVE_SRC[k], { mode: 'cors' }).catch(() => {}); } catch (e) {}
     };
-    // Phones open on the rabbit: 440 KB against the kart's 1.6 MB, and a tall
-    // model suits a narrow portrait stage better than a wide one. Tapping any
-    // chip still loads that asset.
     const isNarrow = typeof window !== 'undefined' && window.matchMedia('(max-width:768px)').matches;
-    const asset = s.asset ?? (isNarrow ? 'rabbit' : (this.props.defaultAsset ?? 'kart'));
+    const asset = s.asset ?? this._initialAsset();
     // A 42% spread needs a wide stage; on a ~400px phone stage the outer parts
     // (rabbit ears, kart wheels) push past the frame and get cropped. Same idea,
     // smaller throw — the user can still drag the slider the whole way.
     const explodeVal = s.explode ?? (isNarrow ? 20 : (this.props.explodeAmount ?? 42));
     const [glbSrc, fileLabel] = this.files[asset];
     const meta = CODE[asset];
-    const pick = (k) => () => this.setState({ asset: k, groups: [], parts: 0, hidden: {}, flash: null, picked: null });
+    const pick = (k) => () => this.setState({ asset: k, groups: [], parts: 0, hidden: {}, flash: null, picked: null, chipsTouched: true });
     const mkToggle = (name, off) => (e) => {
       if (e && e.stopPropagation) e.stopPropagation();
       const h = { ...this.state.hidden }; h[name] = !off; this.setState({ hidden: h });
@@ -891,6 +913,17 @@ class Component extends DCLogic {
       fileLabel, glbSrc,
       spinSecs: this.props.spinSeconds ?? 2.8,
       kartMark: asset === 'kart' ? '♥' : '', gunMark: asset === 'gun' ? '♥' : '', rabbitMark: asset === 'rabbit' ? '♥' : '', cakeMark: asset === 'cake' ? '♥' : '',
+      // Same "these are buttons" trick the tool tabs use: every chip that is
+      // NOT the current model ripples until the first pick, so a visitor sees
+      // there are other models here rather than assuming one fixed preview.
+      chipsCls: s.chipsTouched ? 'chips-touched' : '',
+      kartCls: asset === 'kart' ? 'chip' : 'chip chiphint',
+      gunCls: asset === 'gun' ? 'chip' : 'chip chiphint',
+      rabbitCls: asset === 'rabbit' ? 'chip' : 'chip chiphint',
+      cakeCls: asset === 'cake' ? 'chip' : 'chip chiphint',
+      rabbitExCls: s.editEx === 'rabbit' ? 'chip' : 'chip chiphint',
+      pigExCls: s.editEx === 'pig' ? 'chip' : 'chip chiphint',
+      cakeExCls: s.editEx === 'cake' ? 'chip' : 'chip chiphint',
       pickKart: pick('kart'), pickGun: pick('gun'), pickRabbit: pick('rabbit'), pickCake: pick('cake'),
       isCode: s.tab === 'code',
       viewerMark: s.tab === 'viewer' ? '●' : '○', codeMark: s.tab === 'code' ? '●' : '○',
@@ -935,9 +968,9 @@ class Component extends DCLogic {
       editFile: { rabbit: '🐰 robot_rabbit.glb', pig: '🐷 pig_car.glb', cake: '🍰 cheesecake.glb' }[s.editEx],
       editChanged: { rabbit: 'the eyes, ears, bow & palette', pig: 'the wings & nameplate', cake: 'the berries & glaze' }[s.editEx],
       rabbitEditMark: s.editEx === 'rabbit' ? '♥' : '', pigMark: s.editEx === 'pig' ? '♥' : '', cakeEditMark: s.editEx === 'cake' ? '♥' : '',
-      pickEditRabbit: () => { this._exAct = Date.now(); this._prefetchEdit('rabbit'); this.setState({ editEx: 'rabbit' }); },
-      pickEditPig: () => { this._exAct = Date.now(); this._prefetchEdit('pig'); this.setState({ editEx: 'pig' }); },
-      pickEditCake: () => { this._exAct = Date.now(); this._prefetchEdit('cake'); this.setState({ editEx: 'cake' }); },
+      pickEditRabbit: () => { this._exAct = Date.now(); this._prefetchEdit('rabbit'); this.setState({ editEx: 'rabbit', chipsTouched: true }); },
+      pickEditPig: () => { this._exAct = Date.now(); this._prefetchEdit('pig'); this.setState({ editEx: 'pig', chipsTouched: true }); },
+      pickEditCake: () => { this._exAct = Date.now(); this._prefetchEdit('cake'); this.setState({ editEx: 'cake', chipsTouched: true }); },
       tabs,
       tabsCls: s.tabsTouched ? 'tabs-touched' : '',
       showTabHint: !s.tabsTouched,

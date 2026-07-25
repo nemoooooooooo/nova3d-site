@@ -593,16 +593,31 @@ class NovaViewer extends HTMLElement{
    const v=L.anchor.localToWorld(L.local.clone()).project(this.camera);
    L.px=(v.x*0.5+0.5)*w;L.py=(-v.y*0.5+0.5)*h;L.behind=v.z>1;
   });
+  // Narrow stage: two 110px label columns on a ~390px canvas leave the model
+  // nowhere to sit, so the callouts end up over it. Shrink the type and give
+  // each one a paper chip to sit on — they stay readable wherever they land,
+  // instead of being dropped. Applied once per breakpoint change, not per frame.
+  const narrow=w<520;
+  if(this._labNarrow!==narrow){
+   this._labNarrow=narrow;
+   this._labels.forEach(L=>{
+    L.el.style.fontSize=narrow?'9px':'10.5px';
+    L.el.style.padding=narrow?'2px 5px':'';
+    L.el.style.borderRadius=narrow?'6px':'';
+    L.el.style.background=narrow?'color-mix(in oklab, var(--paper,#fff) 82%, transparent)':'';
+   });
+  }
+  const pad=narrow?8:14,gap=narrow?21:26,edge=narrow?14:20;
   const left=[],right=[];
   this._labels.forEach(L=>{(L.px<w/2?left:right).push(L)});
   [['l',left],['r',right]].forEach(([side,arr])=>{
    arr.sort((a,b)=>a.py-b.py);
    let prev=-1e9;
    arr.forEach(L=>{
-    let ly=Math.max(20,Math.min(h-20,L.py));
-    ly=Math.max(ly,prev+26);prev=ly;
+    let ly=Math.max(edge,Math.min(h-edge,L.py));
+    ly=Math.max(ly,prev+gap);prev=ly;
     const lw=L.el.offsetWidth||80;
-    const lx=side==='l'?14:w-14-lw;
+    const lx=side==='l'?pad:w-pad-lw;
     L.el.style.transform='translate('+lx+'px,'+(ly-8)+'px)';
     const ax=side==='l'?lx+lw+6:lx-6;
     L.line.setAttribute('points',ax+','+ly+' '+L.px+','+L.py);
