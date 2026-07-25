@@ -226,8 +226,10 @@ class NovaViewer extends HTMLElement{
   }
   this._applyMats();
   this._load.style.opacity='0';const ld=this._load;setTimeout(()=>{if(id===this._loadId)ld.style.display='none'},350);
-  this._t0=performance.now();this._lastT=this._t0;this._baseRot=root.rotation.y;
-  this._frame();
+  this._t0=performance.now();this._lastT=this._t0;this._baseRot=root.rotation.y;this._introSnapped=false;
+  // _frame() fits target+distance to the new model; _applyCamAngle() then locks
+  // the orbit angle back to the front, so every (re)load starts front-facing.
+  this._frame();this._applyCamAngle();
   this.dispatchEvent(new CustomEvent('nova-ready',{bubbles:true,composed:true,detail:{src,root:gr.name||'root',parts:this._meshes.length,groups:this._counts}}));
  }
  // Normalize a model for the view. With `body-match`, scale/center by the bbox
@@ -253,7 +255,15 @@ class NovaViewer extends HTMLElement{
   if(id!==this._loadId)return;
   const container=new T.Group();container.add(rootA);
   let rootB=null;
-  if(g2){rootB=g2.scene;container.add(rootB);}
+  if(g2){rootB=g2.scene;container.add(rootB);
+   // compare-offset="x,y,z": nudge the EDITED model into the original's frame.
+   // Needed when the two GLBs were authored/exported at different origins —
+   // compare mode draws both raw, so without this the shared parts don't line
+   // up across the divider (one sits higher/further back than the other).
+   const off=this._attr('compare-offset');
+   if(off){const a=off.split(',').map(v=>parseFloat(v));
+    if(a.length===3&&a.every(n=>!isNaN(n))){rootB.position.x+=a[0];rootB.position.y+=a[1];rootB.position.z+=a[2];}}
+  }
   this.scene.add(container);this._root=container;container.updateMatrixWorld(true);
   this._compareRoots=rootB?[rootA,rootB]:[rootA];
   rootA.traverse(o=>{if(o.isMesh){this._meshes.push(o);this._orig.set(o,o.material);}});
@@ -278,7 +288,7 @@ class NovaViewer extends HTMLElement{
   this._wipeMode=true;this._wipe=0.5;this._wipeAuto=true;this._wipeDrag=false;this._wipeT0=null;
   this._applyMats();
   this._load.style.opacity='0';const ld=this._load;setTimeout(()=>{if(id===this._loadId)ld.style.display='none'},350);
-  this._t0=performance.now();this._lastT=this._t0;this._baseRot=container.rotation.y;
+  this._t0=performance.now();this._lastT=this._t0;this._baseRot=container.rotation.y;this._introSnapped=false;
   this._frame();this._applyCamAngle();this._setWipe(0.5);
   this.dispatchEvent(new CustomEvent('nova-ready',{bubbles:true,composed:true,detail:{src,root:'compare',parts:this._meshes.length,groups:[]}}));
  }
@@ -307,14 +317,33 @@ class NovaViewer extends HTMLElement{
  }
  // Re-assert the configured load angle around the current target (guarantees a
  // consistent front-on framing even if the element was re-mounted).
+ // Deterministic camera placement. Runs after _frame(), which has already set a
+ // fit-derived target + distance, so only the ORBIT ANGLE is decided here.
+ // Two things make this "every time" rather than "the first time":
+ //   - no early return: a viewer with no cam-* attrs still gets re-aimed to the
+ //     default front angle instead of inheriting wherever the user left it;
+ //   - controls.update() resyncs OrbitControls' damped internal spherical state,
+ //     which otherwise snaps the camera back to the previous orbit on reload.
  _applyCamAngle(){
   const cy=this._attr('cam-yaw'),cp=this._attr('cam-pitch');
-  if(cy==null&&cp==null)return;
-  const yaw=parseFloat(cy)||0,pitch=(cp!=null?parseFloat(cp):0.15);
+  // No cam-* attrs (e.g. the hero studio viewer) => reproduce the original
+  // three-quarter default from the constructor's (3.1, 1.7, 3.7) camera, so
+  // that viewer keeps its designed framing and merely becomes repeatable.
+  const yaw=cy!=null?(parseFloat(cy)||0):0.697;
+  const pitch=cp!=null?(parseFloat(cp)||0):0.338;
   const t=this.controls?this.controls.target:new this.T.Vector3();
   const d=this.camera.position.distanceTo(t)||5;
   this.camera.position.set(t.x+Math.sin(yaw)*Math.cos(pitch)*d,t.y+Math.sin(pitch)*d,t.z+Math.cos(yaw)*Math.cos(pitch)*d);
   this.camera.lookAt(t);
+  // Snap OrbitControls' internal spherical to the position we just set. Damping
+  // must be OFF for this one update, otherwise the leftover sphericalDelta from
+  // the previous orbit is re-applied and drags the camera back off-front.
+  if(this.controls){
+   const damp=this.controls.enableDamping;
+   this.controls.enableDamping=false;
+   this.controls.update();
+   this.controls.enableDamping=damp;
+  }
  }
  _buildPins(){
   this._labels.forEach(L=>{L.el.remove();L.line.remove();L.dot.remove()});this._labels=[];
@@ -365,6 +394,12 @@ class NovaViewer extends HTMLElement{
    if(t<spinD){
     this._root.rotation.y=this._baseRot+easeIO(Math.min(1,t/spinD))*Math.PI*2*this._num('spins',1);
    }else{
+    // Snap to the intro's exact end pose once. The intro is a whole number of
+    // turns, so that pose IS _baseRot. Without this, a short spin (e.g. 0.01s)
+    // ends wherever the last intro frame happened to land — and with rot=0
+    // nothing ever corrects it, so the model froze at a random angle on some
+    // loads and the correct one on others.
+    if(!this._introSnapped){this._root.rotation.y=this._baseRot;this._introSnapped=true;}
     this._root.rotation.y+=dt*this._num('rot',0.3);
     if(this._manual){f=this._target();}
     else{
@@ -501,7 +536,7 @@ class NovaViewer extends HTMLElement{
   this._hlSet=set;this._hl=name;this._applyMats();
  }
  highlightGroup(name,on){this.highlightNode(name,on);}
- replay(){if(this._root){this._manual=false;this._root.rotation.y=this._baseRot||0;this._t0=performance.now();this._introDone=false;}}
+ replay(){if(this._root){this._manual=false;this._root.rotation.y=this._baseRot||0;this._t0=performance.now();this._introDone=false;this._introSnapped=false;}}
  disconnectedCallback(){this._looping=false;cancelAnimationFrame(this._raf);if(this._ro)this._ro.disconnect();if(this._vis)this._vis.disconnect();}
 }
 customElements.define('nova-viewer',NovaViewer);
