@@ -694,6 +694,10 @@ class Component extends DCLogic {
     return narrow ? 'rabbit' : (this.props.defaultAsset ?? 'kart');
   }
 
+  // cycle order, shared by the auto-cycler and the look-ahead prefetch
+  assetOrder = ['kart', 'gun', 'rabbit', 'cake'];
+  exOrder = ['rabbit', 'pig', 'cake'];
+
   files = {
     kart: ['assets/banana-kart.glb', 'banana_kart.glb'],
     gun: ['assets/dslr-gun.glb', 'dslr_gun.glb'],
@@ -711,10 +715,23 @@ class Component extends DCLogic {
       // out while it is still loading — that race was showing half-settled
       // models at the wrong angle.
       this._lastReady = Date.now();
+      // The edit rotation must be timed off the EDIT pair's own load. _lastReady
+      // is stamped by every viewer on the page, and the studio one reloads every
+      // ~8s, which kept shoving the edit clock forward and made its hand-over
+      // land anywhere between 11s and 20s instead of after one wipe.
+      if (this._isEditSrc(e.detail.src)) this._editReady = Date.now();
       // Edit tab: once the ORIGINAL pig has actually loaded, let it spin for a
       // few turns, then swap to the edited version. Driving the swap off load
       // (not a fixed timer) means the original always visibly spins first.
       if (e.detail.src !== this._studioSrc()) return;
+      // the studio cycle is timed from THIS model's load: a 3.6 MB asset must
+      // still get its full spin/explode/collapse, not the tail of it
+      this._studioReady = Date.now();
+      // Warm the NEXT model while this one performs. The order is fixed and the
+      // performance lasts ~7.5s, so the swap is a cache hit instead of a cold
+      // multi-MB fetch — the difference between an instant cut and a visible
+      // stall on the 3.6 MB gun. Same bytes either way, just fetched earlier.
+      this._warmNext();
       this.setState({ groups: e.detail.groups, parts: e.detail.parts, rootName: e.detail.root, hidden: {}, expanded: {}, flash: null, picked: null });
     };
     document.addEventListener('nova-ready', this._ready);
@@ -787,31 +804,46 @@ class Component extends DCLogic {
         this._toolIo.observe(tools);
       }
     }, 800);
-    // Both idle cyclers stay off on phones: every swap pulls another multi-MB
-    // GLB over cellular, and the model changes under the reader's thumb. The
-    // asset chips / example chips are one tap away instead.
-    const noAutoCycle = typeof window !== 'undefined' && window.matchMedia('(max-width:768px)').matches;
+    // Both cyclers advance on the ANIMATION, not an arbitrary dwell: each model
+    // gets to finish its performance once, then hands over. The timings below
+    // mirror nova-viewer's own constants — keep them in step if those change.
+    //
+    //   studio : spin 2.8s, then EXP .9 + HOLD 1.7 + RET .9  (collapse ends at
+    //            6.3s; +1.2s to sit assembled before handing over)
+    //   edit   : wipe HOLD 1.5 + SWEEP 1.15 + HOLD 1.5 + SWEEP 1.15 = 5.3s for
+    //            one before -> after -> back to before (+1.5s to read the line)
+    const STUDIO_CYCLE_MS = 7500, EDIT_CYCLE_MS = 6800;
+    // A visitor who just touched something keeps the model longer than one
+    // pass, so nothing is yanked out from under them mid-inspection.
+    const INTERACT_GRACE_MS = 15000;
     this._exCyc = setInterval(() => {
-      if (noAutoCycle) return;
       if (document.visibilityState !== 'visible' || !this._hwView) return;
       if (this.state.feat !== 'edit') { this._exAct = Date.now(); return; }
-      // dwell counts from whichever happened later: the last interaction, or the
-      // moment the current pair actually finished loading
-      if (Date.now() - Math.max(this._exAct, this._lastReady || 0) < 20000) return;
-      this._exAct = Date.now();
-      const exOrder = ['rabbit', 'pig', 'cake'];
+      // one full wipe after the pair loaded, and a longer beat after a touch
+      if (Date.now() - (this._editReady || 0) < EDIT_CYCLE_MS) return;
+      if (Date.now() - this._exAct < INTERACT_GRACE_MS) return;
+      const exOrder = this.exOrder;
       const nxEx = exOrder[(exOrder.indexOf(this.state.editEx) + 1) % exOrder.length];
-      this._prefetchEdit(nxEx);
+      this._prefetchEdit(nxEx);   // no-op if _warmNext already cached it
+      // same as the studio: advance the cycle clock, not the interaction clock
+      this._editReady = Date.now();
       this.setState({ editEx: nxEx });
     }, 1000);
     this._cyc = setInterval(() => {
-      if (noAutoCycle) return;
       if (document.visibilityState !== 'visible' || !this._inView || this.state.tab !== 'viewer') return;
-      if (Date.now() - this._act < 15000) return;
-      const order = ['kart', 'gun', 'rabbit', 'cake'];
-      const cur = this.state.asset ?? (this.props.defaultAsset ?? 'kart');
+      // hand over once THIS model has spun, exploded and collapsed once —
+      // timed from when it finished loading, not from when the interval started
+      if (Date.now() - (this._studioReady || 0) < STUDIO_CYCLE_MS) return;
+      if (Date.now() - this._act < INTERACT_GRACE_MS) return;
+      const order = this.assetOrder;
+      const cur = this.state.asset ?? this._initialAsset();
       const nx = order[(order.indexOf(cur) + 1) % order.length];
-      this._act = Date.now();
+      // Stamp the CYCLE clock, not the interaction clock. Bumping _act here
+      // made every auto-advance look like a user touch, so the rotation ran on
+      // the 15s interaction grace instead of the model's own performance. This
+      // provisional stamp is overwritten by the real nova-ready, and keeps the
+      // rotation from spinning if a model never loads.
+      this._studioReady = Date.now();
       this.setState({ asset: nx, groups: [], parts: 0, hidden: {}, expanded: {}, flash: null, picked: null });
     }, 1000);
   }
@@ -841,14 +873,37 @@ class Component extends DCLogic {
   }
   // Only the pair actually on screen is fetched; the other examples stay cold
   // until you switch to them (or the idle cycler is about to bring them up).
+  editFiles = {
+    rabbit: ['assets/live/edit_rabbit_orig.glb', 'assets/live/edit_rabbit.glb'],
+    pig: ['assets/live/edit_pig_orig.glb', 'assets/live/edit_pig.glb'],
+    cake: ['assets/live/edit_cake_orig.glb', 'assets/live/edit_cake_berry.glb']
+  };
+
   _prefetchEdit(which) {
-    const files = {
-      rabbit: ['assets/live/edit_rabbit_orig.glb', 'assets/live/edit_rabbit.glb'],
-      pig: ['assets/live/edit_pig_orig.glb', 'assets/live/edit_pig.glb'],
-      cake: ['assets/live/edit_cake_orig.glb', 'assets/live/edit_cake_berry.glb']
-    };
-    (files[which] || []).forEach(f => { try { fetch(f); } catch (e) {} });
+    (this.editFiles[which] || []).forEach(f => { try { fetch(f).catch(() => {}); } catch (e) {} });
   }
+
+  _isEditSrc(src) {
+    return Object.values(this.editFiles).some((pair) => pair.includes(src));
+  }
+  // Pull the next model in each rotation into the HTTP cache while the current
+  // one is still playing, so an auto-transition never waits on the network.
+  // Guarded by _pf so a model is only ever warmed once per page.
+  _warmNext() {
+    this._pf = this._pf || {};
+    const cur = this.state.asset ?? this._initialAsset();
+    const nx = this.assetOrder[(this.assetOrder.indexOf(cur) + 1) % this.assetOrder.length];
+    const src = (this.files[nx] || [])[0];
+    if (src && !this._pf['a:' + nx]) {
+      this._pf['a:' + nx] = 1;
+      try { fetch(src).catch(() => {}); } catch (e) {}
+    }
+    if (this.state.feat === 'edit') {
+      const ex = this.exOrder[(this.exOrder.indexOf(this.state.editEx) + 1) % this.exOrder.length];
+      if (!this._pf['e:' + ex]) { this._pf['e:' + ex] = 1; this._prefetchEdit(ex); }
+    }
+  }
+
   _clearEdit() { clearTimeout(this._e1); clearTimeout(this._e2); }
   el() { return document.querySelector('nova-viewer'); }
   renderVals() {
