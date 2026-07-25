@@ -259,7 +259,13 @@ class NovaViewer extends HTMLElement{
   // (Arms/Body/Ears/Face) and must be left exactly as it is.
   const MIN_G=4,MAX_G=14;
   let groups=gr.children.filter(hasMesh);
-  for(let guard=0;guard<8&&groups.length<MIN_G;guard++){
+  // The opposite failure to the one below: a file exported with its hierarchy
+  // flattened has every mesh sitting at the top level, and callouts for 300 of
+  // them are noise laid over the model. Treat that as "this file has no
+  // grouping" rather than inventing one — the parts are still named, still
+  // listed in the scene graph, and still explode individually.
+  this._flat=groups.length>MAX_G;
+  for(let guard=0;guard<8&&!this._flat&&groups.length<MIN_G;guard++){
    const cand=groups
     .map((g,i)=>({i,kids:g.children.filter(hasMesh)}))
     .filter(c=>c.kids.length&&groups.length-1+c.kids.length<=MAX_G)
@@ -284,6 +290,7 @@ class NovaViewer extends HTMLElement{
     if(kids.length)kids.forEach(k=>{const kc=worldC(k);mkMover(k,kc.lengthSq()<1e-4?new T.Vector3(0,1,0):kc,0.6);});
     else mkMover(g,new T.Vector3(0,1,0),0.4);
    }
+   if(this._flat)return;                      // no grouping in the file to label
    const el=document.createElement('div');
    // ('0'+n) alone printed "011" once a model had more than nine groups
    el.innerHTML='<span style="opacity:.45">'+('0'+(i+1)).slice(-2)+'</span>&nbsp;'+g.name;
@@ -365,7 +372,7 @@ class NovaViewer extends HTMLElement{
    try{this._legIK=['FL','FR','BR','BL'].map(l=>new LegIK(T,root,l));}catch(e){this._legIK=null;}
   }
   const controls=Object.keys(this._ctrl).map(k=>({name:k,min:this._ctrl[k].min,max:this._ctrl[k].max,purpose:this._ctrl[k].purpose}));
-  this.dispatchEvent(new CustomEvent('nova-ready',{bubbles:true,composed:true,detail:{src,root:gr.name||'root',parts:this._meshes.length,groups:this._counts,clips:this._clips,controls}}));
+  this.dispatchEvent(new CustomEvent('nova-ready',{bubbles:true,composed:true,detail:{src,root:gr.name||'root',parts:this._meshes.length,groups:this._counts,flat:this._flat,clips:this._clips,controls}}));
  }
  // Normalize a model for the view. With `body-match`, scale/center by the bbox
  // of meshes whose name contains that string (e.g. "Pig_Body_Shell") so two
