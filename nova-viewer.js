@@ -92,9 +92,21 @@ class NovaViewer extends HTMLElement{
   this._onScreen=true;
   this._vis=new IntersectionObserver((es)=>{es.forEach((x)=>{this._onScreen=x.isIntersecting;});},{rootMargin:'150px'});
   this._vis.observe(this);
+  // Hold the GLB fetch until the stage is within ~a screen of the viewport.
+  // The rig viewer is the default tab but sits ~4 screens down, so on a phone
+  // its model used to download during first paint, competing with the content
+  // actually on screen. The observer fires on the next frame, so anything
+  // already in view still loads immediately.
+  this._near=new IntersectionObserver((es,ob)=>{
+   if(!es.some(x=>x.isIntersecting))return;
+   ob.disconnect();this._near=null;
+   const s=this._pendingSrc;this._pendingSrc=null;
+   if(s)this._loadSrc(s);
+  },{rootMargin:'700px 0px'});
+  this._near.observe(this);
   this._resize();
   this._startLoop();
-  if(this.getAttribute('src'))this._loadSrc(this.getAttribute('src'));
+  if(this.getAttribute('src'))this._pendingSrc=this.getAttribute('src');
  }
  _startLoop(){
   if(this._looping||!this.renderer)return;
@@ -136,7 +148,8 @@ class NovaViewer extends HTMLElement{
  }
  attributeChangedCallback(n,o,v){
   if(o===v)return;
-  if(n==='src'&&this.renderer&&v)this._loadSrc(v);
+  // still waiting to come into view: swap the pending src, don't fetch yet
+  if(n==='src'&&this.renderer&&v){if(this._near)this._pendingSrc=v;else this._loadSrc(v);}
   if((n==='wireframe'||n==='normals')&&this.renderer)this._applyMats();
   if(n==='explode'&&this._root&&o!=null)this._manual=true;
  }
@@ -523,6 +536,11 @@ class NovaViewer extends HTMLElement{
  }
  // hover: raycast at most once per frame, only when the pointer moved
  _procHover(){
+  // A tap fires pointermove too, so on touch the dark cursor-tooltip would
+  // appear alongside the pinned pick label — two copies of the same name, the
+  // stray one left hanging where the finger lifted. Touch gets the pin only.
+  if(this._coarse===undefined)this._coarse=!!(window.matchMedia&&window.matchMedia('(hover:none),(pointer:coarse)').matches);
+  if(this._coarse){this._hovEvt=null;return;}
   const e=this._hovEvt;if(e==null)return;this._hovEvt=null;
   const hit=this._raycast(e);
   this._setHover(hit?hit.object:null);
@@ -628,7 +646,7 @@ class NovaViewer extends HTMLElement{
  }
  highlightGroup(name,on){this.highlightNode(name,on);}
  replay(){if(this._root){this._manual=false;this._root.rotation.y=this._baseRot||0;this._t0=performance.now();this._introDone=false;this._introSnapped=false;}}
- disconnectedCallback(){this._looping=false;cancelAnimationFrame(this._raf);if(this._ro)this._ro.disconnect();if(this._vis)this._vis.disconnect();}
+ disconnectedCallback(){this._looping=false;cancelAnimationFrame(this._raf);if(this._ro)this._ro.disconnect();if(this._vis)this._vis.disconnect();if(this._near){this._near.disconnect();this._near=null;}}
 }
 customElements.define('nova-viewer',NovaViewer);
 })();

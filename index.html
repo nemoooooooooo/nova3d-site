@@ -58,6 +58,14 @@ input[type=range]{accent-color:#ff9ec7}
 .tabs-touched .tabhint{animation:none}
 @keyframes pointbob{0%,100%{transform:translateX(0)}50%{transform:translateX(5px)}}
 .pointbob{animation:pointbob 1.1s ease-in-out infinite}
+/* mobile: the hint sits under the tab grid and points up at it */
+@keyframes pointbobv{0%,100%{transform:rotate(90deg) translateX(0)}50%{transform:rotate(90deg) translateX(5px)}}
+/* mobile tab pills: lift clear off the hard shadow so they read as pressable */
+@keyframes tabpop{
+  0%,70%,100%{transform:translateY(0);box-shadow:2.5px 2.5px 0 var(--edge)}
+  80%{transform:translateY(-4px);box-shadow:3.5px 6px 0 var(--edge)}
+  92%{transform:translateY(0);box-shadow:2.5px 2.5px 0 var(--edge)}
+}
 @media(prefers-reduced-motion:reduce){.tabhint,.pointbob{animation:none !important}}
 /* Below ~1100px a fixed 322px code column eats the stage: the viewer gets
    squeezed under 470px and the control row wraps raggedly. Stack instead —
@@ -74,40 +82,148 @@ input[type=range]{accent-color:#ff9ec7}
    crushes the titles and the map-swatch labels into each other */
 .card-grid{grid-template-columns:1fr 1fr !important}
 }
+/* ══ TOUCH COPY SWAP ═══════════════════════════════════════════════════
+   "hover" is a lie on a phone. Every hint ships both wordings; the pointer
+   type picks one. Coarse-pointer laptops with touchscreens get the touch
+   copy too, which is the safer default of the two. */
+.tp{display:none}
+@media(hover:none),(pointer:coarse){.hv{display:none}.tp{display:inline}}
+
 @media(max-width:768px){
-nav{flex-direction:column;gap:12px;padding:10px 16px}nav>div:first-child{width:100%}nav>div:last-child{flex-direction:row;flex-wrap:wrap;justify-content:center;gap:8px;width:100%}
-nav a,nav span{font-size:11px !important;padding:4px 10px !important}
-/* tracking must scale with the type — a fixed -1.8px at 36px eats the word space */
-h1{font-size:36px !important;line-height:1.1;letter-spacing:-.03em !important}
-header{padding:30px 16px 20px !important}
-section{padding:12px 16px 30px !important}
-.studio-grid{grid-template-columns:1fr !important;grid-template-rows:auto auto auto !important}
-.studio-viewer{height:400px !important}.studio-sidebar{border-left:none;border-top:1.5px solid var(--line);height:auto !important;padding:10px 8px !important}
-.studio-tools{display:none}
-/* how-it-works: 5-col (step,arrow,step,arrow,step) -> one column, arrows hidden */
-.hw-steps{grid-template-columns:1fr !important;gap:16px !important}
+/* ══ NAV — one row, not three ═══════════════════════════════════════════
+   The stacked nav ate ~150px above the fold. Discord/Showcase/GitHub move
+   to the footer; the bar keeps only identity + theme + the primary CTA. */
+nav{padding:11px 16px !important;gap:10px}
+nav>div:last-child{gap:9px !important;font-size:12px !important}
+nav>div:last-child>a:not(:last-child){display:none !important}
+nav>div:last-child>a:last-child{font-size:12.5px !important;padding:8px 15px !important}
+nav>div:last-child>span{width:34px !important;height:34px !important;flex:none}
+.foot-links{display:flex !important}
+
+/* ══ TYPE ═══════════════════════════════════════════════════════════════ */
+h1{font-size:clamp(25px,7.8vw,34px) !important;line-height:1.1;letter-spacing:-.03em !important}
+header{padding:24px 16px 16px !important}
+header>p:nth-of-type(1){font-size:14.5px !important;line-height:1.45 !important}
+header>p:nth-of-type(2){font-size:14.5px !important}
+header>div:first-child{font-size:12px !important;letter-spacing:1.4px !important}
+section{padding:10px 14px 26px !important}
+h2{font-size:26px !important;line-height:1.12;letter-spacing:-.02em}
+
+/* ══ STUDIO WINDOW ══════════════════════════════════════════════════════ */
+/* stage over scene graph, one column — the desktop track (46px rail / 1fr /
+   216px sidebar) leaves the viewer only ~128px at phone width */
+.studio-grid{grid-template-columns:1fr !important;grid-template-rows:auto auto !important}
+/* filename + asset chips collide at 390px — give the chips their own row */
+.studio-topbar{flex-wrap:wrap;padding:8px 11px !important;gap:7px !important}
+.studio-file{margin-left:4px !important;font-size:10.5px !important}
+.studio-chips{margin-left:0 !important;width:100%;justify-content:space-between;gap:6px !important}
+.studio-chips>span{flex:1;justify-content:center;text-align:center;padding:7px 4px !important;font-size:11.5px !important}
+/* controls: mode buttons on one line, explode + replay on the next, so
+   "replay" stops being pushed off the right edge (it was clipped at 435px) */
+.studio-ctrl{flex-wrap:wrap;gap:8px !important;padding:8px 11px !important}
+.studio-explode{margin-left:0 !important;width:100%;gap:7px !important}
+.studio-explode>input[type=range]{flex:1;width:auto !important;min-width:0;height:26px}
+.studio-modes>span{padding:5px 14px !important}
+/* the vertical tool rail has an inline display:flex — without !important the
+   old rule lost, and three orphan icons floated over the model */
+.studio-tools{display:none !important}
+.studio-viewer{height:min(56vh,400px) !important}
+.studio-sidebar{border-left:none !important;border-top:1.5px solid var(--line);height:auto !important;
+  max-height:214px;padding:11px 12px 12px !important;gap:1px !important;-webkit-overflow-scrolling:touch}
+.studio-sidebar>div:first-child{font-size:12px !important;margin-bottom:2px !important}
+.studio-graphhint{font-size:9px !important;padding-top:8px !important}
+/* four cramped columns -> two tidy rows */
+.studio-status{flex-wrap:wrap;gap:4px 14px !important;padding:8px 12px !important;font-size:9.5px !important;line-height:1.5}
+.studio-status>span:nth-child(3){margin-left:0 !important}
+/* (leader-line callouts are turned off for narrow screens in the state init —
+   they're drawn by the viewer with no classes to hook, so CSS can't reach them) */
+
+/* ══ TAB STRIP → 2×2 PILL GRID ══════════════════════════════════════════
+   A sideways scroller always showed two tabs sliced off at both edges, so it
+   read as broken rather than scrollable — and a half-visible tab is not an
+   obvious button. All four fit as full pills instead: nothing clipped,
+   nothing to discover, and each one is a 44px touch target. */
+.tabstrip{display:grid !important;grid-template-columns:1fr 1fr;gap:7px !important;
+  align-items:stretch !important;overflow:visible !important;
+  padding:11px 11px 12px !important;
+  -webkit-mask-image:none;mask-image:none}
+.tabstrip>span:not(.tabs-hint){
+  border:1.5px solid var(--edge) !important;border-radius:11px !important;
+  margin-bottom:0 !important;transform:none !important;
+  justify-content:center !important;text-align:center;line-height:1.15;
+  padding:11px 8px !important;font-size:12.5px !important;
+  white-space:normal !important;min-height:46px}
+/* the active tab is the one WITHOUT .tabhint — ring it so "you are here" is
+   unmistakable once the strip is a grid rather than a row of folder tabs.
+   The trailing hint is also a plain span, so it has to be excluded here or it
+   renders as a ringed fifth "tab". */
+.tabstrip>span:not(.tabhint):not(.tabs-hint){
+  box-shadow:inset 0 3px 0 var(--yellow),0 0 0 2.5px color-mix(in oklab,var(--yellow) 70%,transparent) !important}
+/* the desktop ripple is a 3px nudge — too subtle on a phone. This one lifts
+   the pill off its shadow, staggered so they ripple left-to-right. */
+.tabstrip .tabhint{animation:tabpop 2.3s ease-in-out infinite !important}
+.tabstrip .tabhint:nth-of-type(2){animation-delay:.13s !important}
+.tabstrip .tabhint:nth-of-type(3){animation-delay:.26s !important}
+.tabstrip .tabhint:nth-of-type(4){animation-delay:.39s !important}
+.tabs-touched .tabhint{animation:none !important}
+/* hint spans the full width under the grid and points UP at it — plain text,
+   no border/shadow, so it never reads as another tab */
+.tabs-hint{display:flex !important;grid-column:1/-1;margin-left:0 !important;
+  justify-content:center;padding:5px 0 0 !important;font-size:12px !important;
+  border:none !important;box-shadow:none !important;background:none !important;
+  min-height:0 !important}
+.tabs-hint .pointbob{animation:pointbobv 1.1s ease-in-out infinite !important}
+
+/* ══ EDIT-PER-PART WINDOW ═══════════════════════════════════════════════ */
+/* a 520px stage on a 390px screen made a tall empty column with a small
+   model adrift in it */
+.edit-viewer{height:330px !important}
+.edit-topbar{flex-wrap:wrap;gap:7px !important;padding:8px 11px !important}
+.edit-file{margin-left:4px !important;font-size:10.5px !important}
+.edit-chips{margin-left:0 !important;width:100%;justify-content:space-between;gap:6px !important}
+.edit-chips>span{flex:1;justify-content:center;text-align:center;padding:7px 3px !important;font-size:11px !important}
+/* the "you said" pill beside a 4-line quote squeezed the quote into a column */
+.edit-said{flex-direction:column;align-items:flex-start !important;gap:8px !important;padding:12px 14px !important}
+.edit-said>span:last-child{font-size:15px !important}
+
+/* ══ HOW IT WORKS / CARDS / USEFUL ══════════════════════════════════════ */
+.hw-steps{grid-template-columns:1fr !important;gap:13px !important}
 .hw-steps>div:nth-child(2),.hw-steps>div:nth-child(4){display:none !important}
-/* where-it's-useful: 4 across -> 1 across */
 .useful-grid{grid-template-columns:1fr !important}
-/* rig tab: viewer beside code -> stacked, shorter stage, tighter control row
-   (full-width sliders would orphan the auto button onto a third line) */
-.rig-grid{grid-template-columns:1fr !important}
-/* stay at/above the viewer's 420px internal threshold: below it the fit
-   switches to a much tighter box projection and the kart renders oversized */
-.rig-viewer{height:430px !important}
-.rig-grid input[type=range]{width:72px !important}
 .card-grid{grid-template-columns:1fr !important}
-/* both sliders on one row, both buttons on the next — margin-left:auto would
-   push "auto" onto a third, orphaned row */
+
+/* ══ RIG + EDIT TABS ════════════════════════════════════════════════════ */
+.rig-grid{grid-template-columns:1fr !important}
+/* below the viewer's internal 420px threshold the fit switches to a tighter
+   box projection, which is what we want here: the kart filled a third of an
+   830px stage before. Shorter box + tighter fit = same kart, less dead space. */
+.rig-viewer{height:340px !important}
+.rig-side{flex-direction:column !important}
+.rig-grid input[type=range]{width:78px !important;height:26px}
 .rig-bar{gap:10px !important;padding:10px !important}
 .rig-bar>span:last-child{margin-left:0 !important}
-/* ship-it: copy beside terminal -> stacked, and the terminal wraps not widens */
+/* the compare caption ran off the right edge and got clipped mid-word */
+.edit-bar{flex-wrap:wrap;gap:5px !important;padding:9px 12px !important}
+.edit-note{margin-left:0 !important;text-align:left !important;width:100%;font-size:9.5px !important}
+
+/* ══ SHIP IT ════════════════════════════════════════════════════════════ */
 .ship-grid{grid-template-columns:1fr !important;gap:20px !important}
 .ship-grid pre{font-size:10.5px !important;white-space:pre-wrap !important;word-break:break-word}
+
+/* ══ FOOTER — was overlapping itself ════════════════════════════════════ */
+.site-footer{flex-direction:column;text-align:center;gap:9px !important;padding:20px 16px 26px !important;line-height:1.6}
+
+/* ══ TOUCH ERGONOMICS ═══════════════════════════════════════════════════ */
+input[type=range]{height:26px}
+a,span[onclick],.tabstrip>span{-webkit-tap-highlight-color:transparent}
 }
-@media(max-width:480px){
-h1{font-size:28px !important}nav a{padding:3px 8px !important;font-size:10px !important}
-.studio-viewer{height:320px !important}
+
+@media(max-width:420px){
+h1{letter-spacing:-.025em !important}
+.studio-viewer{height:min(52vh,340px) !important}
+.studio-chips>span{font-size:11px !important;padding:7px 2px !important}
+.studio-status{font-size:9px !important}
+.rig-viewer{height:310px !important}
 }
 </style>
 </helmet>
@@ -139,23 +255,24 @@ h1{font-size:28px !important}nav a{padding:3px 8px !important;font-size:10px !im
 
 <section data-screen-label="Studio window" style="max-width:1240px;margin:0 auto;padding:18px 32px 46px">
   <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:14px;box-shadow:6px 6px 0 rgba(34,29,24,.14);overflow:hidden">
-    <div style="display:flex;align-items:center;gap:8px;padding:9px 14px;border-bottom:1.5px solid var(--edge);background:color-mix(in oklab, var(--pink) 16%, var(--paper))">
+    <div class="studio-topbar" style="display:flex;align-items:center;gap:8px;padding:9px 14px;border-bottom:1.5px solid var(--edge);background:color-mix(in oklab, var(--pink) 16%, var(--paper))">
       <span style="width:11px;height:11px;border-radius:50%;background:var(--pink);border:1.5px solid var(--edge)"></span>
       <span style="width:11px;height:11px;border-radius:50%;background:var(--yellow);border:1.5px solid var(--edge)"></span>
       <span style="width:11px;height:11px;border-radius:50%;background:var(--mint);border:1.5px solid var(--edge)"></span>
-      <span style="font-family:'Space Mono',monospace;font-size:11.5px;margin-left:6px">{{ fileLabel }}</span>
-      <div style="margin-left:auto;display:flex;gap:5px;font-size:11.5px;font-weight:600">
+      <span class="studio-file" style="font-family:'Space Mono',monospace;font-size:11.5px;margin-left:6px">{{ fileLabel }}</span>
+      <div class="studio-chips" style="margin-left:auto;display:flex;gap:5px;font-size:11.5px;font-weight:600">
         <span onClick="{{ pickKart }}" style="cursor:pointer;border:1.5px solid var(--line);border-radius:8px;padding:3px 10px;background:var(--paper)">{{ kartMark }} 🍌 kart</span>
+        <span onClick="{{ pickGun }}" style="cursor:pointer;border:1.5px solid var(--line);border-radius:8px;padding:3px 10px;background:var(--paper)">{{ gunMark }} 📷 gun</span>
         <span onClick="{{ pickRabbit }}" style="cursor:pointer;border:1.5px solid var(--line);border-radius:8px;padding:3px 10px;background:var(--paper)">{{ rabbitMark }} 🐰 rabbit</span>
         <span onClick="{{ pickCake }}" style="cursor:pointer;border:1.5px solid var(--line);border-radius:8px;padding:3px 10px;background:var(--paper)">{{ cakeMark }} 🍰 cake</span>
       </div>
     </div>
-    <div style="display:flex;align-items:center;gap:14px;padding:6px 14px;border-bottom:1.5px solid var(--line);background:var(--bg)">
-      <div style="display:flex;gap:4px;font-family:'Pixelify Sans',monospace;font-size:13.5px">
+    <div class="studio-ctrl" style="display:flex;align-items:center;gap:14px;padding:6px 14px;border-bottom:1.5px solid var(--line);background:var(--bg)">
+      <div class="studio-modes" style="display:flex;gap:4px;font-family:'Pixelify Sans',monospace;font-size:13.5px">
         <span onClick="{{ showViewer }}" style="cursor:pointer;padding:3px 12px;border:1.5px solid var(--edge);border-radius:8px;background:var(--paper)">{{ viewerMark }} viewer</span>
         <span onClick="{{ showCode }}" style="cursor:pointer;padding:3px 12px;border:1.5px solid var(--edge);border-radius:8px;background:var(--paper)">{{ codeMark }} code</span>
       </div>
-      <div style="margin-left:auto;display:flex;align-items:center;gap:8px;font-family:'Space Mono',monospace;font-size:10.5px;color:var(--muted)">
+      <div class="studio-explode" style="margin-left:auto;display:flex;align-items:center;gap:8px;font-family:'Space Mono',monospace;font-size:10.5px;color:var(--muted)">
         <span>explode</span>
         <input type="range" min="0" max="100" value="{{ explodeVal }}" onChange="{{ onExplode }}" style="width:130px">
         <span onClick="{{ onReplay }}" style="cursor:pointer;border:1.5px solid var(--line);border-radius:8px;padding:2px 10px;background:var(--paper);font-family:'Pixelify Sans',monospace;font-size:12.5px;color:var(--ink)">↻ replay</span>
@@ -169,7 +286,7 @@ h1{font-size:28px !important}nav a{padding:3px 8px !important;font-size:10px !im
       </div>
       <div class="studio-viewer" style="position:relative;height:600px;background:conic-gradient(var(--paper) 90deg,var(--bg) 90deg 180deg,var(--paper) 180deg 270deg,var(--bg) 270deg) 0 0/26px 26px">
         <x-import component-from-global-scope="nova-viewer" from="./nova-viewer.js" src="{{ glbSrc }}" wireframe="{{ wf }}" normals="{{ normalsOn }}" labels="{{ labelsOn }}" explode="{{ explodeVal }}" spin="{{ spinSecs }}" hint-size="100%,600px" style="position:absolute;inset:0"></x-import>
-        <div style="position:absolute;left:12px;bottom:10px;z-index:3;font-family:'Space Mono',monospace;font-size:10px;color:var(--soft);background:color-mix(in oklab, var(--paper) 78%, transparent);border:1.5px solid var(--line);border-radius:8px;padding:3px 10px;pointer-events:none">hover a part for its name · click to pin it</div>
+        <div class="studio-hint" style="position:absolute;left:12px;bottom:10px;z-index:3;font-family:'Space Mono',monospace;font-size:10px;color:var(--soft);background:color-mix(in oklab, var(--paper) 78%, transparent);border:1.5px solid var(--line);border-radius:8px;padding:3px 10px;pointer-events:none"><span class="hv">hover a part for its name · click to pin it</span><span class="tp">tap a part to name it · drag to orbit</span></div>
         <sc-if value="{{ isCode }}" hint-placeholder-val="{{ false }}">
           <div style="position:absolute;inset:0;z-index:4;background:var(--codebg);padding:18px 26px 22px;overflow:auto;box-sizing:border-box">
             <div style="display:flex;gap:10px;align-items:baseline;margin-bottom:12px;font-family:'Space Mono',monospace;font-size:11px;color:#a09685;position:sticky;top:0">
@@ -190,10 +307,10 @@ h1{font-size:28px !important}nav a{padding:3px 8px !important;font-size:10px !im
             <span style="display:flex;gap:7px;align-items:center;flex:none"><span onClick="{{ g.toggle }}" title="show / hide">{{ g.mark }}</span><span style="color:var(--soft)">{{ g.count }}</span></span>
           </div>
         </sc-for>
-        <div style="margin-top:auto;padding-top:10px;font-family:'Space Mono',monospace;font-size:9.5px;color:var(--soft);line-height:1.6">hover a row to light it up in 3D · ▣ hides · click a part in 3D and its group flashes here</div>
+        <div class="studio-graphhint" style="margin-top:auto;padding-top:10px;font-family:'Space Mono',monospace;font-size:9.5px;color:var(--soft);line-height:1.6"><span class="hv">hover a row to light it up in 3D · ▣ hides · click a part in 3D and its group flashes here</span><span class="tp">tap a row to light it up in 3D · ▣ hides · tap a part in 3D and its group flashes here</span></div>
       </div>
     </div>
-    <div style="display:flex;align-items:center;gap:18px;padding:7px 16px;border-top:1.5px solid var(--edge);background:var(--bg);font-family:'Space Mono',monospace;font-size:10.5px;color:var(--muted)">
+    <div class="studio-status" style="display:flex;align-items:center;gap:18px;padding:7px 16px;border-top:1.5px solid var(--edge);background:var(--bg);font-family:'Space Mono',monospace;font-size:10.5px;color:var(--muted)">
       <span>{{ parts }} parts · {{ groupCount }} groups{{ pickedInfo }}</span>
       <span>pivots placed · UVs unwrapped</span>
       <span style="margin-left:auto;color:var(--pinkdeep)"><span style="font-family:'Pixelify Sans',monospace;font-size:12px">hierarchy: real ✓</span></span>
@@ -231,15 +348,15 @@ h1{font-size:28px !important}nav a{padding:3px 8px !important;font-size:10px !im
       <span style="font-family:'Space Mono',monospace;font-size:11.5px;margin-left:6px">🗂 asset_tools</span>
       <span style="margin-left:auto;font-family:'Space Mono',monospace;font-size:11px;color:var(--soft);letter-spacing:3px">▁ ▢ ✕</span>
     </div>
-    <div class="{{ tabsCls }}" style="display:flex;align-items:flex-end;gap:4px;padding:9px 10px 0;background:var(--bg);border-bottom:1.5px solid var(--edge);overflow-x:auto">
+    <div class="tabstrip {{ tabsCls }}" style="display:flex;align-items:flex-end;gap:4px;padding:9px 10px 0;background:var(--bg);border-bottom:1.5px solid var(--edge);overflow-x:auto">
       <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="7">
         <span class="{{ t.cls }}" onClick="{{ t.go }}" style="cursor:pointer;display:flex;align-items:center;gap:6px;font-family:'Pixelify Sans',monospace;font-size:12.5px;border:1.5px solid var(--edge);border-bottom:none;border-radius:8px 8px 0 0;padding:7px 13px 9px;margin-bottom:-1.5px;background:{{ t.bg }};color:{{ t.col }};box-shadow:{{ t.sh }};transform:translateY({{ t.ty }});white-space:nowrap;flex:none">
           <span style="font-size:13px">{{ t.icon }}</span>{{ t.label }}<span style="color:var(--soft);font-size:10.5px">{{ t.soon }}</span>
         </span>
       </sc-for>
       <sc-if value="{{ showTabHint }}" hint-placeholder-val="{{ true }}">
-        <span style="margin-left:auto;flex:none;display:flex;align-items:center;gap:5px;font-family:'Pixelify Sans',monospace;font-size:11.5px;color:var(--pinkdeep);padding-bottom:8px;white-space:nowrap;pointer-events:none">
-          <span class="pointbob" style="display:inline-block">👈</span>click a tab to try it
+        <span class="tabs-hint" style="margin-left:auto;flex:none;display:flex;align-items:center;gap:5px;font-family:'Pixelify Sans',monospace;font-size:11.5px;color:var(--pinkdeep);padding-bottom:8px;white-space:nowrap;pointer-events:none">
+          <span class="pointbob" style="display:inline-block">👈</span><span class="hv">click a tab to try it</span><span class="tp">tap a tab to try it</span>
         </span>
       </sc-if>
     </div>
@@ -361,18 +478,18 @@ h1{font-size:28px !important}nav a{padding:3px 8px !important;font-size:10px !im
     <sc-if value="{{ isFeatEdit }}" hint-placeholder-val="{{ false }}">
       <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);margin:0 0 14px;text-align:center">Every part is editable by name. Say what you want in plain words — only that part changes, nothing else moves.</div>
       <div style="max-width:860px;margin:0 auto;border:1.5px solid var(--edge);border-radius:16px;overflow:hidden;box-shadow:5px 5px 0 rgba(34,29,24,.14)">
-        <div style="display:flex;align-items:center;gap:8px;padding:8px 14px;border-bottom:1.5px solid var(--edge);background:color-mix(in oklab, var(--lav) 16%, var(--paper))">
+        <div class="edit-topbar" style="display:flex;align-items:center;gap:8px;padding:8px 14px;border-bottom:1.5px solid var(--edge);background:color-mix(in oklab, var(--lav) 16%, var(--paper))">
           <span style="width:11px;height:11px;border-radius:50%;background:var(--pink);border:1.5px solid var(--edge)"></span>
           <span style="width:11px;height:11px;border-radius:50%;background:var(--yellow);border:1.5px solid var(--edge)"></span>
           <span style="width:11px;height:11px;border-radius:50%;background:var(--mint);border:1.5px solid var(--edge)"></span>
-          <span style="font-family:'Space Mono',monospace;font-size:11.5px;margin-left:5px;color:var(--muted)">{{ editFile }}</span>
-          <span style="margin-left:auto;display:flex;gap:5px;font-size:11.5px;font-weight:600">
+          <span class="edit-file" style="font-family:'Space Mono',monospace;font-size:11.5px;margin-left:5px;color:var(--muted)">{{ editFile }}</span>
+          <span class="edit-chips" style="margin-left:auto;display:flex;gap:5px;font-size:11.5px;font-weight:600">
             <span onClick="{{ pickEditRabbit }}" style="cursor:pointer;border:1.5px solid var(--line);border-radius:8px;padding:3px 10px;background:var(--paper)">{{ rabbitEditMark }} 🐰 rabbit</span>
             <span onClick="{{ pickEditPig }}" style="cursor:pointer;border:1.5px solid var(--line);border-radius:8px;padding:3px 10px;background:var(--paper)">{{ pigMark }} 🐷 pig car</span>
             <span onClick="{{ pickEditCake }}" style="cursor:pointer;border:1.5px solid var(--line);border-radius:8px;padding:3px 10px;background:var(--paper)">{{ cakeEditMark }} 🍰 cheesecake</span>
           </span>
         </div>
-        <div style="display:flex;align-items:center;gap:11px;padding:14px 18px;border-bottom:1.5px solid var(--edge);background:color-mix(in oklab, var(--mint) 30%, var(--paper))">
+        <div class="edit-said" style="display:flex;align-items:center;gap:11px;padding:14px 18px;border-bottom:1.5px solid var(--edge);background:color-mix(in oklab, var(--mint) 30%, var(--paper))">
           <span style="flex:none;font-family:'Pixelify Sans',monospace;font-size:12px;color:var(--pinkdeep);border:1.5px solid var(--edge);border-radius:999px;padding:3px 11px;background:var(--paper);box-shadow:2px 2px 0 var(--edge)">✏️ you said</span>
           <sc-if value="{{ isEditRabbit }}" hint-placeholder-val="{{ true }}">
             <span style="font-family:'Outfit',sans-serif;font-size:17px;font-weight:600;color:var(--ink);line-height:1.3">“make her a blossom variant — <span style="color:var(--pinkdeep)">heart eyes</span>, <span style="color:var(--pinkdeep)">plush ears with a mint bow</span>, and a <span style="color:var(--pinkdeep)">rose-gold collar</span>”</span>
@@ -384,7 +501,7 @@ h1{font-size:28px !important}nav a{padding:3px 8px !important;font-size:10px !im
             <span style="font-family:'Outfit',sans-serif;font-size:17px;font-weight:600;color:var(--ink);line-height:1.3">“swap the blueberries for <span style="color:var(--pinkdeep)">raspberries and a strawberry</span>, and make the glaze <span style="color:var(--pinkdeep)">berry pink</span>”</span>
           </sc-if>
         </div>
-        <div style="position:relative;height:520px;background:conic-gradient(var(--paper) 90deg,var(--bg) 90deg 180deg,var(--paper) 180deg 270deg,var(--bg) 270deg) 0 0/24px 24px">
+        <div class="edit-viewer" style="position:relative;height:520px;background:conic-gradient(var(--paper) 90deg,var(--bg) 90deg 180deg,var(--paper) 180deg 270deg,var(--bg) 270deg) 0 0/24px 24px">
           <sc-if value="{{ isEditRabbit }}" hint-placeholder-val="{{ true }}">
             <x-import component-from-global-scope="nova-viewer" from="./nova-viewer.js" src="assets/live/edit_rabbit_orig.glb" compare-src="assets/live/edit_rabbit.glb" cam-yaw="2.63" cam-pitch="0.05" fit="0.8" compare-label-a="original" compare-label-b="edited" spin="0.01" rot="0" explode="0" min-h="0" hint-size="100%,520px" style="position:absolute;inset:0"></x-import>
           </sc-if>
@@ -395,9 +512,9 @@ h1{font-size:28px !important}nav a{padding:3px 8px !important;font-size:10px !im
             <x-import component-from-global-scope="nova-viewer" from="./nova-viewer.js" src="assets/live/edit_cake_orig.glb" compare-src="assets/live/edit_cake_berry.glb" compare-offset="0.008,-0.514,1.004" cam-yaw="0.5" cam-pitch="0.33" fit="0.78" compare-label-a="original" compare-label-b="edited" spin="0.01" rot="0" explode="0" min-h="0" hint-size="100%,520px" style="position:absolute;inset:0"></x-import>
           </sc-if>
         </div>
-        <div style="display:flex;align-items:center;gap:8px;padding:9px 15px;border-top:1.5px solid var(--edge);background:var(--bg);font-family:'Space Mono',monospace;font-size:10.5px;color:var(--muted)">
+        <div class="edit-bar" style="display:flex;align-items:center;gap:8px;padding:9px 15px;border-top:1.5px solid var(--edge);background:var(--bg);font-family:'Space Mono',monospace;font-size:10.5px;color:var(--muted)">
           <span style="font-family:'Pixelify Sans',monospace;font-size:12px;color:var(--pinkdeep);flex:none">⇆ drag the divider · drag the model to orbit</span>
-          <span style="margin-left:auto;text-align:right">only <span style="color:var(--pinkdeep);font-weight:700">{{ editChanged }}</span> changed across the split — everything else lines up</span>
+          <span class="edit-note" style="margin-left:auto;text-align:right">only <span style="color:var(--pinkdeep);font-weight:700">{{ editChanged }}</span> changed across the split — everything else lines up</span>
         </div>
       </div>
     </sc-if>
@@ -414,7 +531,7 @@ h1{font-size:28px !important}nav a{padding:3px 8px !important;font-size:10px !im
           </div>
           <div class="rig-viewer" style="position:relative;height:430px;background:conic-gradient(var(--paper) 90deg,var(--bg) 90deg 180deg,var(--paper) 180deg 270deg,var(--bg) 270deg) 0 0/24px 24px">
             <x-import component-from-global-scope="nova-viewer" from="./nova-viewer.js" src="{{ rigSrc }}" rig="kart" labels="false" explode="0" spin="0.01" rot="0.2" cam-yaw="0.72" cam-pitch="0.2" fit="{{ rigFit }}" min-h="0" hint-size="100%,430px" style="position:absolute;inset:0"></x-import>
-            <div style="position:absolute;left:12px;bottom:10px;z-index:3;font-family:'Space Mono',monospace;font-size:10px;color:var(--soft);background:color-mix(in oklab, var(--paper) 78%, transparent);border:1.5px solid var(--line);border-radius:8px;padding:3px 10px;pointer-events:none">hover a part for its name · drag to orbit</div>
+            <div style="position:absolute;left:12px;bottom:10px;z-index:3;font-family:'Space Mono',monospace;font-size:10px;color:var(--soft);background:color-mix(in oklab, var(--paper) 78%, transparent);border:1.5px solid var(--line);border-radius:8px;padding:3px 10px;pointer-events:none"><span class="hv">hover a part for its name · drag to orbit</span><span class="tp">tap a part to name it · drag to orbit</span></div>
           </div>
           <div class="rig-bar" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:10px 14px;border-top:1.5px solid var(--edge);background:var(--bg)">
             <span style="display:flex;align-items:center;gap:7px;font-family:'Space Mono',monospace;font-size:10.5px;color:var(--muted)">throttle
@@ -527,10 +644,15 @@ body.scale.set(1-k*.6, 1+k, 1-k*.6)
   </div>
 </section>
 
-<footer data-screen-label="Footer" style="border-top:1.5px solid var(--edge);padding:18px 32px;display:flex;align-items:center;justify-content:space-between;font-family:'Space Mono',monospace;font-size:10.5px;color:var(--soft)">
+<footer data-screen-label="Footer" class="site-footer" style="border-top:1.5px solid var(--edge);padding:18px 32px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;font-family:'Space Mono',monospace;font-size:10.5px;color:var(--soft)">
   <div style="display:flex;align-items:center;gap:8px">
     <div style="width:14px;height:14px;background:var(--yellow);border:1.5px solid var(--edge);border-radius:4px 4px 8px 4px"></div>
     <span>nova3d</span>
+  </div>
+  <div class="foot-links" style="display:none;gap:10px;flex-wrap:wrap;justify-content:center">
+    <a href="https://app.nova3d.xyz/showcase" style="color:var(--pinkdeep)">Showcase</a>
+    <a href="https://discord.gg/QEH8mzcwdR" style="color:var(--pinkdeep)">Discord</a>
+    <a href="https://github.com/RareSense/Nova3D" style="color:var(--pinkdeep)">GitHub</a>
   </div>
   <span>no waitlist · no key request</span>
   <span>© 2026 Nova3D · Rare Sense Inc.</span>
@@ -540,11 +662,16 @@ body.scale.set(1-k*.6, 1+k, 1-k*.6)
 
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;defaultAsset&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;kart&quot;,&quot;rabbit&quot;,&quot;cake&quot;],&quot;default&quot;:&quot;kart&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Viewer&quot;},&quot;spinSeconds&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:2.8,&quot;min&quot;:1,&quot;max&quot;:6,&quot;step&quot;:0.5,&quot;unit&quot;:&quot;s&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Viewer&quot;},&quot;explodeAmount&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:42,&quot;min&quot;:0,&quot;max&quot;:100,&quot;step&quot;:1,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Viewer&quot;}}">
-const CODE = {"kart": {"file": "code.py", "lines": 822, "url": "https://nova3dshowcase.blob.core.windows.net/showcase/banana-kart-1784198724/code.py", "text": "# Banana kart: cartoon off-road go-kart whose body is a giant ripe banana\n# (brown speckles, dark stem rising at the rear, dark nose tip at the front),\n# open cockpit recess with padded seat + headrest + steering wheel, four chunky\n# blue-grey off-road tires with tread blocks and wire-laced spokes, orange\n# coil-over shock absorbers at each corner, a side-mounted cylindrical muffler\n# fed by curved exhaust headers, and workshop props on the ground (open blue\n# toolbox, wrenches, screwdriver, washers, spray can, melted banana puddle).\n# Scale: real-world metres. Kart ~2.0m long, ~1.2m tall at the stem.\n# ⋯\n# hierarchy machinery — parenting keeps world pos; pivots become origins\ndef parent_to(child, parent):\n    bpy.context.view_layer.update()\n    m = child.matrix_world.copy()\n    child.parent = parent\n    child.matrix_world = m\n\ndef set_pivot(obj, pivot_world):\n    obj.data.transform(Matrix.Translation(-Vector(pivot_world)))\n    obj.location = Vector(pivot_world)\n\n# ⋯\n# ═══ DIMENSION CONSTANTS (metres) ═════════════════════════════════════\nGROUND_Z = 0.0\n\n# Wheels — chunky off-road, rears slightly larger than fronts\nWHEEL_R_REAR  = 0.30\nWHEEL_R_FRONT = 0.26\nWHEEL_W_REAR  = 0.22\nWHEEL_W_FRONT = 0.19\nTRACK_REAR    = 0.60          # |x| of rear wheel centres\n# ⋯\ndef build_wheel(col, MAT, parent, center, R, W, side, rear):\n    # ⋯ tire, tread blocks, rim, laced spokes — origin ON the axle\n# ⋯\ndef build():\n    col = bpy.data.collections.new(\"Model\")\n    bpy.context.scene.collection.children.link(col)\n    MAT = setup_materials()\n\n    root = make_empty(col, \"BananaKart_Root\")\n    g_body = make_empty(col, \"Body_Group\", parent=root)\n    g_cockpit = make_empty(col, \"Cockpit_Group\", parent=root)\n    g_chassis = make_empty(col, \"Chassis_Group\", parent=root)\n    g_wheels = make_empty(col, \"Wheels_Group\", parent=root)\n    g_susp = make_empty(col, \"Suspension_Group\", parent=root)\n    g_engine = make_empty(col, \"Engine_Group\", parent=root)\n    g_props = make_empty(col, \"Accessories_Group\", parent=root)\n\n    build_banana_shell(col, MAT, g_body)\n    build_stem(col, MAT, g_body)\n    build_nose_tip(col, MAT, g_body)\n    build_cockpit(col, MAT, g_cockpit)\n    build_chassis(col, MAT, g_chassis)\n\n    # ⋯ + suspension, engine, wheels ×4, workshop props …"}, "rabbit": {"file": "code.py", "lines": 622, "url": "https://nova3dshowcase.blob.core.windows.net/showcase/robot-rabbit-companion-bot-1784260572/code.py", "text": "# Robot rabbit companion bot: floating spherical body/head with riveted\n# yellow + pale-blue armor panels, a bolted porthole face with glowing cyan\n# pixel eyes behind dark glass, a rust-red gasket ring sealing the face dome,\n# two big paddle rabbit ears (yellow, dark tips) on ringed pipe mounts, dark\n# flexible tube arms from stacked-gasket shoulder cuffs ending in capsule\n# forearms (blue wrist caps) with spread claw fingers, and a teal bow tie.\n# ⋯\ndef build():\n    col = bpy.data.collections.new(\"Model\")\n    bpy.context.scene.collection.children.link(col)\n    MAT = setup_materials()\n\n    root = make_empty(col, \"RobotRabbit_Root\")\n    g_body = make_empty(col, \"Body_Group\", parent=root)\n    g_face = make_empty(col, \"Face_Group\", parent=root)\n    g_ears = make_empty(col, \"Ears_Group\", parent=root)\n    g_arms = make_empty(col, \"Arms_Group\", parent=root)\n\n    build_body(col, MAT, g_body)\n    build_bow_tie(col, MAT, g_body)\n    build_face(col, MAT, g_face)\n\n    # Viewer-left (+X) ear more upright; viewer-right (-X) ear tilted wide.\n    # Mounts sit near the crown; the lean axis splays further outward.\n    build_ear(col, MAT, g_ears, (0.18, -0.04, 0.98), (0.30, -0.08, 0.95), \"L\")\n    build_ear(col, MAT, g_ears, (-0.36, 0.06, 0.93), (-0.70, 0.16, 0.68), \"R\")\n\n    build_arm(col, MAT, g_arms, SIDE_HANG, raised=False)\n    build_arm(col, MAT, g_arms, SIDE_RAISED, raised=True)\n    # ⋯"}, "cake": {"file": "code.py", "lines": 446, "url": "https://nova3dshowcase.blob.core.windows.net/showcase/blueberry-cheesecake-1783746042/code.py", "text": "# Stylized blueberry cheesecake slice, standard prop scale, volumetric icing and garnishes.\n# ⋯\ndef build():\n    col = bpy.data.collections.new(\"Model\")\n    bpy.context.scene.collection.children.link(col)\n    MAT = setup_materials()\n\n    # 1. Hierarchy Empties\n    root = make_empty(col, \"Cheesecake_Root\")\n    g_body = make_empty(col, \"Cake_Body\", parent=root)\n    g_garnish = make_empty(col, \"Garnish\", parent=root)\n    \n    # 2. Build Wedge\n    crust = build_crust(col, MAT)\n    parent_to(crust, g_body)\n    \n    cheese = build_cheese(col, MAT)\n    parent_to(cheese, g_body)\n    \n    icing = build_icing(col, MAT)\n    parent_to(icing, g_body)\n    \n    # 3. Build Garnishes (placed embedded slightly into the soft icing)\n    # Z coordinate is TOTAL_H + ~icing_thickness - small_sink_amount\n    # ⋯ blueberries placed by golden-angle ring, each its own mesh"}};
+const CODE = {"gun": {"file": "code.py", "lines": 1810, "url": "https://nova3dshowcase.blob.core.windows.net/showcase/dslr-gun-1785006423/code.py", "text": "# DSLR Gun: a camera body fused to a pistol frame — lens barrel with zoom and\n# focus rings, integrated grip and trigger, mode dial and rear controls. Every\n# moving control is its own object with its origin ON its axis of motion.\n# ⋯\ndef build():\n    clear_scene()\n    asset_collection = make_collection(\"DSLR_GUN\")\n    collections = {\n        \"body\":     make_collection(\"01_CAMERA_BODY_AND_MOUNT\", asset_collection),\n        \"lens\":     make_collection(\"02_OPTICAL_LENS_ASSEMBLY\", asset_collection),\n        \"weapon\":   make_collection(\"03_INTEGRATED_PISTOL_FRAME\", asset_collection),\n        \"controls\": make_collection(\"04_CAMERA_CONTROLS_AND_REAR\", asset_collection),\n    }\n    mats = make_materials()\n    root = make_empty(\"DSLR_Gun_Root\", asset_collection)\n\n    body_root, mount_root              = build_camera_body(collections, root, mats)\n    lens_root, zoom_pivot, focus_pivot = build_lens(collections, root, mount_root, mats)\n    frame_root, trigger_pivot          = build_weapon_frame(collections, root, body_root, mats)\n    controls_root, mode_pivot          = build_controls(collections, root, body_root, mats)\n\n    # every *_pivot below is a real origin, not a label: the zoom and focus\n    # rings turn about the lens axis, the trigger pulls, the dial clicks round\n    return {\n        \"root\": root,\n        \"lens_root\": lens_root, \"zoom_pivot\": zoom_pivot, \"focus_pivot\": focus_pivot,\n        \"frame_root\": frame_root, \"trigger_pivot\": trigger_pivot,\n        \"controls_root\": controls_root, \"mode_pivot\": mode_pivot,\n    }"}, "kart": {"file": "code.py", "lines": 822, "url": "https://nova3dshowcase.blob.core.windows.net/showcase/banana-kart-1784198724/code.py", "text": "# Banana kart: cartoon off-road go-kart whose body is a giant ripe banana\n# (brown speckles, dark stem rising at the rear, dark nose tip at the front),\n# open cockpit recess with padded seat + headrest + steering wheel, four chunky\n# blue-grey off-road tires with tread blocks and wire-laced spokes, orange\n# coil-over shock absorbers at each corner, a side-mounted cylindrical muffler\n# fed by curved exhaust headers, and workshop props on the ground (open blue\n# toolbox, wrenches, screwdriver, washers, spray can, melted banana puddle).\n# Scale: real-world metres. Kart ~2.0m long, ~1.2m tall at the stem.\n# ⋯\n# hierarchy machinery — parenting keeps world pos; pivots become origins\ndef parent_to(child, parent):\n    bpy.context.view_layer.update()\n    m = child.matrix_world.copy()\n    child.parent = parent\n    child.matrix_world = m\n\ndef set_pivot(obj, pivot_world):\n    obj.data.transform(Matrix.Translation(-Vector(pivot_world)))\n    obj.location = Vector(pivot_world)\n\n# ⋯\n# ═══ DIMENSION CONSTANTS (metres) ═════════════════════════════════════\nGROUND_Z = 0.0\n\n# Wheels — chunky off-road, rears slightly larger than fronts\nWHEEL_R_REAR  = 0.30\nWHEEL_R_FRONT = 0.26\nWHEEL_W_REAR  = 0.22\nWHEEL_W_FRONT = 0.19\nTRACK_REAR    = 0.60          # |x| of rear wheel centres\n# ⋯\ndef build_wheel(col, MAT, parent, center, R, W, side, rear):\n    # ⋯ tire, tread blocks, rim, laced spokes — origin ON the axle\n# ⋯\ndef build():\n    col = bpy.data.collections.new(\"Model\")\n    bpy.context.scene.collection.children.link(col)\n    MAT = setup_materials()\n\n    root = make_empty(col, \"BananaKart_Root\")\n    g_body = make_empty(col, \"Body_Group\", parent=root)\n    g_cockpit = make_empty(col, \"Cockpit_Group\", parent=root)\n    g_chassis = make_empty(col, \"Chassis_Group\", parent=root)\n    g_wheels = make_empty(col, \"Wheels_Group\", parent=root)\n    g_susp = make_empty(col, \"Suspension_Group\", parent=root)\n    g_engine = make_empty(col, \"Engine_Group\", parent=root)\n    g_props = make_empty(col, \"Accessories_Group\", parent=root)\n\n    build_banana_shell(col, MAT, g_body)\n    build_stem(col, MAT, g_body)\n    build_nose_tip(col, MAT, g_body)\n    build_cockpit(col, MAT, g_cockpit)\n    build_chassis(col, MAT, g_chassis)\n\n    # ⋯ + suspension, engine, wheels ×4, workshop props …"}, "rabbit": {"file": "code.py", "lines": 622, "url": "https://nova3dshowcase.blob.core.windows.net/showcase/robot-rabbit-companion-bot-1784260572/code.py", "text": "# Robot rabbit companion bot: floating spherical body/head with riveted\n# yellow + pale-blue armor panels, a bolted porthole face with glowing cyan\n# pixel eyes behind dark glass, a rust-red gasket ring sealing the face dome,\n# two big paddle rabbit ears (yellow, dark tips) on ringed pipe mounts, dark\n# flexible tube arms from stacked-gasket shoulder cuffs ending in capsule\n# forearms (blue wrist caps) with spread claw fingers, and a teal bow tie.\n# ⋯\ndef build():\n    col = bpy.data.collections.new(\"Model\")\n    bpy.context.scene.collection.children.link(col)\n    MAT = setup_materials()\n\n    root = make_empty(col, \"RobotRabbit_Root\")\n    g_body = make_empty(col, \"Body_Group\", parent=root)\n    g_face = make_empty(col, \"Face_Group\", parent=root)\n    g_ears = make_empty(col, \"Ears_Group\", parent=root)\n    g_arms = make_empty(col, \"Arms_Group\", parent=root)\n\n    build_body(col, MAT, g_body)\n    build_bow_tie(col, MAT, g_body)\n    build_face(col, MAT, g_face)\n\n    # Viewer-left (+X) ear more upright; viewer-right (-X) ear tilted wide.\n    # Mounts sit near the crown; the lean axis splays further outward.\n    build_ear(col, MAT, g_ears, (0.18, -0.04, 0.98), (0.30, -0.08, 0.95), \"L\")\n    build_ear(col, MAT, g_ears, (-0.36, 0.06, 0.93), (-0.70, 0.16, 0.68), \"R\")\n\n    build_arm(col, MAT, g_arms, SIDE_HANG, raised=False)\n    build_arm(col, MAT, g_arms, SIDE_RAISED, raised=True)\n    # ⋯"}, "cake": {"file": "code.py", "lines": 446, "url": "https://nova3dshowcase.blob.core.windows.net/showcase/blueberry-cheesecake-1783746042/code.py", "text": "# Stylized blueberry cheesecake slice, standard prop scale, volumetric icing and garnishes.\n# ⋯\ndef build():\n    col = bpy.data.collections.new(\"Model\")\n    bpy.context.scene.collection.children.link(col)\n    MAT = setup_materials()\n\n    # 1. Hierarchy Empties\n    root = make_empty(col, \"Cheesecake_Root\")\n    g_body = make_empty(col, \"Cake_Body\", parent=root)\n    g_garnish = make_empty(col, \"Garnish\", parent=root)\n    \n    # 2. Build Wedge\n    crust = build_crust(col, MAT)\n    parent_to(crust, g_body)\n    \n    cheese = build_cheese(col, MAT)\n    parent_to(cheese, g_body)\n    \n    icing = build_icing(col, MAT)\n    parent_to(icing, g_body)\n    \n    # 3. Build Garnishes (placed embedded slightly into the soft icing)\n    # Z coordinate is TOTAL_H + ~icing_thickness - small_sink_amount\n    # ⋯ blueberries placed by golden-angle ring, each its own mesh"}};
 class Component extends DCLogic {
-  state = { asset: null, tab: 'viewer', feat: 'rig', live: {}, wf: false, normals: false, labels: true, explode: null, groups: [], parts: 0, hidden: {}, expanded: {}, rootName: '', dark: false, flash: null, picked: null, editEx: 'rabbit', tabsTouched: false, rigArmed: false, rigThr: 0, rigSteer: 0, rigManual: false, rigFit: 0.72 };
+  // Group callouts are laid out for a wide stage — on a phone the leader lines
+  // cross the model and each other, so they start off there. Tap-to-name is
+  // unaffected (the pick label is drawn independently of this flag).
+  state = { asset: null, tab: 'viewer', feat: 'rig', live: {}, wf: false, normals: false,
+    labels: !(typeof window !== 'undefined' && window.matchMedia('(max-width:768px)').matches), explode: null, groups: [], parts: 0, hidden: {}, expanded: {}, rootName: '', dark: false, flash: null, picked: null, editEx: 'rabbit', tabsTouched: false, rigArmed: false, rigThr: 0, rigSteer: 0, rigManual: false, rigFit: 0.72 };
   files = {
     kart: ['assets/banana-kart.glb', 'banana_kart.glb'],
+    gun: ['assets/dslr-gun.glb', 'dslr_gun.glb'],
     rabbit: ['assets/robot-rabbit.glb', 'robot_rabbit.glb'],
     // blueberry original — berry_cheesecake.glb is the raspberry/strawberry EDIT
     // (byte-identical to the edit tab's "after"), which contradicted the
@@ -635,7 +762,12 @@ class Component extends DCLogic {
         this._toolIo.observe(tools);
       }
     }, 800);
+    // Both idle cyclers stay off on phones: every swap pulls another multi-MB
+    // GLB over cellular, and the model changes under the reader's thumb. The
+    // asset chips / example chips are one tap away instead.
+    const noAutoCycle = typeof window !== 'undefined' && window.matchMedia('(max-width:768px)').matches;
     this._exCyc = setInterval(() => {
+      if (noAutoCycle) return;
       if (document.visibilityState !== 'visible' || !this._hwView) return;
       if (this.state.feat !== 'edit') { this._exAct = Date.now(); return; }
       // dwell counts from whichever happened later: the last interaction, or the
@@ -648,11 +780,12 @@ class Component extends DCLogic {
       this.setState({ editEx: nxEx });
     }, 1000);
     this._cyc = setInterval(() => {
+      if (noAutoCycle) return;
       if (document.visibilityState !== 'visible' || !this._inView || this.state.tab !== 'viewer') return;
       if (Date.now() - this._act < 15000) return;
-      const order = ['kart', 'rabbit', 'cake'];
+      const order = ['kart', 'gun', 'rabbit', 'cake'];
       const cur = this.state.asset ?? (this.props.defaultAsset ?? 'kart');
-      const nx = order[(order.indexOf(cur) + 1) % 3];
+      const nx = order[(order.indexOf(cur) + 1) % order.length];
       this._act = Date.now();
       this.setState({ asset: nx, groups: [], parts: 0, hidden: {}, expanded: {}, flash: null, picked: null });
     }, 1000);
@@ -708,8 +841,15 @@ class Component extends DCLogic {
       this._pf[k] = 1;
       try { fetch(LIVE_SRC[k], { mode: 'cors' }).catch(() => {}); } catch (e) {}
     };
-    const asset = s.asset ?? (this.props.defaultAsset ?? 'kart');
-    const explodeVal = s.explode ?? (this.props.explodeAmount ?? 42);
+    // Phones open on the rabbit: 440 KB against the kart's 1.6 MB, and a tall
+    // model suits a narrow portrait stage better than a wide one. Tapping any
+    // chip still loads that asset.
+    const isNarrow = typeof window !== 'undefined' && window.matchMedia('(max-width:768px)').matches;
+    const asset = s.asset ?? (isNarrow ? 'rabbit' : (this.props.defaultAsset ?? 'kart'));
+    // A 42% spread needs a wide stage; on a ~400px phone stage the outer parts
+    // (rabbit ears, kart wheels) push past the frame and get cropped. Same idea,
+    // smaller throw — the user can still drag the slider the whole way.
+    const explodeVal = s.explode ?? (isNarrow ? 20 : (this.props.explodeAmount ?? 42));
     const [glbSrc, fileLabel] = this.files[asset];
     const meta = CODE[asset];
     const pick = (k) => () => this.setState({ asset: k, groups: [], parts: 0, hidden: {}, flash: null, picked: null });
@@ -739,7 +879,9 @@ class Component extends DCLogic {
     };
     s.groups.forEach((g) => walk(g, 0));
     const codeText = meta.text + '\n\n# ⋯ excerpt — the full ' + meta.lines + '-line program IS the asset.\n# GLB is just its compilation target.';
-    const FEATS = [{id:'rig',icon:'🦾',label:'Articulate / animate'},{id:'pbr',icon:'🎨',label:'PBR textures'},{id:'uv',icon:'🗺',label:'UV maps'},{id:'edit',icon:'🧩',label:'Edit per part'}];
+    // Edit-per-part sits ahead of UV maps: it's the one that sells "the asset
+    // stays alive", where UV maps read as a technical footnote by comparison.
+    const FEATS = [{id:'rig',icon:'🦾',label:'Articulate / animate'},{id:'pbr',icon:'🎨',label:'PBR textures'},{id:'edit',icon:'🧩',label:'Edit per part'},{id:'uv',icon:'🗺',label:'UV maps'}];
     // Unselected tabs carry `tabhint`, which ripples them until the first click
     // marks the strip `tabs-touched` and the CSS kills the animation for good.
     const tabs = FEATS.map((fd) => { const on = s.feat === fd.id; return { label: fd.label, icon: fd.icon, soon: fd.soon ? ' · soon' : '', cls: on ? '' : 'tabhint', go: () => { this._exAct = Date.now(); this.setState({ feat: fd.id, tabsTouched: true }); }, bg: on ? 'var(--paper)' : 'color-mix(in oklab, var(--mint) 22%, var(--bg))', col: on ? 'var(--ink)' : 'var(--muted)', ty: on ? '0' : '3px', sh: on ? 'inset 0 3px 0 var(--yellow)' : '2.5px 2.5px 0 var(--edge)' }; });
@@ -748,8 +890,8 @@ class Component extends DCLogic {
       toggleTheme: () => { document.body.classList.toggle('dark', !s.dark); this.setState({ dark: !s.dark }); },
       fileLabel, glbSrc,
       spinSecs: this.props.spinSeconds ?? 2.8,
-      kartMark: asset === 'kart' ? '♥' : '', rabbitMark: asset === 'rabbit' ? '♥' : '', cakeMark: asset === 'cake' ? '♥' : '',
-      pickKart: pick('kart'), pickRabbit: pick('rabbit'), pickCake: pick('cake'),
+      kartMark: asset === 'kart' ? '♥' : '', gunMark: asset === 'gun' ? '♥' : '', rabbitMark: asset === 'rabbit' ? '♥' : '', cakeMark: asset === 'cake' ? '♥' : '',
+      pickKart: pick('kart'), pickGun: pick('gun'), pickRabbit: pick('rabbit'), pickCake: pick('cake'),
       isCode: s.tab === 'code',
       viewerMark: s.tab === 'viewer' ? '●' : '○', codeMark: s.tab === 'code' ? '●' : '○',
       showViewer: () => this.setState({ tab: 'viewer' }),
