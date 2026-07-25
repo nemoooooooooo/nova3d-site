@@ -12,7 +12,7 @@ const PAL=['#e8b73a','#6fbf8b','#f47fb0','#a986e0','#5fa8e6','#f0925e','#b8b34e'
 const SVGNS='http://www.w3.org/2000/svg';
 const easeIO=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
 class NovaViewer extends HTMLElement{
- static get observedAttributes(){return['src','wireframe','normals','labels','explode','spin']}
+ static get observedAttributes(){return['src','wireframe','normals','labels','explode','spin','rig']}
  constructor(){super();this._movers=[];this._labels=[];this._meshes=[];this._orig=new Map();this._mgroup=new Map();this._hl=null;this._hlSet=null;this._loadId=0;this._f=0;this._manual=false;this._hover=null;this._pickObj=null;this._introDone=false;}
  _on(n){const v=this.getAttribute(n);return v!=null&&v!=='false'&&v!=='0'}
  _num(n,d){const v=parseFloat(this.getAttribute(n));return isNaN(v)?d:v}
@@ -145,7 +145,7 @@ class NovaViewer extends HTMLElement{
   this._load.style.opacity='1';this._load.style.display='';
   const {T,GLTFLoader}=await libs();
   if(this._root){this.scene.remove(this._root);this._root.traverse(o=>{if(o.geometry)o.geometry.dispose()});this._root=null;}
-  this._movers=[];this._meshes=[];this._orig=new Map();this._mgroup=new Map();this._hl=null;this._hlSet=null;this._manual=false;this._introDone=false;this._pinMode=false;this._compareRoots=null;this._cmpT0=null;this._pinSpec=null;this._fade=null;this._cmpMats=null;this._clearPick();this._setHover(null);
+  this._movers=[];this._meshes=[];this._orig=new Map();this._mgroup=new Map();this._hl=null;this._hlSet=null;this._manual=false;this._introDone=false;this._pinMode=false;this._compareRoots=null;this._cmpT0=null;this._pinSpec=null;this._fade=null;this._cmpMats=null;this._rig=null;this._rigLean=null;this._clearPick();this._setHover(null);
   this._labels.forEach(L=>{L.el.remove();L.line.remove();L.dot.remove()});this._labels=[];
   if(this._cmpBadge){this._cmpBadge.remove();this._cmpBadge=null;}
   ['_divLine','_divHandle','_tagA','_tagB'].forEach(k=>{if(this[k]){this[k].remove();this[k]=null;}});
@@ -160,7 +160,23 @@ class NovaViewer extends HTMLElement{
   const na=this._normOf(root);
   root.scale.setScalar(na.s);
   root.position.set(-na.c.x*na.s,-na.c.y*na.s,-na.c.z*na.s);
-  this.scene.add(root);this._root=root;
+  // Rig mode inserts two transform wrappers ABOVE the model so the demo can
+  // squash and lean it without touching the asset's own hierarchy:
+  //   wrap (=_root) : idle turntable + impact squash, origin ON THE GROUND so
+  //                   the squash grows upward instead of about the bbox centre
+  //     lean        : roll/pitch, INSIDE the turntable so the tilt stays
+  //                   model-relative as the kart spins
+  //       root      : the normalized GLB, untouched
+  if(this._attr('rig')){
+   root.updateMatrixWorld(true);
+   const ground=new T.Box3().setFromObject(root).min.y;
+   const wrap=new T.Group(),lean=new T.Group();
+   wrap.position.y=ground;root.position.y-=ground;
+   lean.add(root);wrap.add(lean);
+   this.scene.add(wrap);this._root=wrap;this._rigLean=lean;
+  }else{
+   this.scene.add(root);this._root=root;
+  }
   root.updateMatrixWorld(true);
   let gr=null;root.traverse(n=>{if(!gr&&/_root$/i.test(n.name||''))gr=n;});
   if(!gr){gr=root;while(gr.children.length===1)gr=gr.children[0];}
@@ -224,9 +240,10 @@ class NovaViewer extends HTMLElement{
     this._pinMode=this._labels.length>0;
    }
   }
+  if(this._attr('rig'))this._buildRig(root);
   this._applyMats();
   this._load.style.opacity='0';const ld=this._load;setTimeout(()=>{if(id===this._loadId)ld.style.display='none'},350);
-  this._t0=performance.now();this._lastT=this._t0;this._baseRot=root.rotation.y;this._introSnapped=false;
+  this._t0=performance.now();this._lastT=this._t0;this._baseRot=this._root.rotation.y;this._introSnapped=false;
   // _frame() fits target+distance to the new model; _applyCamAngle() then locks
   // the orbit angle back to the front, so every (re)load starts front-facing.
   this._frame();this._applyCamAngle();
@@ -366,6 +383,77 @@ class NovaViewer extends HTMLElement{
    if(found){const c=bb.getCenter(new T.Vector3());L.anchor=this._root;L.local=this._root.worldToLocal(c.clone());}
   });
  }
+ // ── RIG MODE ───────────────────────────────────────────────────────────────
+ // Drives the asset's OWN named nodes — nothing here is baked animation and no
+ // bones are added. Wheel_* already carry pivots on their axles, so a rotation
+ // assignment is the whole "rig". The steering wheel is the one part generation
+ // did NOT place a pivot for (its origin sits ~0.86m off the disc it draws), so
+ // we insert a pivot at the disc's own centre — which is exactly the work the
+ // articulation pass automates.
+ _buildRig(model){
+  const T=this.T;
+  const find=n=>{let f=null;model.traverse(o=>{if(!f&&o.name===n)f=o});return f};
+  const wheels=['Wheel_FL','Wheel_FR','Wheel_RL','Wheel_RR'].map(find).filter(Boolean);
+  wheels.forEach(w=>{w.rotation.order='YXZ'});
+  model.updateMatrixWorld(true);
+  // spin rate needs the wheel's on-screen radius (the model is normalized)
+  let radius=0.26;
+  if(wheels.length){const s=new T.Box3().setFromObject(wheels[0]).getSize(new T.Vector3());radius=Math.max(1e-3,Math.max(s.y,s.z)/2);}
+  let steerPivot=null;
+  const sw=find('Steering_Wheel');
+  if(sw&&sw.parent){
+   // The steering assembly is SEVERAL sibling nodes (rim, hub, spokes) — rotating
+   // the rim alone is invisible, because a ring spinning about its own axis looks
+   // identical. Everything except the column (the fixed shaft) turns together.
+   const parts=[];
+   model.traverse(o=>{if(/^Steering_(Wheel|Spoke|Hub|Rim|Grip)/i.test(o.name||''))parts.push(o)});
+   const c=new T.Box3().setFromObject(sw).getCenter(new T.Vector3());
+   const axis=new T.Vector3().setFromMatrixColumn(sw.matrixWorld,1).normalize();   // disc normal = column axis
+   const p=new T.Group();
+   p.position.copy(sw.parent.worldToLocal(c.clone()));
+   const inv=sw.parent.getWorldQuaternion(new T.Quaternion()).invert();
+   p.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),axis.applyQuaternion(inv).normalize());
+   sw.parent.add(p);
+   parts.forEach(o=>{if(o!==p)p.attach(o)});                                       // attach keeps world transform
+   steerPivot=p;this._rigSteerParts=parts.length;
+  }
+  this._rig={wheels,front:wheels.slice(0,2),steerPivot,radius,
+             spin:0,steer:0,sq:{s:0,v:0},manual:false,thr:0,tgt:0,mSteer:0,
+             t0:performance.now(),lastK:-1,started:false};
+ }
+ // One 6s cycle: roll forward → straighten → roll back, steering sweeping the
+ // whole time, with an impact every 2s. Scalar math only — no per-frame allocs.
+ _rigTick(dt,now){
+  const R=this._rig;if(!R)return;
+  let v,steer;
+  if(R.manual){v=R.thr*5.5;steer=R.mSteer;}
+  else{
+   const t=((now-R.t0)/1000)%6,w=2*Math.PI/6;
+   v=5.5*Math.sin(w*t);steer=Math.cos(w*t);
+   const k=Math.floor(t/2);
+   if(k!==R.lastK){if(R.started)R.sq.v-=4.2;R.lastK=k;R.started=true;}
+  }
+  R.tgt+=(v-R.tgt)*Math.min(1,dt*6);                       // ease so control changes never jerk
+  R.spin=(R.spin+(R.tgt/R.radius)*dt)%6.283185307179586;   // wrap: never let the angle drift into float mush
+  for(let i=0;i<R.wheels.length;i++)R.wheels[i].rotation.x=-R.spin;
+  R.steer+=(steer*0.42-R.steer)*Math.min(1,dt*8);
+  for(let i=0;i<R.front.length;i++)R.front[i].rotation.y=R.steer;
+  if(R.steerPivot)R.steerPivot.rotation.y=-R.steer*2.4;    // hands turn further than the road wheels
+  const sq=R.sq;                                           // impact spring
+  sq.v+=(-sq.s*90-sq.v*12)*dt;sq.s+=sq.v*dt;
+  const k2=Math.max(-0.32,Math.min(0.32,sq.s));
+  this._root.scale.set(1-k2*0.6,1+k2,1-k2*0.6);
+  if(this._rigLean){
+   const lean=-R.steer*Math.min(1,Math.abs(R.tgt)/6)*0.30,pitch=-R.tgt*0.004,e=Math.min(1,dt*7);
+   this._rigLean.rotation.z+=(lean-this._rigLean.rotation.z)*e;
+   this._rigLean.rotation.x+=(pitch-this._rigLean.rotation.x)*e;
+  }
+ }
+ // Any control hands the rig to the user and stops the auto cycle + turntable.
+ rigSet(kind,val){const R=this._rig;if(!R)return;R.manual=true;if(kind==='thr')R.thr=val;else R.mSteer=val;}
+ rigWhack(){const R=this._rig;if(!R)return;R.manual=true;R.sq.v-=4.6;}
+ rigAuto(){const R=this._rig;if(!R)return;R.manual=false;R.thr=0;R.mSteer=0;R.t0=performance.now();R.lastK=-1;R.started=false;}
+ rigManual(){return!!(this._rig&&this._rig.manual)}
  _target(){return Math.max(0,Math.min(1,this._num('explode',42)/100))}
  _setExplode(f){this._f=f;this._movers.forEach(m=>{m.obj.position.copy(m.base).addScaledVector(m.dir,f*m.dist)})}
  _tick(){
@@ -400,7 +488,9 @@ class NovaViewer extends HTMLElement{
     // nothing ever corrects it, so the model froze at a random angle on some
     // loads and the correct one on others.
     if(!this._introSnapped){this._root.rotation.y=this._baseRot;this._introSnapped=true;}
-    this._root.rotation.y+=dt*this._num('rot',0.3);
+    // rig mode: the turntable idles only while the cycle is playing — once the
+    // user takes a control, the view holds still so they can inspect the joint
+    if(!(this._rig&&this._rig.manual))this._root.rotation.y+=dt*this._num('rot',0.3);
     if(this._manual){f=this._target();}
     else{
      const EXP=0.9,HOLD=1.7,RET=0.9,REST=3.5,CYC=EXP+HOLD+RET+REST;
@@ -412,6 +502,7 @@ class NovaViewer extends HTMLElement{
     }
    }
    this._setExplode(f);
+   if(this._rig)this._rigTick(dt,now);
   }
   this._procHover();
   this._updateLabels();

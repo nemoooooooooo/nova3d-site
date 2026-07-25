@@ -1,3 +1,5 @@
 name = "nova3d-site"
 compatibility_date = "2024-01-01"
-pages_build_output_dir = "."
+# Deploy the built folder, never the repo root — "." would ship .git, the stale
+# .dc.html snapshot and ~4.7 MB of unreferenced assets. Build it with ./publish.sh
+pages_build_output_dir = "dist"

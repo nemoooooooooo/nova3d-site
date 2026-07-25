@@ -36,28 +36,49 @@ input[type=range]{accent-color:#ff9ec7}
 /* Tool tabs: nudge the unselected tabs so it reads as "these are buttons".
    Staggered so they ripple left-to-right rather than twitching in unison.
    .tabs-touched is set on first click and permanently stops the hint. */
+/* The old hint was a 3.4s cycle that only moved for ~0.5s of it — easy to miss.
+   The real affordance is now static: unselected tabs carry a hard drop shadow so
+   they read as raised buttons. The bounce is faster and just draws the eye. */
 @keyframes tabnudge{
-  0%,72%,100%{transform:translateY(3px)}
-  80%{transform:translateY(-2px)}
-  88%{transform:translateY(1px)}
+  0%,55%,100%{transform:translateY(3px)}
+  66%{transform:translateY(-3px)}
+  78%{transform:translateY(0)}
+  88%{transform:translateY(-1.5px)}
 }
 @keyframes tabglow{
-  0%,72%,100%{box-shadow:none}
-  82%{box-shadow:0 0 0 2.5px color-mix(in oklab, var(--yellow) 70%, transparent)}
+  0%,55%,100%{box-shadow:2.5px 2.5px 0 var(--edge)}
+  70%{box-shadow:2.5px 2.5px 0 var(--edge), 0 0 0 3px color-mix(in oklab, var(--yellow) 85%, transparent)}
 }
-.tabhint{animation:tabnudge 3.4s ease-in-out infinite, tabglow 3.4s ease-in-out infinite}
-.tabhint:nth-of-type(2){animation-delay:.12s}
-.tabhint:nth-of-type(3){animation-delay:.24s}
-.tabhint:nth-of-type(4){animation-delay:.36s}
-.tabhint:nth-of-type(5){animation-delay:.48s}
+.tabhint{animation:tabnudge 1.8s ease-in-out infinite, tabglow 1.8s ease-in-out infinite}
+.tabhint:nth-of-type(2){animation-delay:.09s}
+.tabhint:nth-of-type(3){animation-delay:.18s}
+.tabhint:nth-of-type(4){animation-delay:.27s}
+.tabhint:nth-of-type(5){animation-delay:.36s}
+.tabhint:hover{animation:none;transform:translateY(-1px) !important;box-shadow:4px 4px 0 var(--edge) !important}
 .tabs-touched .tabhint{animation:none}
 @keyframes pointbob{0%,100%{transform:translateX(0)}50%{transform:translateX(5px)}}
 .pointbob{animation:pointbob 1.1s ease-in-out infinite}
 @media(prefers-reduced-motion:reduce){.tabhint,.pointbob{animation:none !important}}
+/* Below ~1100px a fixed 322px code column eats the stage: the viewer gets
+   squeezed under 470px and the control row wraps raggedly. Stack instead —
+   both panes then get the full window width. */
+@media(max-width:1100px){
+.rig-grid{grid-template-columns:1fr !important}
+.rig-side{flex-direction:row !important;gap:12px !important}
+.rig-side>div{flex:1}
+.hw-steps{grid-template-columns:1fr 1fr 1fr !important;gap:16px !important}
+.hw-steps>div:nth-child(2),.hw-steps>div:nth-child(4){display:none !important}
+.useful-grid{grid-template-columns:1fr 1fr !important}
+.studio-sidebar{width:186px}
+/* three preview cards across a narrow window shrinks each to ~160px, which
+   crushes the titles and the map-swatch labels into each other */
+.card-grid{grid-template-columns:1fr 1fr !important}
+}
 @media(max-width:768px){
 nav{flex-direction:column;gap:12px;padding:10px 16px}nav>div:first-child{width:100%}nav>div:last-child{flex-direction:row;flex-wrap:wrap;justify-content:center;gap:8px;width:100%}
 nav a,nav span{font-size:11px !important;padding:4px 10px !important}
-h1{font-size:36px !important;line-height:1.1}
+/* tracking must scale with the type — a fixed -1.8px at 36px eats the word space */
+h1{font-size:36px !important;line-height:1.1;letter-spacing:-.03em !important}
 header{padding:30px 16px 20px !important}
 section{padding:12px 16px 30px !important}
 .studio-grid{grid-template-columns:1fr !important;grid-template-rows:auto auto auto !important}
@@ -68,6 +89,18 @@ section{padding:12px 16px 30px !important}
 .hw-steps>div:nth-child(2),.hw-steps>div:nth-child(4){display:none !important}
 /* where-it's-useful: 4 across -> 1 across */
 .useful-grid{grid-template-columns:1fr !important}
+/* rig tab: viewer beside code -> stacked, shorter stage, tighter control row
+   (full-width sliders would orphan the auto button onto a third line) */
+.rig-grid{grid-template-columns:1fr !important}
+/* stay at/above the viewer's 420px internal threshold: below it the fit
+   switches to a much tighter box projection and the kart renders oversized */
+.rig-viewer{height:430px !important}
+.rig-grid input[type=range]{width:72px !important}
+.card-grid{grid-template-columns:1fr !important}
+/* both sliders on one row, both buttons on the next — margin-left:auto would
+   push "auto" onto a third, orphaned row */
+.rig-bar{gap:10px !important;padding:10px !important}
+.rig-bar>span:last-child{margin-left:0 !important}
 /* ship-it: copy beside terminal -> stacked, and the terminal wraps not widens */
 .ship-grid{grid-template-columns:1fr !important;gap:20px !important}
 .ship-grid pre{font-size:10.5px !important;white-space:pre-wrap !important;word-break:break-word}
@@ -190,8 +223,7 @@ h1{font-size:28px !important}nav a{padding:3px 8px !important;font-size:10px !im
       </div>
     </div>
   </div>
-  <div style="font-family:'Space Mono',monospace;font-size:12px;color:var(--muted);margin:30px 0 16px">then — <span style="color:var(--ink);font-weight:700">texture in full PBR, up to 4K</span>, and keep going:</div>
-  <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;box-shadow:6px 6px 0 rgba(34,29,24,.14);overflow:hidden">
+  <div id="tools" style="margin-top:30px;background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;box-shadow:6px 6px 0 rgba(34,29,24,.14);overflow:hidden">
     <div style="display:flex;align-items:center;gap:8px;padding:8px 13px;border-bottom:1.5px solid var(--edge);background:color-mix(in oklab, var(--lav) 20%, var(--paper))">
       <span style="width:11px;height:11px;border-radius:50%;background:var(--pink);border:1.5px solid var(--edge)"></span>
       <span style="width:11px;height:11px;border-radius:50%;background:var(--yellow);border:1.5px solid var(--edge)"></span>
@@ -213,12 +245,12 @@ h1{font-size:28px !important}nav a{padding:3px 8px !important;font-size:10px !im
     </div>
     <div style="background:var(--paper);padding:20px">
     <sc-if value="{{ isFeatUv }}" hint-placeholder-val="{{ false }}">
-  <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);margin:0 0 14px">Every asset arrives UV-unwrapped and ready to paint — parts packed into clean, non-overlapping atlases with even texel density. The checkerboard is just there to show that. Click a card to spin the real GLB.</div>
-  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+  <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);margin:0 0 14px">Every asset arrives UV-unwrapped and ready to paint — parts packed into clean, non-overlapping atlases with even texel density.</div>
+  <div class="card-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
     <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;overflow:hidden;box-shadow:3px 3px 0 rgba(34,29,24,.1)">
       <div style="aspect-ratio:4/3;position:relative;overflow:hidden;background:conic-gradient(var(--paper) 90deg,var(--bg) 90deg 180deg,var(--paper) 180deg 270deg,var(--bg) 270deg) 0 0/22px 22px">
         <sc-if value="{{ uIdle0 }}" hint-placeholder-val="{{ true }}">
-          <div onClick="{{ goU0 }}" style="position:absolute;inset:0;cursor:pointer;display:grid;place-items:center">
+          <div onClick="{{ goU0 }}" onMouseEnter="{{ preU0 }}" style="position:absolute;inset:0;cursor:pointer;display:grid;place-items:center">
             <img loading="lazy" src="./assets/showcase/uv_kart.webp" style="max-width:92%;max-height:92%;object-fit:contain">
             <span style="position:absolute;left:10px;bottom:10px;font-family:'Pixelify Sans',monospace;font-size:12px;background:var(--yellow);color:#221d18;border:1.5px solid var(--edge);border-radius:8px;padding:2px 10px;box-shadow:2px 2px 0 var(--edge)">▶ spin it · 3.2 MB</span>
           </div>
@@ -234,7 +266,7 @@ h1{font-size:28px !important}nav a{padding:3px 8px !important;font-size:10px !im
     <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;overflow:hidden;box-shadow:3px 3px 0 rgba(34,29,24,.1)">
       <div style="aspect-ratio:4/3;position:relative;overflow:hidden;background:conic-gradient(var(--paper) 90deg,var(--bg) 90deg 180deg,var(--paper) 180deg 270deg,var(--bg) 270deg) 0 0/22px 22px">
         <sc-if value="{{ uIdle1 }}" hint-placeholder-val="{{ true }}">
-          <div onClick="{{ goU1 }}" style="position:absolute;inset:0;cursor:pointer;display:grid;place-items:center">
+          <div onClick="{{ goU1 }}" onMouseEnter="{{ preU1 }}" style="position:absolute;inset:0;cursor:pointer;display:grid;place-items:center">
             <img loading="lazy" src="./assets/showcase/uv_rabbit.webp" style="max-width:92%;max-height:92%;object-fit:contain">
             <span style="position:absolute;left:10px;bottom:10px;font-family:'Pixelify Sans',monospace;font-size:12px;background:var(--yellow);color:#221d18;border:1.5px solid var(--edge);border-radius:8px;padding:2px 10px;box-shadow:2px 2px 0 var(--edge)">▶ spin it · 1.5 MB</span>
           </div>
@@ -250,7 +282,7 @@ h1{font-size:28px !important}nav a{padding:3px 8px !important;font-size:10px !im
     <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;overflow:hidden;box-shadow:3px 3px 0 rgba(34,29,24,.1)">
       <div style="aspect-ratio:4/3;position:relative;overflow:hidden;background:conic-gradient(var(--paper) 90deg,var(--bg) 90deg 180deg,var(--paper) 180deg 270deg,var(--bg) 270deg) 0 0/22px 22px">
         <sc-if value="{{ uIdle2 }}" hint-placeholder-val="{{ true }}">
-          <div onClick="{{ goU2 }}" style="position:absolute;inset:0;cursor:pointer;display:grid;place-items:center">
+          <div onClick="{{ goU2 }}" onMouseEnter="{{ preU2 }}" style="position:absolute;inset:0;cursor:pointer;display:grid;place-items:center">
             <img loading="lazy" src="./assets/showcase/uv_gary.webp" style="max-width:92%;max-height:92%;object-fit:contain">
             <span style="position:absolute;left:10px;bottom:10px;font-family:'Pixelify Sans',monospace;font-size:12px;background:var(--yellow);color:#221d18;border:1.5px solid var(--edge);border-radius:8px;padding:2px 10px;box-shadow:2px 2px 0 var(--edge)">▶ spin it · 6.0 MB</span>
           </div>
@@ -264,7 +296,7 @@ h1{font-size:28px !important}nav a{padding:3px 8px !important;font-size:10px !im
       </div>
     </div>
   </div>
-  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:14px">
+  <div class="card-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:14px">
     <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;overflow:hidden;box-shadow:3px 3px 0 rgba(34,29,24,.1)"><img loading="lazy" src="./assets/showcase/atlas_kart.webp" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block"><div style="display:flex;justify-content:space-between;padding:7px 11px;border-top:1.5px solid var(--edge)"><span style="font-weight:700;font-size:12.5px">kart — atlas sheet</span><span style="font-family:'Space Mono',monospace;font-size:9.5px;color:var(--soft)">per-island wireframes</span></div></div>
     <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;overflow:hidden;box-shadow:3px 3px 0 rgba(34,29,24,.1)"><img loading="lazy" src="./assets/showcase/atlas_rabbit.webp" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block"><div style="display:flex;justify-content:space-between;padding:7px 11px;border-top:1.5px solid var(--edge)"><span style="font-weight:700;font-size:12.5px">rabbit — atlas sheet</span><span style="font-family:'Space Mono',monospace;font-size:9.5px;color:var(--soft)">area-budgeted islands</span></div></div>
     <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;overflow:hidden;box-shadow:3px 3px 0 rgba(34,29,24,.1)"><img loading="lazy" src="./assets/showcase/atlas_gary.webp" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block"><div style="display:flex;justify-content:space-between;padding:7px 11px;border-top:1.5px solid var(--edge)"><span style="font-weight:700;font-size:12.5px">Gary — atlas sheet</span><span style="font-family:'Space Mono',monospace;font-size:9.5px;color:var(--soft)">one dense sculpt atlas</span></div></div>
@@ -272,11 +304,11 @@ h1{font-size:28px !important}nav a{padding:3px 8px !important;font-size:10px !im
     </sc-if>
     <sc-if value="{{ isFeatPbr }}" hint-placeholder-val="{{ true }}">
   <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);margin:0 0 14px">Restyle from a prompt — full PBR up to 4K (albedo, normal, roughness, metallic, AO, height), packed with every asset. Click a card to spin the real textured GLB.</div>
-  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+  <div class="card-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
     <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;overflow:hidden;box-shadow:3px 3px 0 rgba(34,29,24,.1)">
       <div style="aspect-ratio:4/3;position:relative;overflow:hidden;background:var(--codebg)">
         <sc-if value="{{ tIdle0 }}" hint-placeholder-val="{{ true }}">
-          <div onClick="{{ goT0 }}" style="position:absolute;inset:0;cursor:pointer;display:grid;place-items:center">
+          <div onClick="{{ goT0 }}" onMouseEnter="{{ preT0 }}" style="position:absolute;inset:0;cursor:pointer;display:grid;place-items:center">
             <img loading="lazy" src="./assets/showcase/tex_handpaint.webp" style="max-width:92%;max-height:92%;object-fit:contain">
             <span style="position:absolute;left:10px;bottom:10px;font-family:'Pixelify Sans',monospace;font-size:12px;background:var(--yellow);color:#221d18;border:1.5px solid var(--edge);border-radius:8px;padding:2px 10px;box-shadow:2px 2px 0 var(--edge)">▶ spin it · 15 MB</span>
           </div>
@@ -293,7 +325,7 @@ h1{font-size:28px !important}nav a{padding:3px 8px !important;font-size:10px !im
     <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;overflow:hidden;box-shadow:3px 3px 0 rgba(34,29,24,.1)">
       <div style="aspect-ratio:4/3;position:relative;overflow:hidden;background:var(--codebg)">
         <sc-if value="{{ tIdle1 }}" hint-placeholder-val="{{ true }}">
-          <div onClick="{{ goT1 }}" style="position:absolute;inset:0;cursor:pointer;display:grid;place-items:center">
+          <div onClick="{{ goT1 }}" onMouseEnter="{{ preT1 }}" style="position:absolute;inset:0;cursor:pointer;display:grid;place-items:center">
             <img loading="lazy" src="./assets/showcase/tex_mossy.webp" style="max-width:92%;max-height:92%;object-fit:contain">
             <span style="position:absolute;left:10px;bottom:10px;font-family:'Pixelify Sans',monospace;font-size:12px;background:var(--yellow);color:#221d18;border:1.5px solid var(--edge);border-radius:8px;padding:2px 10px;box-shadow:2px 2px 0 var(--edge)">▶ spin it · 12 MB</span>
           </div>
@@ -310,7 +342,7 @@ h1{font-size:28px !important}nav a{padding:3px 8px !important;font-size:10px !im
     <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;overflow:hidden;box-shadow:3px 3px 0 rgba(34,29,24,.1)">
       <div style="aspect-ratio:4/3;position:relative;overflow:hidden;background:var(--codebg)">
         <sc-if value="{{ tIdle2 }}" hint-placeholder-val="{{ true }}">
-          <div onClick="{{ goT2 }}" style="position:absolute;inset:0;cursor:pointer;display:grid;place-items:center">
+          <div onClick="{{ goT2 }}" onMouseEnter="{{ preT2 }}" style="position:absolute;inset:0;cursor:pointer;display:grid;place-items:center">
             <img loading="lazy" src="./assets/showcase/tex_procreate.webp" style="max-width:92%;max-height:92%;object-fit:contain">
             <span style="position:absolute;left:10px;bottom:10px;font-family:'Pixelify Sans',monospace;font-size:12px;background:var(--yellow);color:#221d18;border:1.5px solid var(--edge);border-radius:8px;padding:2px 10px;box-shadow:2px 2px 0 var(--edge)">▶ spin it · 10 MB</span>
           </div>
@@ -369,20 +401,44 @@ h1{font-size:28px !important}nav a{padding:3px 8px !important;font-size:10px !im
         </div>
       </div>
     </sc-if>
-    <sc-if value="{{ isFeatArtic }}" hint-placeholder-val="{{ false }}">
-      <div style="text-align:center;padding:52px 20px">
-        <div style="font-size:40px">🦾</div>
-        <div style="font-family:'Pixelify Sans',monospace;font-size:22px;margin-top:12px">Articulate <span style="color:var(--pinkdeep)">— coming soon</span></div>
-        <div style="font-family:'Space Mono',monospace;font-size:12px;color:var(--muted);margin:9px auto 0;max-width:540px;line-height:1.65">pivots already sit on the real joints — turn the parented hierarchy into articulated, grabbable parts with no manual rigging.</div>
-        <div style="display:inline-block;margin-top:16px;font-family:'Pixelify Sans',monospace;font-size:12px;background:color-mix(in oklab, var(--lav) 30%, var(--paper));border:1.5px solid var(--edge);border-radius:999px;padding:5px 14px;box-shadow:2px 2px 0 var(--edge)">articulation pipeline — soon</div>
-      </div>
-    </sc-if>
-    <sc-if value="{{ isFeatAnim }}" hint-placeholder-val="{{ false }}">
-      <div style="text-align:center;padding:52px 20px">
-        <div style="font-size:40px">🎬</div>
-        <div style="font-family:'Pixelify Sans',monospace;font-size:22px;margin-top:12px">Animation-ready <span style="color:var(--pinkdeep)">— coming soon</span></div>
-        <div style="font-family:'Space Mono',monospace;font-size:12px;color:var(--muted);margin:9px auto 0;max-width:540px;line-height:1.65">every part is already named and every pivot already placed, so the GLB drops straight onto an animation timeline.</div>
-        <div style="display:inline-block;margin-top:16px;font-family:'Pixelify Sans',monospace;font-size:12px;background:color-mix(in oklab, var(--lav) 30%, var(--paper));border:1.5px solid var(--edge);border-radius:999px;padding:5px 14px;box-shadow:2px 2px 0 var(--edge)">animation demo — soon</div>
+    <sc-if value="{{ isFeatRig }}" hint-placeholder-val="{{ false }}">
+      <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);margin:0 0 14px">This is the downloadable file, moving. Nobody rigged it — the wheels turn because the kart already knows where its own axles are. <span style="color:var(--ink);font-weight:700">Grab a slider and drive it.</span></div>
+      <div class="rig-grid" style="display:grid;grid-template-columns:1fr 322px;gap:14px">
+        <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;overflow:hidden;box-shadow:3px 3px 0 rgba(34,29,24,.1)">
+          <div style="display:flex;align-items:center;gap:8px;padding:7px 12px;border-bottom:1.5px solid var(--edge);background:color-mix(in oklab, var(--mint) 22%, var(--paper))">
+            <span style="width:10px;height:10px;border-radius:50%;background:var(--pink);border:1.5px solid var(--edge)"></span>
+            <span style="width:10px;height:10px;border-radius:50%;background:var(--yellow);border:1.5px solid var(--edge)"></span>
+            <span style="width:10px;height:10px;border-radius:50%;background:var(--mint);border:1.5px solid var(--edge)"></span>
+            <span style="font-family:'Space Mono',monospace;font-size:11px;margin-left:4px">🦾 banana_kart.glb · live rig</span>
+            <span style="margin-left:auto;font-family:'Pixelify Sans',monospace;font-size:11.5px;color:{{ rigPillCol }};background:{{ rigPillBg }};border:1.5px solid var(--edge);border-radius:999px;padding:1px 10px;white-space:nowrap">{{ rigPill }}</span>
+          </div>
+          <div class="rig-viewer" style="position:relative;height:430px;background:conic-gradient(var(--paper) 90deg,var(--bg) 90deg 180deg,var(--paper) 180deg 270deg,var(--bg) 270deg) 0 0/24px 24px">
+            <x-import component-from-global-scope="nova-viewer" from="./nova-viewer.js" src="{{ rigSrc }}" rig="kart" labels="false" explode="0" spin="0.01" rot="0.2" cam-yaw="0.72" cam-pitch="0.2" fit="{{ rigFit }}" min-h="0" hint-size="100%,430px" style="position:absolute;inset:0"></x-import>
+            <div style="position:absolute;left:12px;bottom:10px;z-index:3;font-family:'Space Mono',monospace;font-size:10px;color:var(--soft);background:color-mix(in oklab, var(--paper) 78%, transparent);border:1.5px solid var(--line);border-radius:8px;padding:3px 10px;pointer-events:none">hover a part for its name · drag to orbit</div>
+          </div>
+          <div class="rig-bar" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:10px 14px;border-top:1.5px solid var(--edge);background:var(--bg)">
+            <span style="display:flex;align-items:center;gap:7px;font-family:'Space Mono',monospace;font-size:10.5px;color:var(--muted)">throttle
+              <input id="rig-thr" type="range" min="-1" max="1" step="0.02" value="{{ rigThrVal }}" onChange="{{ onRigThr }}" style="width:104px;vertical-align:middle">
+            </span>
+            <span style="display:flex;align-items:center;gap:7px;font-family:'Space Mono',monospace;font-size:10.5px;color:var(--muted)">steering
+              <input id="rig-steer" type="range" min="-1" max="1" step="0.02" value="{{ rigSteerVal }}" onChange="{{ onRigSteer }}" style="width:104px;vertical-align:middle">
+            </span>
+            <span onClick="{{ onRigWhack }}" style="cursor:pointer;border:1.5px solid var(--edge);border-radius:8px;padding:2px 11px;background:var(--pink);color:#221d18;font-family:'Pixelify Sans',monospace;font-size:12.5px;box-shadow:2px 2px 0 var(--edge)">💥 whack it</span>
+            <span onClick="{{ onRigAuto }}" style="cursor:pointer;margin-left:auto;border:1.5px solid var(--line);border-radius:8px;padding:2px 11px;background:var(--paper);font-family:'Pixelify Sans',monospace;font-size:12.5px;color:var(--ink)">↻ auto</span>
+          </div>
+        </div>
+        <div class="rig-side" style="display:flex;flex-direction:column;gap:12px">
+          <div style="flex:1;background:var(--codebg);border:1.5px solid var(--edge);border-radius:12px;padding:13px 15px;box-shadow:3px 3px 0 rgba(34,29,24,.1)">
+            <div style="font-family:'Space Mono',monospace;font-size:10px;color:#a09685;margin-bottom:9px">the entire rig ↓</div>
+            <pre style="margin:0;font-family:'Space Mono',monospace;font-size:11px;line-height:1.9;color:var(--codetx);white-space:pre;overflow-x:auto">w = glb.getObjectByName(<span style="color:#ffd23e">'Wheel_FL'</span>)
+
+w.rotation.x -= v/r * dt  <span style="color:#8d819c">// roll</span>
+w.rotation.y  = steer     <span style="color:#8d819c">// steer</span>
+
+body.scale.set(1-k*.6, 1+k, 1-k*.6)
+                          <span style="color:#8d819c">// impact</span></pre>
+          </div>
+        </div>
       </div>
     </sc-if>
     <div style="margin-top:18px;padding-top:14px;border-top:1.5px solid var(--line);font-family:'Space Mono',monospace;font-size:11.5px"><a href="https://app.nova3d.xyz/showcase" target="_blank">browse all generations — live 3D, with the code that built each one ↗</a></div>
@@ -461,9 +517,8 @@ h1{font-size:28px !important}nav a{padding:3px 8px !important;font-size:10px !im
       <span style="margin-left:auto;font-family:'Pixelify Sans',monospace;font-size:12px;color:var(--pinkdeep)">● rec</span>
     </div>
     <video id="wt-vid" src="./assets/world-teaser.mp4" muted="muted" loop="loop" autoplay playsinline preload="metadata" style="display:block;width:100%;aspect-ratio:16/9;object-fit:cover;background:#dfeef2"></video>
-    <div style="display:flex;justify-content:space-between;padding:7px 14px;border-top:1.5px solid var(--edge);background:var(--bg);font-family:'Space Mono',monospace;font-size:10.5px;color:var(--muted)">
+    <div style="padding:7px 14px;border-top:1.5px solid var(--edge);background:var(--bg);font-family:'Space Mono',monospace;font-size:10.5px;color:var(--muted)">
       <span>somewhere in the lab, generated assets are already driving around a world of their own</span>
-      <span style="color:var(--pinkdeep)">every part named · every pivot live</span>
     </div>
   </div>
   <div style="display:flex;gap:12px;justify-content:center">
@@ -487,11 +542,14 @@ h1{font-size:28px !important}nav a{padding:3px 8px !important;font-size:10px !im
 <script type="text/x-dc" data-dc-script data-props="{&quot;defaultAsset&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;kart&quot;,&quot;rabbit&quot;,&quot;cake&quot;],&quot;default&quot;:&quot;kart&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Viewer&quot;},&quot;spinSeconds&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:2.8,&quot;min&quot;:1,&quot;max&quot;:6,&quot;step&quot;:0.5,&quot;unit&quot;:&quot;s&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Viewer&quot;},&quot;explodeAmount&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:42,&quot;min&quot;:0,&quot;max&quot;:100,&quot;step&quot;:1,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Viewer&quot;}}">
 const CODE = {"kart": {"file": "code.py", "lines": 822, "url": "https://nova3dshowcase.blob.core.windows.net/showcase/banana-kart-1784198724/code.py", "text": "# Banana kart: cartoon off-road go-kart whose body is a giant ripe banana\n# (brown speckles, dark stem rising at the rear, dark nose tip at the front),\n# open cockpit recess with padded seat + headrest + steering wheel, four chunky\n# blue-grey off-road tires with tread blocks and wire-laced spokes, orange\n# coil-over shock absorbers at each corner, a side-mounted cylindrical muffler\n# fed by curved exhaust headers, and workshop props on the ground (open blue\n# toolbox, wrenches, screwdriver, washers, spray can, melted banana puddle).\n# Scale: real-world metres. Kart ~2.0m long, ~1.2m tall at the stem.\n# ⋯\n# hierarchy machinery — parenting keeps world pos; pivots become origins\ndef parent_to(child, parent):\n    bpy.context.view_layer.update()\n    m = child.matrix_world.copy()\n    child.parent = parent\n    child.matrix_world = m\n\ndef set_pivot(obj, pivot_world):\n    obj.data.transform(Matrix.Translation(-Vector(pivot_world)))\n    obj.location = Vector(pivot_world)\n\n# ⋯\n# ═══ DIMENSION CONSTANTS (metres) ═════════════════════════════════════\nGROUND_Z = 0.0\n\n# Wheels — chunky off-road, rears slightly larger than fronts\nWHEEL_R_REAR  = 0.30\nWHEEL_R_FRONT = 0.26\nWHEEL_W_REAR  = 0.22\nWHEEL_W_FRONT = 0.19\nTRACK_REAR    = 0.60          # |x| of rear wheel centres\n# ⋯\ndef build_wheel(col, MAT, parent, center, R, W, side, rear):\n    # ⋯ tire, tread blocks, rim, laced spokes — origin ON the axle\n# ⋯\ndef build():\n    col = bpy.data.collections.new(\"Model\")\n    bpy.context.scene.collection.children.link(col)\n    MAT = setup_materials()\n\n    root = make_empty(col, \"BananaKart_Root\")\n    g_body = make_empty(col, \"Body_Group\", parent=root)\n    g_cockpit = make_empty(col, \"Cockpit_Group\", parent=root)\n    g_chassis = make_empty(col, \"Chassis_Group\", parent=root)\n    g_wheels = make_empty(col, \"Wheels_Group\", parent=root)\n    g_susp = make_empty(col, \"Suspension_Group\", parent=root)\n    g_engine = make_empty(col, \"Engine_Group\", parent=root)\n    g_props = make_empty(col, \"Accessories_Group\", parent=root)\n\n    build_banana_shell(col, MAT, g_body)\n    build_stem(col, MAT, g_body)\n    build_nose_tip(col, MAT, g_body)\n    build_cockpit(col, MAT, g_cockpit)\n    build_chassis(col, MAT, g_chassis)\n\n    # ⋯ + suspension, engine, wheels ×4, workshop props …"}, "rabbit": {"file": "code.py", "lines": 622, "url": "https://nova3dshowcase.blob.core.windows.net/showcase/robot-rabbit-companion-bot-1784260572/code.py", "text": "# Robot rabbit companion bot: floating spherical body/head with riveted\n# yellow + pale-blue armor panels, a bolted porthole face with glowing cyan\n# pixel eyes behind dark glass, a rust-red gasket ring sealing the face dome,\n# two big paddle rabbit ears (yellow, dark tips) on ringed pipe mounts, dark\n# flexible tube arms from stacked-gasket shoulder cuffs ending in capsule\n# forearms (blue wrist caps) with spread claw fingers, and a teal bow tie.\n# ⋯\ndef build():\n    col = bpy.data.collections.new(\"Model\")\n    bpy.context.scene.collection.children.link(col)\n    MAT = setup_materials()\n\n    root = make_empty(col, \"RobotRabbit_Root\")\n    g_body = make_empty(col, \"Body_Group\", parent=root)\n    g_face = make_empty(col, \"Face_Group\", parent=root)\n    g_ears = make_empty(col, \"Ears_Group\", parent=root)\n    g_arms = make_empty(col, \"Arms_Group\", parent=root)\n\n    build_body(col, MAT, g_body)\n    build_bow_tie(col, MAT, g_body)\n    build_face(col, MAT, g_face)\n\n    # Viewer-left (+X) ear more upright; viewer-right (-X) ear tilted wide.\n    # Mounts sit near the crown; the lean axis splays further outward.\n    build_ear(col, MAT, g_ears, (0.18, -0.04, 0.98), (0.30, -0.08, 0.95), \"L\")\n    build_ear(col, MAT, g_ears, (-0.36, 0.06, 0.93), (-0.70, 0.16, 0.68), \"R\")\n\n    build_arm(col, MAT, g_arms, SIDE_HANG, raised=False)\n    build_arm(col, MAT, g_arms, SIDE_RAISED, raised=True)\n    # ⋯"}, "cake": {"file": "code.py", "lines": 446, "url": "https://nova3dshowcase.blob.core.windows.net/showcase/blueberry-cheesecake-1783746042/code.py", "text": "# Stylized blueberry cheesecake slice, standard prop scale, volumetric icing and garnishes.\n# ⋯\ndef build():\n    col = bpy.data.collections.new(\"Model\")\n    bpy.context.scene.collection.children.link(col)\n    MAT = setup_materials()\n\n    # 1. Hierarchy Empties\n    root = make_empty(col, \"Cheesecake_Root\")\n    g_body = make_empty(col, \"Cake_Body\", parent=root)\n    g_garnish = make_empty(col, \"Garnish\", parent=root)\n    \n    # 2. Build Wedge\n    crust = build_crust(col, MAT)\n    parent_to(crust, g_body)\n    \n    cheese = build_cheese(col, MAT)\n    parent_to(cheese, g_body)\n    \n    icing = build_icing(col, MAT)\n    parent_to(icing, g_body)\n    \n    # 3. Build Garnishes (placed embedded slightly into the soft icing)\n    # Z coordinate is TOTAL_H + ~icing_thickness - small_sink_amount\n    # ⋯ blueberries placed by golden-angle ring, each its own mesh"}};
 class Component extends DCLogic {
-  state = { asset: null, tab: 'viewer', feat: 'pbr', live: {}, wf: false, normals: false, labels: true, explode: null, groups: [], parts: 0, hidden: {}, expanded: {}, rootName: '', dark: false, flash: null, picked: null, editEx: 'rabbit', tabsTouched: false };
+  state = { asset: null, tab: 'viewer', feat: 'rig', live: {}, wf: false, normals: false, labels: true, explode: null, groups: [], parts: 0, hidden: {}, expanded: {}, rootName: '', dark: false, flash: null, picked: null, editEx: 'rabbit', tabsTouched: false, rigArmed: false, rigThr: 0, rigSteer: 0, rigManual: false, rigFit: 0.72 };
   files = {
     kart: ['assets/banana-kart.glb', 'banana_kart.glb'],
     rabbit: ['assets/robot-rabbit.glb', 'robot_rabbit.glb'],
-    cake: ['assets/berry_cheesecake.glb', 'berry_cheesecake.glb']
+    // blueberry original — berry_cheesecake.glb is the raspberry/strawberry EDIT
+    // (byte-identical to the edit tab's "after"), which contradicted the
+    // blueberry-cheesecake source linked in the code panel beside it
+    cake: ['assets/cheesecake.glb', 'cheesecake.glb']
   };
   componentDidMount() {
     this._studioSrc = () => this.files[this.state.asset ?? (this.props.defaultAsset ?? 'kart')][0];
@@ -522,6 +580,19 @@ class Component extends DCLogic {
     this._bump = () => { this._act = Date.now(); this._exAct = Date.now(); };
     document.addEventListener('nova-interact', this._bump);
     document.addEventListener('pointerdown', this._bump, true);
+    // Rig camera distance by layout band. Only fires on a band CHANGE, so a
+    // drag-resize never re-renders per pixel; the viewer re-fits on its own
+    // resize observer once the new attribute lands.
+    // Keep the stage at 430px everywhere: dropping under the component's 420px
+    // threshold flips it to a much tighter box-projection fit that overshot to
+    // 260% frame coverage. Camera distance alone does the responsive work.
+    this._fitFor = (w) => (w >= 1100 ? 0.8 : w > 768 ? 0.88 : 1.1);
+    this._syncFit = () => {
+      const f = this._fitFor(window.innerWidth);
+      if (f !== this.state.rigFit) this.setState({ rigFit: f });
+    };
+    this._syncFit();
+    window.addEventListener('resize', this._syncFit);
     this._inView = true;
     this._io = new IntersectionObserver((es) => es.forEach((x) => { this._inView = x.isIntersecting; }));
     setTimeout(() => { const v = this.el(); if (v) this._io.observe(v); }, 1200);
@@ -550,6 +621,19 @@ class Component extends DCLogic {
       if (!hw) return;
       this._hwIo = new IntersectionObserver((es) => es.forEach((x) => { this._hwView = x.isIntersecting; }), { rootMargin: '120px' });
       this._hwIo.observe(hw);
+      // Arm the rig GLB on approach of the TOOLS WINDOW itself — watching the
+      // whole how-it-works section armed instantly on a tall desktop viewport,
+      // which put the rig download straight back in the hero kart's way.
+      const tools = document.getElementById('tools');
+      if (tools) {
+        this._toolIo = new IntersectionObserver((es) => es.forEach((x) => {
+          if (x.isIntersecting && !this.state.rigArmed) {
+            this.setState({ rigArmed: true });
+            if (this._toolIo) this._toolIo.disconnect();
+          }
+        }), { rootMargin: '300px' });
+        this._toolIo.observe(tools);
+      }
     }, 800);
     this._exCyc = setInterval(() => {
       if (document.visibilityState !== 'visible' || !this._hwView) return;
@@ -584,6 +668,8 @@ class Component extends DCLogic {
     if (this._io) this._io.disconnect();
     if (this._vio) this._vio.disconnect();
     if (this._hwIo) this._hwIo.disconnect();
+    if (this._toolIo) this._toolIo.disconnect();
+    window.removeEventListener('resize', this._syncFit);
     this._clearEdit();
   }
   // Edit-per-part reveal: original -> cartoon whirl -> edited, then hold on the
@@ -609,6 +695,19 @@ class Component extends DCLogic {
   el() { return document.querySelector('nova-viewer'); }
   renderVals() {
     const s = this.state;
+    const rigEl = () => [...document.querySelectorAll('nova-viewer')].find((v) => v.hasAttribute('rig')) || null;
+    const LIVE_SRC = {
+      u0: 'assets/live/uv_kart.glb', u1: 'assets/live/uv_rabbit.glb', u2: 'assets/live/uv_gary.glb',
+      t0: 'https://nova3dshowcase.blob.core.windows.net/showcase/tex-a-hand-painted-stylized-and-worn-off-finish-1784050995/model.glb',
+      t1: 'https://nova3dshowcase.blob.core.windows.net/showcase/tex-mossy-stone-gary-1784924073/model.glb',
+      t2: 'https://nova3dshowcase.blob.core.windows.net/showcase/tex-procreate-oil-painting-style-cheesecake-1784051991/model.glb'
+    };
+    const pre = (k) => () => {
+      this._pf = this._pf || {};
+      if (this._pf[k] || !LIVE_SRC[k]) return;
+      this._pf[k] = 1;
+      try { fetch(LIVE_SRC[k], { mode: 'cors' }).catch(() => {}); } catch (e) {}
+    };
     const asset = s.asset ?? (this.props.defaultAsset ?? 'kart');
     const explodeVal = s.explode ?? (this.props.explodeAmount ?? 42);
     const [glbSrc, fileLabel] = this.files[asset];
@@ -640,10 +739,10 @@ class Component extends DCLogic {
     };
     s.groups.forEach((g) => walk(g, 0));
     const codeText = meta.text + '\n\n# ⋯ excerpt — the full ' + meta.lines + '-line program IS the asset.\n# GLB is just its compilation target.';
-    const FEATS = [{id:'pbr',icon:'🎨',label:'PBR textures'},{id:'uv',icon:'🗺',label:'UV maps'},{id:'edit',icon:'🧩',label:'Edit per part'},{id:'artic',icon:'🦾',label:'Articulate',soon:1},{id:'anim',icon:'🎬',label:'Animation-ready',soon:1}];
+    const FEATS = [{id:'rig',icon:'🦾',label:'Articulate / animate'},{id:'pbr',icon:'🎨',label:'PBR textures'},{id:'uv',icon:'🗺',label:'UV maps'},{id:'edit',icon:'🧩',label:'Edit per part'}];
     // Unselected tabs carry `tabhint`, which ripples them until the first click
     // marks the strip `tabs-touched` and the CSS kills the animation for good.
-    const tabs = FEATS.map((fd) => { const on = s.feat === fd.id; return { label: fd.label, icon: fd.icon, soon: fd.soon ? ' · soon' : '', cls: on ? '' : 'tabhint', go: () => { this._exAct = Date.now(); this.setState({ feat: fd.id, tabsTouched: true }); }, bg: on ? 'var(--paper)' : 'color-mix(in oklab, var(--mint) 22%, var(--bg))', col: on ? 'var(--ink)' : 'var(--muted)', ty: on ? '0' : '3px', sh: on ? 'inset 0 3px 0 var(--yellow)' : 'none' }; });
+    const tabs = FEATS.map((fd) => { const on = s.feat === fd.id; return { label: fd.label, icon: fd.icon, soon: fd.soon ? ' · soon' : '', cls: on ? '' : 'tabhint', go: () => { this._exAct = Date.now(); this.setState({ feat: fd.id, tabsTouched: true }); }, bg: on ? 'var(--paper)' : 'color-mix(in oklab, var(--mint) 22%, var(--bg))', col: on ? 'var(--ink)' : 'var(--muted)', ty: on ? '0' : '3px', sh: on ? 'inset 0 3px 0 var(--yellow)' : '2.5px 2.5px 0 var(--edge)' }; });
     return {
       themeIcon: s.dark ? '☀' : '☾',
       toggleTheme: () => { document.body.classList.toggle('dark', !s.dark); this.setState({ dark: !s.dark }); },
@@ -663,7 +762,33 @@ class Component extends DCLogic {
       explodeVal,
       onExplode: (e) => this.setState({ explode: +e.target.value }),
       onReplay: () => { const v = this.el(); if (v) v.replay(); },
-      isFeatUv: s.feat === 'uv', isFeatPbr: s.feat === 'pbr', isFeatEdit: s.feat === 'edit', isFeatArtic: s.feat === 'artic', isFeatAnim: s.feat === 'anim',
+      isFeatUv: s.feat === 'uv', isFeatPbr: s.feat === 'pbr', isFeatEdit: s.feat === 'edit', isFeatRig: s.feat === 'rig',
+      // Withheld until the tools section nears the viewport, so the rig GLB never
+      // races the hero kart on first paint (it is the landing tab now).
+      rigSrc: s.rigArmed ? 'assets/live/rig_kart.glb' : '',
+      // The kart is a long, low object. One fit value cannot serve both a wide
+      // two-column stage and a near-portrait phone canvas — at 0.72 the model
+      // projected to 134% of the canvas width at 390px, i.e. clipped off both
+      // sides. Band it by layout instead. (Set by the resize watcher below.)
+      rigFit: s.rigFit,
+      // Rig controls are FULLY imperative — no setState anywhere on the drag
+      // path. An earlier version flipped state to swap the status pill, and the
+      // re-render re-applied value="0" to the range inputs, so the thumb snapped
+      // back to centre mid-drag: the kart obeyed but the control looked dead.
+      // Sliders stay uncontrolled; the pill is written directly.
+      // The template is a vdom: `value` is a controlled prop, so it MUST track
+      // state or the thumb snaps back to the last rendered value on every event
+      // (the kart obeyed, the slider looked dead). Same pattern as the hero
+      // explode slider. The viewer is still driven imperatively so the 3D loop
+      // never waits on a re-render.
+      rigThrVal: s.rigThr, rigSteerVal: s.rigSteer,
+      onRigThr: (e) => { const n = +e.target.value; const v = rigEl(); if (v) v.rigSet('thr', n); this.setState({ rigThr: n, rigManual: true }); },
+      onRigSteer: (e) => { const n = +e.target.value; const v = rigEl(); if (v) v.rigSet('steer', n); this.setState({ rigSteer: n, rigManual: true }); },
+      onRigWhack: () => { const v = rigEl(); if (v) v.rigWhack(); if (!s.rigManual) this.setState({ rigManual: true }); },
+      onRigAuto: () => { const v = rigEl(); if (v) v.rigAuto(); this.setState({ rigThr: 0, rigSteer: 0, rigManual: false }); },
+      rigPill: s.rigManual ? 'you have the rig' : 'playing · 6s loop',
+      rigPillBg: s.rigManual ? 'var(--yellow)' : 'var(--paper)',
+      rigPillCol: s.rigManual ? '#221d18' : 'var(--muted)',
       isEditRabbit: s.editEx === 'rabbit', isEditPig: s.editEx === 'pig', isEditCake: s.editEx === 'cake',
       editFile: { rabbit: '🐰 robot_rabbit.glb', pig: '🐷 pig_car.glb', cake: '🍰 cheesecake.glb' }[s.editEx],
       editChanged: { rabbit: 'the eyes, ears, bow & palette', pig: 'the wings & nameplate', cake: 'the berries & glaze' }[s.editEx],
@@ -674,6 +799,10 @@ class Component extends DCLogic {
       tabs,
       tabsCls: s.tabsTouched ? 'tabs-touched' : '',
       showTabHint: !s.tabsTouched,
+      // Hover prefetch: these GLBs are 1.5–15.4 MB, so starting the download on
+      // intent rather than on click removes most of the wait. Fires once per card.
+      preU0: pre('u0'), preU1: pre('u1'), preU2: pre('u2'),
+      preT0: pre('t0'), preT1: pre('t1'), preT2: pre('t2'),
       uIdle0: !s.live.u0, uLive0: !!s.live.u0, goU0: () => this.setState({ live: { ...s.live, u0: true } }),
       uIdle1: !s.live.u1, uLive1: !!s.live.u1, goU1: () => this.setState({ live: { ...s.live, u1: true } }),
       uIdle2: !s.live.u2, uLive2: !!s.live.u2, goU2: () => this.setState({ live: { ...s.live, u2: true } }),
