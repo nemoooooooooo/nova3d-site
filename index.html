@@ -570,7 +570,7 @@ h1{letter-spacing:-.025em !important}
         <span onClick="{{ pickRigRobot }}" class="{{ rigRobotCls }}" style="cursor:pointer;border:1.5px solid var(--line);border-radius:8px;padding:4px 12px;background:var(--paper)">{{ rigRobotMark }} 🤖 eye robot</span>
       </div>
       <sc-if value="{{ isRigKart }}" hint-placeholder-val="{{ true }}">
-      <div class="rig-grid" style="display:grid;grid-template-columns:1fr 322px;gap:14px">
+      <div class="rig-grid" style="display:grid;grid-template-columns:1fr 322px;gap:14px;opacity:{{ rigOpacity }};transition:opacity .26s ease">
         <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;overflow:hidden;box-shadow:3px 3px 0 rgba(34,29,24,.1)">
           <div style="display:flex;align-items:center;gap:8px;padding:7px 12px;border-bottom:1.5px solid var(--edge);background:color-mix(in oklab, var(--mint) 22%, var(--paper))">
             <span style="width:10px;height:10px;border-radius:50%;background:var(--pink);border:1.5px solid var(--edge)"></span>
@@ -610,14 +610,13 @@ body.scale.set(1-k*.6, 1+k, 1-k*.6)
       </sc-if>
 
       <sc-if value="{{ isRigRobot }}" hint-placeholder-val="{{ false }}">
-      <div class="rig-grid" style="display:grid;grid-template-columns:1fr 322px;gap:14px">
+      <div class="rig-grid" style="display:grid;grid-template-columns:1fr 322px;gap:14px;opacity:{{ rigOpacity }};transition:opacity .26s ease">
         <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;overflow:hidden;box-shadow:3px 3px 0 rgba(34,29,24,.1)">
           <div style="display:flex;align-items:center;gap:8px;padding:7px 12px;border-bottom:1.5px solid var(--edge);background:color-mix(in oklab, var(--lav) 24%, var(--paper))">
             <span style="width:10px;height:10px;border-radius:50%;background:var(--pink);border:1.5px solid var(--edge)"></span>
             <span style="width:10px;height:10px;border-radius:50%;background:var(--yellow);border:1.5px solid var(--edge)"></span>
             <span style="width:10px;height:10px;border-radius:50%;background:var(--mint);border:1.5px solid var(--edge)"></span>
-            <span style="font-family:'Space Mono',monospace;font-size:11px;margin-left:4px">🤖 retro_eye_robot.glb · {{ robotClipCount }} baked clips</span>
-            <span style="margin-left:auto;font-family:'Pixelify Sans',monospace;font-size:11.5px;color:var(--ink);background:color-mix(in oklab, var(--mint) 55%, var(--paper));border:1.5px solid var(--edge);border-radius:999px;padding:1px 10px;white-space:nowrap">▶ Showreel · 6 clips in the file</span>
+            <span style="font-family:'Space Mono',monospace;font-size:11px;margin-left:4px">🤖 retro_eye_robot.glb · live rig</span>
           </div>
           <div class="rig-viewer" style="position:relative;height:430px;background:conic-gradient(var(--paper) 90deg,var(--bg) 90deg 180deg,var(--paper) 180deg 270deg,var(--bg) 270deg) 0 0/24px 24px">
             <x-import component-from-global-scope="nova-viewer" from="./nova-viewer.js" src="assets/eye-robot.glb" clip="{{ rigClipName }}" joints="{{ rigJointsJson }}" labels="false" explode="0" spin="0.01" rot="0" cam-yaw="0.4" cam-pitch="0.18" fit="1" min-h="0" hint-size="100%,430px" style="position:absolute;inset:0"></x-import>
@@ -757,7 +756,7 @@ class Component extends DCLogic {
   state = { asset: null, tab: 'viewer', feat: 'rig', live: {}, wf: false, normals: false, labels: true, explode: null, groups: [], parts: 0, hidden: {}, expanded: {}, rootName: '', dark: false, flash: null, picked: null, editEx: 'rabbit', tabsTouched: false, chipsTouched: false, rigArmed: false, rigThr: 0, rigSteer: 0, rigManual: false, rigFit: 0.72,
     // Articulate/animate tab: which asset, which baked clip, and any joints
     // the visitor has taken over. rigCtrls/rigClips are read off the GLB.
-    rigEx: 'kart', rigClip: null, rigJoints: {}, rigCtrls: [], rigClips: [] };
+    rigEx: null, rigFade: false, rigClip: null, rigJoints: {}, rigCtrls: [], rigClips: [] };
   // Which asset the studio opens on before the visitor picks one. Every screen
   // size opens on the same one and walks assetOrder from there, so the preview
   // tells the same story in the same order everywhere — phones used to start on
@@ -767,6 +766,25 @@ class Component extends DCLogic {
   // rotation starts from a different model than the one on screen.
   // Which articulated asset the tab opens on. Picked once per page load so the
   // kart is not always first, then the pair alternates on its own.
+  // Hand over by dipping the stage out and back rather than cutting: the two
+  // assets are different sizes and the control rows differ, so an instant swap
+  // reads as a glitch.
+  _rigSwap(next) {
+    if (this._rigSwapT) return;
+    this.setState({ rigFade: true });
+    this._rigSwapT = setTimeout(() => {
+      this._rigSwapT = null;
+      this._rigSince = Date.now(); this._rigReady = 0;
+      this.setState({ rigEx: next });          // stay faded out…
+      // …and come back only once the new asset is actually on screen. Swapping
+      // tears the viewer down and builds a new one (WebGL context, environment,
+      // GLB parse), so a fixed-length fade just exposed "assembling parts…".
+      // The safety timer means a model that never loads cannot leave it blank.
+      clearTimeout(this._rigFadeT);
+      this._rigFadeT = setTimeout(() => this.setState({ rigFade: false }), 2500);
+    }, 240);
+  }
+
   _initialRig() {
     if (!this._rig0) this._rig0 = Math.random() < 0.5 ? 'kart' : 'robot';
     return this._rig0;
@@ -808,6 +826,17 @@ class Component extends DCLogic {
       // ~8s, which kept shoving the edit clock forward and made its hand-over
       // land anywhere between 11s and 20s instead of after one wipe.
       if (this._isEditSrc(e.detail.src)) this._editReady = Date.now();
+      // the rig dwell counts from when ITS model is actually on screen
+      if (e.target && e.target.closest && e.target.closest('.rig-viewer')) {
+        this._rigReady = Date.now();
+        clearTimeout(this._rigFadeT);
+        if (this.state.rigFade) this.setState({ rigFade: false });
+        // warm the OTHER rig asset during this one's turn, so the hand-over
+        // is a cache hit and each turn is its dwell rather than dwell+load
+        this._pf = this._pf || {};
+        const other = (this.state.rigEx || this._initialRig()) === 'kart' ? 'assets/eye-robot.glb' : 'assets/banana-kart.glb';
+        if (!this._pf['r:' + other]) { this._pf['r:' + other] = 1; try { fetch(other).catch(() => {}); } catch (x) {} }
+      }
       // An articulated asset reports its baked clips and its joint contract
       // (axis + limits, straight out of the glTF extras). Keep them so the
       // rig tab can build a clip picker and sliders whose ranges came from
@@ -946,15 +975,21 @@ class Component extends DCLogic {
       this.setState({ editEx: nxEx });
     }, 1000);
     // The two articulated assets hand over to each other while nobody is
-    // touching them, the same way the studio rotates its models.
+    // touching them. Each gets its own dwell — the robot's showreel has more to
+    // show than the kart's idle loop — counted from the moment THAT model
+    // finished loading, so a cold first load still gets its full turn on screen
+    // rather than spending part of it downloading. Checked four times a second:
+    // a 1s tick made the same 6s land anywhere between 6.0 and 6.7.
+    const RIG_DWELL = { kart: 6000, robot: 9000 };
     this._rigCyc = setInterval(() => {
       if (document.visibilityState !== 'visible' || !this._toolsView) return;
       if (this.state.feat !== 'rig') { this._rigSince = Date.now(); return; }
-      if (Date.now() - (this._rigSince || 0) < 6000) return;
+      const cur = this.state.rigEx || this._initialRig();
+      const since = Math.max(this._rigReady || 0, this._rigSince || 0);
+      if (Date.now() - since < (RIG_DWELL[cur] || 6000)) return;
       if (Date.now() - this._act < INTERACT_GRACE_MS) return;
-      this._rigSince = Date.now();
-      this.setState({ rigEx: (this.state.rigEx || this._initialRig()) === 'kart' ? 'robot' : 'kart' });
-    }, 1000);
+      this._rigSwap(cur === 'kart' ? 'robot' : 'kart');
+    }, 250);
     this._cyc = setInterval(() => {
       if (document.visibilityState !== 'visible' || !this._inView || this.state.tab !== 'viewer') return;
       // hand over once THIS model has spun, exploded and collapsed once —
@@ -980,6 +1015,8 @@ class Component extends DCLogic {
     document.removeEventListener('pointerdown', this._bump, true);
     clearInterval(this._cyc);
     clearInterval(this._rigCyc);
+    clearTimeout(this._rigSwapT);
+    clearTimeout(this._rigFadeT);
     if (this._toolVis) this._toolVis.disconnect();
     clearInterval(this._exCyc);
     clearTimeout(this._flashT);
@@ -1158,14 +1195,14 @@ class Component extends DCLogic {
       explodeVal,
       onExplode: (e) => this.setState({ explode: +e.target.value }),
       onReplay: () => { const v = this.el(); if (v) v.replay(); },
+      rigOpacity: s.rigFade ? '0' : '1',
       isRigKart: rigEx !== 'robot', isRigRobot: rigEx === 'robot',
       rigKartMark: rigEx !== 'robot' ? '♥' : '', rigRobotMark: rigEx === 'robot' ? '♥' : '',
       rigKartCls: rigEx !== 'robot' ? 'chip' : 'chip chiphint',
       rigRobotCls: rigEx === 'robot' ? 'chip' : 'chip chiphint',
-      pickRigKart: () => { this._act = Date.now(); this._rigSince = Date.now(); this.setState({ rigEx: 'kart', chipsTouched: true }); },
-      pickRigRobot: () => { this._act = Date.now(); this._rigSince = Date.now(); this.setState({ rigEx: 'robot', chipsTouched: true }); },
+      pickRigKart: () => { this._act = Date.now(); this.setState({ chipsTouched: true }); if ((s.rigEx || rigEx) !== 'kart') this._rigSwap('kart'); },
+      pickRigRobot: () => { this._act = Date.now(); this.setState({ chipsTouched: true }); if ((s.rigEx || rigEx) !== 'robot') this._rigSwap('robot'); },
       rigClipName, jointRows,
-      robotClipCount: (s.rigClips && s.rigClips.length) || 6,
       rigJointsJson: JSON.stringify(s.rigJoints || {}),
       onRobotAuto: () => { this._act = Date.now(); this.setState({ rigJoints: {} }); },
       isFeatUv: s.feat === 'uv', isFeatPbr: s.feat === 'pbr', isFeatEdit: s.feat === 'edit', isFeatRig: s.feat === 'rig',
