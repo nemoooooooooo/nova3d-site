@@ -20,6 +20,8 @@ body.dark{--bg:#241f2b;--paper:#2e2836;--ink:#fbeef2;--muted:#b6a9c4;--soft:#8d8
 a{color:var(--pinkdeep,#c76a86);text-decoration:none}a:hover{color:#a9536f}
 input[type=range]{accent-color:#ff9ec7}
 @keyframes nvblink{50%{opacity:0}}
+@keyframes pigwhirl{0%{transform:rotateY(0deg) scale(1);filter:blur(0)}45%{transform:rotateY(330deg) scale(.88);filter:blur(3px)}100%{transform:rotateY(720deg) scale(1);filter:blur(0)}}
+.pigwhirl{animation:pigwhirl .6s cubic-bezier(.5,0,.5,1)}
 </style>
 </helmet>
 <div style="font-family:'Outfit',sans-serif;color:var(--ink);min-height:100vh">
@@ -28,10 +30,9 @@ input[type=range]{accent-color:#ff9ec7}
   <div style="display:flex;align-items:center;gap:9px">
     <svg width="18" height="24" viewBox="-1 -1 58 78" aria-label="Nova3D" style="display:block"><polygon points="0,10 10,10 14,14 4,14" fill="#1E3A1A"/><polygon points="10,0 14,4 14,14 10,10" fill="#3D6B38"/><rect x="0" y="0" width="10" height="10" fill="#7DB87A"/><polygon points="40,10 50,10 54,14 44,14" fill="#1E3A1A"/><polygon points="50,0 54,4 54,14 50,10" fill="#3D6B38"/><rect x="40" y="0" width="10" height="10" fill="#7DB87A"/><polygon points="0,20 10,20 14,24 4,24" fill="#1E3A1A"/><polygon points="10,10 14,14 14,24 10,20" fill="#3D6B38"/><rect x="0" y="10" width="10" height="10" fill="#7DB87A"/><polygon points="10,20 20,20 24,24 14,24" fill="#1E3A1A"/><polygon points="20,10 24,14 24,24 20,20" fill="#3D6B38"/><rect x="10" y="10" width="10" height="10" fill="#7DB87A"/><polygon points="40,20 50,20 54,24 44,24" fill="#1E3A1A"/><polygon points="50,10 54,14 54,24 50,20" fill="#3D6B38"/><rect x="40" y="10" width="10" height="10" fill="#7DB87A"/><polygon points="0,30 10,30 14,34 4,34" fill="#1E3A1A"/><polygon points="10,20 14,24 14,34 10,30" fill="#3D6B38"/><rect x="0" y="20" width="10" height="10" fill="#7DB87A"/><polygon points="20,30 30,30 34,34 24,34" fill="#1E3A1A"/><polygon points="30,20 34,24 34,34 30,30" fill="#3D6B38"/><rect x="20" y="20" width="10" height="10" fill="#7DB87A"/><polygon points="40,30 50,30 54,34 44,34" fill="#1E3A1A"/><polygon points="50,20 54,24 54,34 50,30" fill="#3D6B38"/><rect x="40" y="20" width="10" height="10" fill="#7DB87A"/><polygon points="0,40 10,40 14,44 4,44" fill="#1E3A1A"/><polygon points="10,30 14,34 14,44 10,40" fill="#3D6B38"/><rect x="0" y="30" width="10" height="10" fill="#7DB87A"/><polygon points="20,40 30,40 34,44 24,44" fill="#1E3A1A"/><polygon points="30,30 34,34 34,44 30,40" fill="#3D6B38"/><rect x="20" y="30" width="10" height="10" fill="#7DB87A"/><polygon points="40,40 50,40 54,44 44,44" fill="#1E3A1A"/><polygon points="50,30 54,34 54,44 50,40" fill="#3D6B38"/><rect x="40" y="30" width="10" height="10" fill="#7DB87A"/><polygon points="0,50 10,50 14,54 4,54" fill="#1E3A1A"/><polygon points="10,40 14,44 14,54 10,50" fill="#3D6B38"/><rect x="0" y="40" width="10" height="10" fill="#7DB87A"/><polygon points="30,50 40,50 44,54 34,54" fill="#1E3A1A"/><polygon points="40,40 44,44 44,54 40,50" fill="#3D6B38"/><rect x="30" y="40" width="10" height="10" fill="#7DB87A"/><polygon points="40,50 50,50 54,54 44,54" fill="#1E3A1A"/><polygon points="50,40 54,44 54,54 50,50" fill="#3D6B38"/><rect x="40" y="40" width="10" height="10" fill="#7DB87A"/><polygon points="0,60 10,60 14,64 4,64" fill="#1E3A1A"/><polygon points="10,50 14,54 14,64 10,60" fill="#3D6B38"/><rect x="0" y="50" width="10" height="10" fill="#7DB87A"/><polygon points="40,60 50,60 54,64 44,64" fill="#1E3A1A"/><polygon points="50,50 54,54 54,64 50,60" fill="#3D6B38"/><rect x="40" y="50" width="10" height="10" fill="#7DB87A"/><polygon points="0,70 10,70 14,74 4,74" fill="#1E3A1A"/><polygon points="10,60 14,64 14,74 10,70" fill="#3D6B38"/><rect x="0" y="60" width="10" height="10" fill="#7DB87A"/><polygon points="40,70 50,70 54,74 44,74" fill="#1E3A1A"/><polygon points="50,60 54,64 54,74 50,70" fill="#3D6B38"/><rect x="40" y="60" width="10" height="10" fill="#7DB87A"/><rect x="0" y="0" width="10" height="1.5" fill="#1A1A1C"/><rect x="0" y="0" width="1.5" height="10" fill="#1A1A1C"/><rect x="8.5" y="0" width="1.5" height="10" fill="#1A1A1C"/><rect x="40" y="0" width="10" height="1.5" fill="#1A1A1C"/><rect x="40" y="0" width="1.5" height="10" fill="#1A1A1C"/><rect x="48.5" y="0" width="1.5" height="10" fill="#1A1A1C"/><rect x="0" y="10" width="1.5" height="10" fill="#1A1A1C"/><rect x="10" y="10" width="10" height="1.5" fill="#1A1A1C"/><rect x="10" y="18.5" width="10" height="1.5" fill="#1A1A1C"/><rect x="18.5" y="10" width="1.5" height="10" fill="#1A1A1C"/><rect x="40" y="10" width="1.5" height="10" fill="#1A1A1C"/><rect x="48.5" y="10" width="1.5" height="10" fill="#1A1A1C"/><rect x="0" y="20" width="1.5" height="10" fill="#1A1A1C"/><rect x="8.5" y="20" width="1.5" height="10" fill="#1A1A1C"/><rect x="20" y="20" width="10" height="1.5" fill="#1A1A1C"/><rect x="20" y="20" width="1.5" height="10" fill="#1A1A1C"/><rect x="28.5" y="20" width="1.5" height="10" fill="#1A1A1C"/><rect x="40" y="20" width="1.5" height="10" fill="#1A1A1C"/><rect x="48.5" y="20" width="1.5" height="10" fill="#1A1A1C"/><rect x="0" y="30" width="1.5" height="10" fill="#1A1A1C"/><rect x="8.5" y="30" width="1.5" height="10" fill="#1A1A1C"/><rect x="20" y="38.5" width="10" height="1.5" fill="#1A1A1C"/><rect x="20" y="30" width="1.5" height="10" fill="#1A1A1C"/><rect x="28.5" y="30" width="1.5" height="10" fill="#1A1A1C"/><rect x="40" y="30" width="1.5" height="10" fill="#1A1A1C"/><rect x="48.5" y="30" width="1.5" height="10" fill="#1A1A1C"/><rect x="0" y="40" width="1.5" height="10" fill="#1A1A1C"/><rect x="8.5" y="40" width="1.5" height="10" fill="#1A1A1C"/><rect x="30" y="40" width="10" height="1.5" fill="#1A1A1C"/><rect x="30" y="48.5" width="10" height="1.5" fill="#1A1A1C"/><rect x="30" y="40" width="1.5" height="10" fill="#1A1A1C"/><rect x="48.5" y="40" width="1.5" height="10" fill="#1A1A1C"/><rect x="0" y="50" width="1.5" height="10" fill="#1A1A1C"/><rect x="8.5" y="50" width="1.5" height="10" fill="#1A1A1C"/><rect x="40" y="50" width="1.5" height="10" fill="#1A1A1C"/><rect x="48.5" y="50" width="1.5" height="10" fill="#1A1A1C"/><rect x="0" y="68.5" width="10" height="1.5" fill="#1A1A1C"/><rect x="0" y="60" width="1.5" height="10" fill="#1A1A1C"/><rect x="8.5" y="60" width="1.5" height="10" fill="#1A1A1C"/><rect x="40" y="68.5" width="10" height="1.5" fill="#1A1A1C"/><rect x="40" y="60" width="1.5" height="10" fill="#1A1A1C"/><rect x="48.5" y="60" width="1.5" height="10" fill="#1A1A1C"/></svg>
     <span style="font-weight:700;font-size:17.5px;letter-spacing:-.2px">nova3d</span>
-    <span style="font-family:'Space Mono',monospace;font-size:10px;color:var(--soft);margin-left:6px">v0.9 · open source</span>
   </div>
   <div style="display:flex;gap:22px;align-items:center;font-size:13.5px;font-weight:500">
-    <a href="https://discord.gg/nova3d" style="display:flex;align-items:center;gap:6px;background:color-mix(in oklab, var(--lav) 30%, var(--paper));border:1.5px solid var(--edge);border-radius:999px;padding:6px 14px;font-weight:700;font-size:12.5px;color:var(--ink);box-shadow:2px 2px 0 var(--edge)" style-hover="transform:translate(-1px,-1px);box-shadow:3px 3px 0 var(--edge)">💬 Discord</a>
+    <a href="https://discord.gg/QEH8mzcwdR" style="display:flex;align-items:center;gap:6px;background:color-mix(in oklab, var(--lav) 30%, var(--paper));border:1.5px solid var(--edge);border-radius:999px;padding:6px 14px;font-weight:700;font-size:12.5px;color:var(--ink);box-shadow:2px 2px 0 var(--edge)" style-hover="transform:translate(-1px,-1px);box-shadow:3px 3px 0 var(--edge)">💬 Discord</a>
     <a href="https://app.nova3d.xyz/showcase" style="display:flex;align-items:center;gap:6px;background:color-mix(in oklab, var(--mint) 40%, var(--paper));border:1.5px solid var(--edge);border-radius:999px;padding:6px 14px;font-weight:700;font-size:12.5px;color:var(--ink);box-shadow:2px 2px 0 var(--edge)" style-hover="transform:translate(-1px,-1px);box-shadow:3px 3px 0 var(--edge)">🍌 Showcase</a>
     <a href="https://github.com/RareSense/Nova3D" style="display:flex;align-items:center;gap:6px;background:color-mix(in oklab, var(--yellow) 35%, var(--paper));border:1.5px solid var(--edge);border-radius:999px;padding:6px 14px;font-weight:700;font-size:12.5px;color:var(--ink);box-shadow:2px 2px 0 var(--edge)" style-hover="transform:translate(-1px,-1px);box-shadow:3px 3px 0 var(--edge)">★ GitHub</a>
     <span onClick="{{ toggleTheme }}" style="cursor:pointer;width:30px;height:30px;border:1.5px solid var(--line);border-radius:9px;display:grid;place-items:center;font-size:14px;background:var(--paper)">{{ themeIcon }}</span>
@@ -160,7 +161,7 @@ input[type=range]{accent-color:#ff9ec7}
         <sc-if value="{{ uIdle0 }}" hint-placeholder-val="{{ true }}">
           <div onClick="{{ goU0 }}" style="position:absolute;inset:0;cursor:pointer;display:grid;place-items:center">
             <img loading="lazy" src="./assets/showcase/uv_kart.webp" style="max-width:92%;max-height:92%;object-fit:contain">
-            <span style="position:absolute;left:10px;bottom:10px;font-family:'Pixelify Sans',monospace;font-size:12px;background:var(--yellow);color:#221d18;border:1.5px solid var(--edge);border-radius:8px;padding:2px 10px;box-shadow:2px 2px 0 var(--edge)">▶ spin it · 3.1 MB</span>
+            <span style="position:absolute;left:10px;bottom:10px;font-family:'Pixelify Sans',monospace;font-size:12px;background:var(--yellow);color:#221d18;border:1.5px solid var(--edge);border-radius:8px;padding:2px 10px;box-shadow:2px 2px 0 var(--edge)">▶ spin it · 3.2 MB</span>
           </div>
         </sc-if>
         <sc-if value="{{ uLive0 }}" hint-placeholder-val="{{ false }}">
@@ -191,27 +192,27 @@ input[type=range]{accent-color:#ff9ec7}
       <div style="aspect-ratio:4/3;position:relative;overflow:hidden;background:conic-gradient(var(--paper) 90deg,var(--bg) 90deg 180deg,var(--paper) 180deg 270deg,var(--bg) 270deg) 0 0/22px 22px">
         <sc-if value="{{ uIdle2 }}" hint-placeholder-val="{{ true }}">
           <div onClick="{{ goU2 }}" style="position:absolute;inset:0;cursor:pointer;display:grid;place-items:center">
-            <img loading="lazy" src="./assets/showcase/uv_cake.webp" style="max-width:92%;max-height:92%;object-fit:contain">
-            <span style="position:absolute;left:10px;bottom:10px;font-family:'Pixelify Sans',monospace;font-size:12px;background:var(--yellow);color:#221d18;border:1.5px solid var(--edge);border-radius:8px;padding:2px 10px;box-shadow:2px 2px 0 var(--edge)">▶ spin it · 2.2 MB</span>
+            <img loading="lazy" src="./assets/showcase/uv_gary.webp" style="max-width:92%;max-height:92%;object-fit:contain">
+            <span style="position:absolute;left:10px;bottom:10px;font-family:'Pixelify Sans',monospace;font-size:12px;background:var(--yellow);color:#221d18;border:1.5px solid var(--edge);border-radius:8px;padding:2px 10px;box-shadow:2px 2px 0 var(--edge)">▶ spin it · 6.0 MB</span>
           </div>
         </sc-if>
         <sc-if value="{{ uLive2 }}" hint-placeholder-val="{{ false }}">
-          <x-import component-from-global-scope="nova-viewer" from="./nova-viewer.js" src="assets/live/uv_cake.glb" labels="false" explode="30" spin="2" rot="0.55" min-h="0" hint-size="100%,100%" style="position:absolute;inset:0"></x-import>
+          <x-import component-from-global-scope="nova-viewer" from="./nova-viewer.js" src="assets/live/uv_gary.glb" labels="false" explode="30" spin="2" rot="0.55" min-h="0" hint-size="100%,100%" style="position:absolute;inset:0"></x-import>
         </sc-if>
       </div>
       <div style="padding:7px 11px;border-top:1.5px solid var(--edge)">
-        <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-weight:700;font-size:12.5px">blueberry cheesecake</span><span style="font-family:'Space Mono',monospace;font-size:9.5px;color:var(--soft);flex:none">8 parts → 2 atlases</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-weight:700;font-size:12.5px">cartoon Gary</span><span style="font-family:'Space Mono',monospace;font-size:9.5px;color:var(--soft);flex:none">23 parts → 1 atlas</span></div>
       </div>
     </div>
   </div>
   <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:14px">
     <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;overflow:hidden;box-shadow:3px 3px 0 rgba(34,29,24,.1)"><img loading="lazy" src="./assets/showcase/atlas_kart.webp" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block"><div style="display:flex;justify-content:space-between;padding:7px 11px;border-top:1.5px solid var(--edge)"><span style="font-weight:700;font-size:12.5px">kart — atlas sheet</span><span style="font-family:'Space Mono',monospace;font-size:9.5px;color:var(--soft)">per-island wireframes</span></div></div>
     <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;overflow:hidden;box-shadow:3px 3px 0 rgba(34,29,24,.1)"><img loading="lazy" src="./assets/showcase/atlas_rabbit.webp" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block"><div style="display:flex;justify-content:space-between;padding:7px 11px;border-top:1.5px solid var(--edge)"><span style="font-weight:700;font-size:12.5px">rabbit — atlas sheet</span><span style="font-family:'Space Mono',monospace;font-size:9.5px;color:var(--soft)">area-budgeted islands</span></div></div>
-    <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;overflow:hidden;box-shadow:3px 3px 0 rgba(34,29,24,.1)"><img loading="lazy" src="./assets/showcase/atlas_cake.webp" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block"><div style="display:flex;justify-content:space-between;padding:7px 11px;border-top:1.5px solid var(--edge)"><span style="font-weight:700;font-size:12.5px">cheesecake — atlas sheet</span><span style="font-family:'Space Mono',monospace;font-size:9.5px;color:var(--soft)">exterior faces only</span></div></div>
+    <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;overflow:hidden;box-shadow:3px 3px 0 rgba(34,29,24,.1)"><img loading="lazy" src="./assets/showcase/atlas_gary.webp" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block"><div style="display:flex;justify-content:space-between;padding:7px 11px;border-top:1.5px solid var(--edge)"><span style="font-weight:700;font-size:12.5px">Gary — atlas sheet</span><span style="font-family:'Space Mono',monospace;font-size:9.5px;color:var(--soft)">one dense sculpt atlas</span></div></div>
   </div>
     </sc-if>
     <sc-if value="{{ isFeatPbr }}" hint-placeholder-val="{{ true }}">
-  <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);margin:0 0 14px">Restyle from a prompt — the geometry stays put and only the surface changes, because the parts never merge. Full PBR up to 4K (albedo, normal, roughness, metallic, AO, height), packed with every asset. Click a card to spin the real textured GLB.</div>
+  <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);margin:0 0 14px">Restyle from a prompt — full PBR up to 4K (albedo, normal, roughness, metallic, AO, height), packed with every asset. Click a card to spin the real textured GLB.</div>
   <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
     <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;overflow:hidden;box-shadow:3px 3px 0 rgba(34,29,24,.1)">
       <div style="aspect-ratio:4/3;position:relative;overflow:hidden;background:var(--codebg)">
@@ -235,15 +236,15 @@ input[type=range]{accent-color:#ff9ec7}
         <sc-if value="{{ tIdle1 }}" hint-placeholder-val="{{ true }}">
           <div onClick="{{ goT1 }}" style="position:absolute;inset:0;cursor:pointer;display:grid;place-items:center">
             <img loading="lazy" src="./assets/showcase/tex_mossy.webp" style="max-width:92%;max-height:92%;object-fit:contain">
-            <span style="position:absolute;left:10px;bottom:10px;font-family:'Pixelify Sans',monospace;font-size:12px;background:var(--yellow);color:#221d18;border:1.5px solid var(--edge);border-radius:8px;padding:2px 10px;box-shadow:2px 2px 0 var(--edge)">▶ spin it · 13 MB</span>
+            <span style="position:absolute;left:10px;bottom:10px;font-family:'Pixelify Sans',monospace;font-size:12px;background:var(--yellow);color:#221d18;border:1.5px solid var(--edge);border-radius:8px;padding:2px 10px;box-shadow:2px 2px 0 var(--edge)">▶ spin it · 12 MB</span>
           </div>
         </sc-if>
         <sc-if value="{{ tLive1 }}" hint-placeholder-val="{{ false }}">
-          <x-import component-from-global-scope="nova-viewer" from="./nova-viewer.js" src="https://nova3dshowcase.blob.core.windows.net/showcase/tex-a-worn-mossy-stone-shell-with-glowing-cracks-1784051191/model.glb" labels="false" explode="0" spin="2" rot="0.55" min-h="0" hint-size="100%,100%" style="position:absolute;inset:0"></x-import>
+          <x-import component-from-global-scope="nova-viewer" from="./nova-viewer.js" src="https://nova3dshowcase.blob.core.windows.net/showcase/tex-mossy-stone-gary-1784924073/model.glb" labels="false" explode="0" spin="2" rot="0.55" min-h="0" hint-size="100%,100%" style="position:absolute;inset:0"></x-import>
         </sc-if>
       </div>
       <div style="padding:7px 11px;border-top:1.5px solid var(--edge)">
-        <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-weight:700;font-size:12.5px">the snail, petrified</span><span style="font-family:'Space Mono',monospace;font-size:9.5px;color:var(--soft);flex:none">“mossy stone, glowing cracks”</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-weight:700;font-size:12.5px">the snail, petrified</span><span style="font-family:'Space Mono',monospace;font-size:9.5px;color:var(--soft);flex:none">“A worn, mossy stone shell”</span></div>
         <div style="display:flex;gap:5px;margin-top:7px"><div style="flex:1;min-width:0"><img loading="lazy" src="./assets/showcase/map_mossy_albedo.webp" style="width:100%;aspect-ratio:1;object-fit:cover;border:1.5px solid var(--line);border-radius:6px;display:block"><div style="font-family:'Space Mono',monospace;font-size:8px;color:var(--soft);text-align:center;margin-top:2px">albed</div></div><div style="flex:1;min-width:0"><img loading="lazy" src="./assets/showcase/map_mossy_normal.webp" style="width:100%;aspect-ratio:1;object-fit:cover;border:1.5px solid var(--line);border-radius:6px;display:block"><div style="font-family:'Space Mono',monospace;font-size:8px;color:var(--soft);text-align:center;margin-top:2px">norma</div></div><div style="flex:1;min-width:0"><img loading="lazy" src="./assets/showcase/map_mossy_roughness.webp" style="width:100%;aspect-ratio:1;object-fit:cover;border:1.5px solid var(--line);border-radius:6px;display:block"><div style="font-family:'Space Mono',monospace;font-size:8px;color:var(--soft);text-align:center;margin-top:2px">rough</div></div><div style="flex:1;min-width:0"><img loading="lazy" src="./assets/showcase/map_mossy_metallic.webp" style="width:100%;aspect-ratio:1;object-fit:cover;border:1.5px solid var(--line);border-radius:6px;display:block"><div style="font-family:'Space Mono',monospace;font-size:8px;color:var(--soft);text-align:center;margin-top:2px">metal</div></div><div style="flex:1;min-width:0"><img loading="lazy" src="./assets/showcase/map_mossy_ao.webp" style="width:100%;aspect-ratio:1;object-fit:cover;border:1.5px solid var(--line);border-radius:6px;display:block"><div style="font-family:'Space Mono',monospace;font-size:8px;color:var(--soft);text-align:center;margin-top:2px">ao</div></div><div style="flex:1;min-width:0"><img loading="lazy" src="./assets/showcase/map_mossy_height.webp" style="width:100%;aspect-ratio:1;object-fit:cover;border:1.5px solid var(--line);border-radius:6px;display:block"><div style="font-family:'Space Mono',monospace;font-size:8px;color:var(--soft);text-align:center;margin-top:2px">heigh</div></div></div>
       </div>
     </div>
@@ -267,11 +268,39 @@ input[type=range]{accent-color:#ff9ec7}
   </div>
     </sc-if>
     <sc-if value="{{ isFeatEdit }}" hint-placeholder-val="{{ false }}">
-      <div style="text-align:center;padding:52px 20px">
-        <div style="font-size:40px">🧩</div>
-        <div style="font-family:'Pixelify Sans',monospace;font-size:22px;margin-top:12px">Edit per part <span style="color:var(--pinkdeep)">— coming soon</span></div>
-        <div style="font-family:'Space Mono',monospace;font-size:12px;color:var(--muted);margin:9px auto 0;max-width:540px;line-height:1.65">swap or regenerate one named part while the rest stays byte-for-byte identical — because every part is its own mesh in code.</div>
-        <div style="display:inline-block;margin-top:16px;font-family:'Pixelify Sans',monospace;font-size:12px;background:color-mix(in oklab, var(--lav) 30%, var(--paper));border:1.5px solid var(--edge);border-radius:999px;padding:5px 14px;box-shadow:2px 2px 0 var(--edge)">✦ in the app today via regenerate_part</div>
+      <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);margin:0 0 14px;text-align:center">Every part is editable by name. Say what you want in plain words — only that part changes, nothing else moves.</div>
+      <div style="max-width:860px;margin:0 auto;border:1.5px solid var(--edge);border-radius:16px;overflow:hidden;box-shadow:5px 5px 0 rgba(34,29,24,.14)">
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 14px;border-bottom:1.5px solid var(--edge);background:color-mix(in oklab, var(--lav) 16%, var(--paper))">
+          <span style="width:11px;height:11px;border-radius:50%;background:var(--pink);border:1.5px solid var(--edge)"></span>
+          <span style="width:11px;height:11px;border-radius:50%;background:var(--yellow);border:1.5px solid var(--edge)"></span>
+          <span style="width:11px;height:11px;border-radius:50%;background:var(--mint);border:1.5px solid var(--edge)"></span>
+          <span style="font-family:'Space Mono',monospace;font-size:11.5px;margin-left:5px;color:var(--muted)">{{ editFile }}</span>
+          <span style="margin-left:auto;display:flex;gap:5px;font-size:11.5px;font-weight:600">
+            <span onClick="{{ pickEditPig }}" style="cursor:pointer;border:1.5px solid var(--line);border-radius:8px;padding:3px 10px;background:var(--paper)">{{ pigMark }} 🐷 pig car</span>
+            <span onClick="{{ pickEditCake }}" style="cursor:pointer;border:1.5px solid var(--line);border-radius:8px;padding:3px 10px;background:var(--paper)">{{ cakeEditMark }} 🍰 cheesecake</span>
+          </span>
+        </div>
+        <div style="display:flex;align-items:center;gap:11px;padding:14px 18px;border-bottom:1.5px solid var(--edge);background:color-mix(in oklab, var(--mint) 30%, var(--paper))">
+          <span style="flex:none;font-family:'Pixelify Sans',monospace;font-size:12px;color:var(--pinkdeep);border:1.5px solid var(--edge);border-radius:999px;padding:3px 11px;background:var(--paper);box-shadow:2px 2px 0 var(--edge)">✏️ you said</span>
+          <sc-if value="{{ isEditPig }}" hint-placeholder-val="{{ true }}">
+            <span style="font-family:'Outfit',sans-serif;font-size:17px;font-weight:600;color:var(--ink);line-height:1.3">“give it <span style="color:var(--pinkdeep)">angel wings</span>, and rename the plate to <span style="color:var(--pinkdeep)">Peppa xoxo</span>”</span>
+          </sc-if>
+          <sc-if value="{{ isEditCake }}" hint-placeholder-val="{{ false }}">
+            <span style="font-family:'Outfit',sans-serif;font-size:17px;font-weight:600;color:var(--ink);line-height:1.3">“swap the blueberries for <span style="color:var(--pinkdeep)">raspberries and a strawberry</span>, and make the glaze <span style="color:var(--pinkdeep)">berry pink</span>”</span>
+          </sc-if>
+        </div>
+        <div style="position:relative;height:520px;background:conic-gradient(var(--paper) 90deg,var(--bg) 90deg 180deg,var(--paper) 180deg 270deg,var(--bg) 270deg) 0 0/24px 24px">
+          <sc-if value="{{ isEditPig }}" hint-placeholder-val="{{ true }}">
+            <x-import component-from-global-scope="nova-viewer" from="./nova-viewer.js" src="assets/live/edit_pig_orig.glb" compare-src="assets/live/edit_pig.glb" cam-yaw="0" cam-pitch="0.05" fit="0.8" compare-label-a="original" compare-label-b="edited" spin="0.01" rot="0" explode="0" min-h="0" hint-size="100%,520px" style="position:absolute;inset:0"></x-import>
+          </sc-if>
+          <sc-if value="{{ isEditCake }}" hint-placeholder-val="{{ false }}">
+            <x-import component-from-global-scope="nova-viewer" from="./nova-viewer.js" src="assets/live/edit_cake_orig.glb" compare-src="assets/live/edit_cake.glb" cam-yaw="0.5" cam-pitch="0.33" fit="0.78" compare-label-a="original" compare-label-b="edited" spin="0.01" rot="0" explode="0" min-h="0" hint-size="100%,520px" style="position:absolute;inset:0"></x-import>
+          </sc-if>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;padding:9px 15px;border-top:1.5px solid var(--edge);background:var(--bg);font-family:'Space Mono',monospace;font-size:10.5px;color:var(--muted)">
+          <span style="font-family:'Pixelify Sans',monospace;font-size:12px;color:var(--pinkdeep);flex:none">⇆ drag the divider · drag the model to orbit</span>
+          <span style="margin-left:auto;text-align:right">only <span style="color:var(--pinkdeep);font-weight:700">{{ editChanged }}</span> changed across the split — everything else lines up</span>
+        </div>
       </div>
     </sc-if>
     <sc-if value="{{ isFeatArtic }}" hint-placeholder-val="{{ false }}">
@@ -288,22 +317,6 @@ input[type=range]{accent-color:#ff9ec7}
         <div style="font-family:'Pixelify Sans',monospace;font-size:22px;margin-top:12px">Animation-ready <span style="color:var(--pinkdeep)">— coming soon</span></div>
         <div style="font-family:'Space Mono',monospace;font-size:12px;color:var(--muted);margin:9px auto 0;max-width:540px;line-height:1.65">named nodes + placed pivots mean no rigging pass — drop the GLB straight onto an animation timeline.</div>
         <div style="display:inline-block;margin-top:16px;font-family:'Pixelify Sans',monospace;font-size:12px;background:color-mix(in oklab, var(--lav) 30%, var(--paper));border:1.5px solid var(--edge);border-radius:999px;padding:5px 14px;box-shadow:2px 2px 0 var(--edge)">animation demo — soon</div>
-      </div>
-    </sc-if>
-    <sc-if value="{{ isFeatRestyle }}" hint-placeholder-val="{{ false }}">
-      <div style="text-align:center;padding:52px 20px">
-        <div style="font-size:40px">✨</div>
-        <div style="font-family:'Pixelify Sans',monospace;font-size:22px;margin-top:12px">Restyle <span style="color:var(--pinkdeep)">— coming soon</span></div>
-        <div style="font-family:'Space Mono',monospace;font-size:12px;color:var(--muted);margin:9px auto 0;max-width:540px;line-height:1.65">same geometry, a new material story from one prompt — structure survives because the parts never merge.</div>
-        <div style="display:inline-block;margin-top:16px;font-family:'Pixelify Sans',monospace;font-size:12px;background:color-mix(in oklab, var(--lav) 30%, var(--paper));border:1.5px solid var(--edge);border-radius:999px;padding:5px 14px;box-shadow:2px 2px 0 var(--edge)">live restyle demo — soon</div>
-      </div>
-    </sc-if>
-    <sc-if value="{{ isFeatRescale }}" hint-placeholder-val="{{ false }}">
-      <div style="text-align:center;padding:52px 20px">
-        <div style="font-size:40px">📐</div>
-        <div style="font-family:'Pixelify Sans',monospace;font-size:22px;margin-top:12px">Rescale <span style="color:var(--pinkdeep)">— coming soon</span></div>
-        <div style="font-family:'Space Mono',monospace;font-size:12px;color:var(--muted);margin:9px auto 0;max-width:540px;line-height:1.65">proportions are parameters in code — rescale by real-world metres without distorting a single part.</div>
-        <div style="display:inline-block;margin-top:16px;font-family:'Pixelify Sans',monospace;font-size:12px;background:color-mix(in oklab, var(--lav) 30%, var(--paper));border:1.5px solid var(--edge);border-radius:999px;padding:5px 14px;box-shadow:2px 2px 0 var(--edge)">rescale demo — soon</div>
       </div>
     </sc-if>
     <div style="margin-top:18px;padding-top:14px;border-top:1.5px solid var(--line);font-family:'Space Mono',monospace;font-size:11.5px"><a href="https://app.nova3d.xyz/showcase" target="_blank">browse all 73 generations — live 3D, with the code that built each one ↗</a></div>
@@ -389,7 +402,7 @@ input[type=range]{accent-color:#ff9ec7}
   </div>
   <div style="display:flex;gap:12px;justify-content:center">
     <a href="https://app.nova3d.xyz" style="background:var(--yellow);border:1.5px solid var(--edge);border-radius:12px;padding:12px 26px;font-weight:700;font-size:15px;color:#221d18;box-shadow:3px 3px 0 var(--edge)">Try the app →</a>
-    <a href="https://discord.gg/nova3d" style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;padding:12px 26px;font-weight:700;font-size:15px;color:var(--ink)">Join the Discord</a>
+    <a href="https://discord.gg/QEH8mzcwdR" style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;padding:12px 26px;font-weight:700;font-size:15px;color:var(--ink)">Join the Discord</a>
   </div>
 </section>
 
@@ -408,7 +421,7 @@ input[type=range]{accent-color:#ff9ec7}
 <script type="text/x-dc" data-dc-script data-props="{&quot;defaultAsset&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;kart&quot;,&quot;rabbit&quot;,&quot;cake&quot;],&quot;default&quot;:&quot;kart&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Viewer&quot;},&quot;spinSeconds&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:2.8,&quot;min&quot;:1,&quot;max&quot;:6,&quot;step&quot;:0.5,&quot;unit&quot;:&quot;s&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Viewer&quot;},&quot;explodeAmount&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:42,&quot;min&quot;:0,&quot;max&quot;:100,&quot;step&quot;:1,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Viewer&quot;}}">
 const CODE = {"kart": {"file": "code.py", "lines": 822, "url": "https://nova3dshowcase.blob.core.windows.net/showcase/banana-kart-1784198724/code.py", "text": "# Banana kart: cartoon off-road go-kart whose body is a giant ripe banana\n# (brown speckles, dark stem rising at the rear, dark nose tip at the front),\n# open cockpit recess with padded seat + headrest + steering wheel, four chunky\n# blue-grey off-road tires with tread blocks and wire-laced spokes, orange\n# coil-over shock absorbers at each corner, a side-mounted cylindrical muffler\n# fed by curved exhaust headers, and workshop props on the ground (open blue\n# toolbox, wrenches, screwdriver, washers, spray can, melted banana puddle).\n# Scale: real-world metres. Kart ~2.0m long, ~1.2m tall at the stem.\n# ⋯\n# hierarchy machinery — parenting keeps world pos; pivots become origins\ndef parent_to(child, parent):\n    bpy.context.view_layer.update()\n    m = child.matrix_world.copy()\n    child.parent = parent\n    child.matrix_world = m\n\ndef set_pivot(obj, pivot_world):\n    obj.data.transform(Matrix.Translation(-Vector(pivot_world)))\n    obj.location = Vector(pivot_world)\n\n# ⋯\n# ═══ DIMENSION CONSTANTS (metres) ═════════════════════════════════════\nGROUND_Z = 0.0\n\n# Wheels — chunky off-road, rears slightly larger than fronts\nWHEEL_R_REAR  = 0.30\nWHEEL_R_FRONT = 0.26\nWHEEL_W_REAR  = 0.22\nWHEEL_W_FRONT = 0.19\nTRACK_REAR    = 0.60          # |x| of rear wheel centres\n# ⋯\ndef build_wheel(col, MAT, parent, center, R, W, side, rear):\n    # ⋯ tire, tread blocks, rim, laced spokes — origin ON the axle\n# ⋯\ndef build():\n    col = bpy.data.collections.new(\"Model\")\n    bpy.context.scene.collection.children.link(col)\n    MAT = setup_materials()\n\n    root = make_empty(col, \"BananaKart_Root\")\n    g_body = make_empty(col, \"Body_Group\", parent=root)\n    g_cockpit = make_empty(col, \"Cockpit_Group\", parent=root)\n    g_chassis = make_empty(col, \"Chassis_Group\", parent=root)\n    g_wheels = make_empty(col, \"Wheels_Group\", parent=root)\n    g_susp = make_empty(col, \"Suspension_Group\", parent=root)\n    g_engine = make_empty(col, \"Engine_Group\", parent=root)\n    g_props = make_empty(col, \"Accessories_Group\", parent=root)\n\n    build_banana_shell(col, MAT, g_body)\n    build_stem(col, MAT, g_body)\n    build_nose_tip(col, MAT, g_body)\n    build_cockpit(col, MAT, g_cockpit)\n    build_chassis(col, MAT, g_chassis)\n\n    # ⋯ + suspension, engine, wheels ×4, workshop props …"}, "rabbit": {"file": "code.py", "lines": 622, "url": "https://nova3dshowcase.blob.core.windows.net/showcase/robot-rabbit-companion-bot-1784260572/code.py", "text": "# Robot rabbit companion bot: floating spherical body/head with riveted\n# yellow + pale-blue armor panels, a bolted porthole face with glowing cyan\n# pixel eyes behind dark glass, a rust-red gasket ring sealing the face dome,\n# two big paddle rabbit ears (yellow, dark tips) on ringed pipe mounts, dark\n# flexible tube arms from stacked-gasket shoulder cuffs ending in capsule\n# forearms (blue wrist caps) with spread claw fingers, and a teal bow tie.\n# ⋯\ndef build():\n    col = bpy.data.collections.new(\"Model\")\n    bpy.context.scene.collection.children.link(col)\n    MAT = setup_materials()\n\n    root = make_empty(col, \"RobotRabbit_Root\")\n    g_body = make_empty(col, \"Body_Group\", parent=root)\n    g_face = make_empty(col, \"Face_Group\", parent=root)\n    g_ears = make_empty(col, \"Ears_Group\", parent=root)\n    g_arms = make_empty(col, \"Arms_Group\", parent=root)\n\n    build_body(col, MAT, g_body)\n    build_bow_tie(col, MAT, g_body)\n    build_face(col, MAT, g_face)\n\n    # Viewer-left (+X) ear more upright; viewer-right (-X) ear tilted wide.\n    # Mounts sit near the crown; the lean axis splays further outward.\n    build_ear(col, MAT, g_ears, (0.18, -0.04, 0.98), (0.30, -0.08, 0.95), \"L\")\n    build_ear(col, MAT, g_ears, (-0.36, 0.06, 0.93), (-0.70, 0.16, 0.68), \"R\")\n\n    build_arm(col, MAT, g_arms, SIDE_HANG, raised=False)\n    build_arm(col, MAT, g_arms, SIDE_RAISED, raised=True)\n    # ⋯"}, "cake": {"file": "code.py", "lines": 446, "url": "https://nova3dshowcase.blob.core.windows.net/showcase/blueberry-cheesecake-1783746042/code.py", "text": "# Stylized blueberry cheesecake slice, standard prop scale, volumetric icing and garnishes.\n# ⋯\ndef build():\n    col = bpy.data.collections.new(\"Model\")\n    bpy.context.scene.collection.children.link(col)\n    MAT = setup_materials()\n\n    # 1. Hierarchy Empties\n    root = make_empty(col, \"Cheesecake_Root\")\n    g_body = make_empty(col, \"Cake_Body\", parent=root)\n    g_garnish = make_empty(col, \"Garnish\", parent=root)\n    \n    # 2. Build Wedge\n    crust = build_crust(col, MAT)\n    parent_to(crust, g_body)\n    \n    cheese = build_cheese(col, MAT)\n    parent_to(cheese, g_body)\n    \n    icing = build_icing(col, MAT)\n    parent_to(icing, g_body)\n    \n    # 3. Build Garnishes (placed embedded slightly into the soft icing)\n    # Z coordinate is TOTAL_H + ~icing_thickness - small_sink_amount\n    # ⋯ blueberries placed by golden-angle ring, each its own mesh"}};
 class Component extends DCLogic {
-  state = { asset: null, tab: 'viewer', feat: 'pbr', live: {}, wf: false, normals: false, labels: true, explode: null, groups: [], parts: 0, hidden: {}, expanded: {}, rootName: '', dark: false, flash: null, picked: null };
+  state = { asset: null, tab: 'viewer', feat: 'pbr', live: {}, wf: false, normals: false, labels: true, explode: null, groups: [], parts: 0, hidden: {}, expanded: {}, rootName: '', dark: false, flash: null, picked: null, editEx: 'pig' };
   files = {
     kart: ['assets/banana-kart.glb', 'banana_kart.glb'],
     rabbit: ['assets/robot-rabbit.glb', 'robot_rabbit.glb'],
@@ -416,7 +429,13 @@ class Component extends DCLogic {
   };
   componentDidMount() {
     this._studioSrc = () => this.files[this.state.asset ?? (this.props.defaultAsset ?? 'kart')][0];
-    this._ready = (e) => { if (e.detail.src !== this._studioSrc()) return; this.setState({ groups: e.detail.groups, parts: e.detail.parts, rootName: e.detail.root, hidden: {}, expanded: {}, flash: null, picked: null }); };
+    this._ready = (e) => {
+      // Edit tab: once the ORIGINAL pig has actually loaded, let it spin for a
+      // few turns, then swap to the edited version. Driving the swap off load
+      // (not a fixed timer) means the original always visibly spins first.
+      if (e.detail.src !== this._studioSrc()) return;
+      this.setState({ groups: e.detail.groups, parts: e.detail.parts, rootName: e.detail.root, hidden: {}, expanded: {}, flash: null, picked: null });
+    };
     document.addEventListener('nova-ready', this._ready);
     // a 3D click pins the part label AND flashes its group row in the scene graph
     this._picked = (e) => {
@@ -429,7 +448,7 @@ class Component extends DCLogic {
     };
     document.addEventListener('nova-pick', this._picked);
     this._act = Date.now();
-    this._bump = () => { this._act = Date.now(); };
+    this._bump = () => { this._act = Date.now(); this._exAct = Date.now(); };
     document.addEventListener('nova-interact', this._bump);
     document.addEventListener('pointerdown', this._bump, true);
     this._inView = true;
@@ -443,6 +462,23 @@ class Component extends DCLogic {
       }), { threshold: 0.25 });
       this._vio.observe(vid);
     }, 800);
+    // Edit tab: cycle through the worked examples (pig car / cheesecake) the
+    // same way the studio viewer cycles assets — paused by any interaction.
+    this._exAct = Date.now();
+    this._hwView = true;
+    setTimeout(() => {
+      const hw = document.getElementById('hw');
+      if (!hw) return;
+      this._hwIo = new IntersectionObserver((es) => es.forEach((x) => { this._hwView = x.isIntersecting; }), { rootMargin: '120px' });
+      this._hwIo.observe(hw);
+    }, 800);
+    this._exCyc = setInterval(() => {
+      if (document.visibilityState !== 'visible' || !this._hwView) return;
+      if (this.state.feat !== 'edit') { this._exAct = Date.now(); return; }
+      if (Date.now() - this._exAct < 13000) return;
+      this._exAct = Date.now();
+      this.setState({ editEx: this.state.editEx === 'pig' ? 'cake' : 'pig' });
+    }, 1000);
     this._cyc = setInterval(() => {
       if (document.visibilityState !== 'visible' || !this._inView || this.state.tab !== 'viewer') return;
       if (Date.now() - this._act < 15000) return;
@@ -459,10 +495,23 @@ class Component extends DCLogic {
     document.removeEventListener('nova-interact', this._bump);
     document.removeEventListener('pointerdown', this._bump, true);
     clearInterval(this._cyc);
+    clearInterval(this._exCyc);
     clearTimeout(this._flashT);
     if (this._io) this._io.disconnect();
     if (this._vio) this._vio.disconnect();
+    if (this._hwIo) this._hwIo.disconnect();
+    this._clearEdit();
   }
+  // Edit-per-part reveal: original -> cartoon whirl -> edited, then hold on the
+  // edited state with callouts. Triggered when the "Edit per part" tab opens.
+  _playEdit() {
+    this._clearEdit();
+    this.setState({ editStage: 'orig' });
+    // prefetch the edited GLB during the spin so the swap is instant; the swap
+    // itself is scheduled by the nova-ready handler once the original loads.
+    try { fetch('assets/live/edit_pig.glb'); } catch (e) {}
+  }
+  _clearEdit() { clearTimeout(this._e1); clearTimeout(this._e2); }
   el() { return document.querySelector('nova-viewer'); }
   renderVals() {
     const s = this.state;
@@ -497,7 +546,7 @@ class Component extends DCLogic {
     };
     s.groups.forEach((g) => walk(g, 0));
     const codeText = meta.text + '\n\n# ⋯ excerpt — the full ' + meta.lines + '-line program IS the asset.\n# GLB is just its compilation target.';
-    const FEATS = [{id:'pbr',icon:'🎨',label:'PBR textures'},{id:'uv',icon:'🗺',label:'UV maps'},{id:'edit',icon:'🧩',label:'Edit per part',soon:1},{id:'artic',icon:'🦾',label:'Articulate',soon:1},{id:'anim',icon:'🎬',label:'Animation-ready',soon:1},{id:'restyle',icon:'✨',label:'Restyle',soon:1},{id:'rescale',icon:'📐',label:'Rescale',soon:1}];
+    const FEATS = [{id:'pbr',icon:'🎨',label:'PBR textures'},{id:'uv',icon:'🗺',label:'UV maps'},{id:'edit',icon:'🧩',label:'Edit per part'},{id:'artic',icon:'🦾',label:'Articulate',soon:1},{id:'anim',icon:'🎬',label:'Animation-ready',soon:1}];
     const tabs = FEATS.map((fd) => { const on = s.feat === fd.id; return { label: fd.label, icon: fd.icon, soon: fd.soon ? ' · soon' : '', go: () => this.setState({ feat: fd.id }), bg: on ? 'var(--paper)' : 'color-mix(in oklab, var(--mint) 22%, var(--bg))', col: on ? 'var(--ink)' : 'var(--muted)', ty: on ? '0' : '3px', sh: on ? 'inset 0 3px 0 var(--yellow)' : 'none' }; });
     return {
       themeIcon: s.dark ? '☀' : '☾',
@@ -518,7 +567,13 @@ class Component extends DCLogic {
       explodeVal,
       onExplode: (e) => this.setState({ explode: +e.target.value }),
       onReplay: () => { const v = this.el(); if (v) v.replay(); },
-      isFeatUv: s.feat === 'uv', isFeatPbr: s.feat === 'pbr', isFeatEdit: s.feat === 'edit', isFeatArtic: s.feat === 'artic', isFeatAnim: s.feat === 'anim', isFeatRestyle: s.feat === 'restyle', isFeatRescale: s.feat === 'rescale',
+      isFeatUv: s.feat === 'uv', isFeatPbr: s.feat === 'pbr', isFeatEdit: s.feat === 'edit', isFeatArtic: s.feat === 'artic', isFeatAnim: s.feat === 'anim',
+      isEditPig: s.editEx === 'pig', isEditCake: s.editEx === 'cake',
+      editFile: s.editEx === 'pig' ? '🐷 pig_car.glb' : '🍰 cheesecake.glb',
+      editChanged: s.editEx === 'pig' ? 'the wings & nameplate' : 'the berries & glaze',
+      pigMark: s.editEx === 'pig' ? '♥' : '', cakeEditMark: s.editEx === 'cake' ? '♥' : '',
+      pickEditPig: () => { this._exAct = Date.now(); this.setState({ editEx: 'pig' }); },
+      pickEditCake: () => { this._exAct = Date.now(); this.setState({ editEx: 'cake' }); },
       tabs,
       uIdle0: !s.live.u0, uLive0: !!s.live.u0, goU0: () => this.setState({ live: { ...s.live, u0: true } }),
       uIdle1: !s.live.u1, uLive1: !!s.live.u1, goU1: () => this.setState({ live: { ...s.live, u1: true } }),

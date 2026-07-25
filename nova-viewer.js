@@ -16,6 +16,7 @@ class NovaViewer extends HTMLElement{
  constructor(){super();this._movers=[];this._labels=[];this._meshes=[];this._orig=new Map();this._mgroup=new Map();this._hl=null;this._hlSet=null;this._loadId=0;this._f=0;this._manual=false;this._hover=null;this._pickObj=null;this._introDone=false;}
  _on(n){const v=this.getAttribute(n);return v!=null&&v!=='false'&&v!=='0'}
  _num(n,d){const v=parseFloat(this.getAttribute(n));return isNaN(v)?d:v}
+ _attr(n){const v=this.getAttribute(n);return v!=null?v:this.getAttribute(n.replace(/-/g,''));}
  connectedCallback(){
   if(this._built){
    if(this._ro)this._ro.observe(this);
@@ -54,13 +55,32 @@ class NovaViewer extends HTMLElement{
   this.scene.environment=pm.fromScene(new RoomEnvironment(),0.04).texture;
   this.camera=new T.PerspectiveCamera(38,1,0.05,60);
   this.camera.position.set(3.1,1.7,3.7);
+  {const _cy=this._attr('cam-yaw'),_cp=this._attr('cam-pitch');if(_cy!=null||_cp!=null){const yaw=parseFloat(_cy)||0,pitch=(_cp!=null?parseFloat(_cp):0.15),d=5;this.camera.position.set(Math.sin(yaw)*Math.cos(pitch)*d,Math.sin(pitch)*d,Math.cos(yaw)*Math.cos(pitch)*d);}}
   this.controls=new OrbitControls(this.camera,r.domElement);
   this.controls.enableDamping=true;this.controls.dampingFactor=0.08;
   this.controls.minDistance=1.6;this.controls.maxDistance=12;
+  // Wipe grab (capture phase, so it pre-empts OrbitControls): grabbing within
+  // ~34px of the divider drags the split; anywhere else orbits the model.
+  r.domElement.addEventListener('pointerdown',e=>{
+   if(!this._wipeMode)return;
+   const rect=this.getBoundingClientRect();
+   if(Math.abs((e.clientX-rect.left)-this._wipe*rect.width)>34)return;
+   e.stopPropagation();this._wipeAuto=false;this._wipeDrag=true;
+   try{r.domElement.setPointerCapture(e.pointerId)}catch(x){}
+   this._setWipe(this._pf(e));
+  },true);
+  r.domElement.addEventListener('pointermove',e=>{
+   if(!this._wipeMode)return;
+   const rect=this.getBoundingClientRect();
+   const near=Math.abs((e.clientX-rect.left)-this._wipe*rect.width)<=34;
+   r.domElement.style.cursor=(this._wipeDrag||near)?'ew-resize':'grab';
+   if(this._wipeDrag){e.stopPropagation();this._setWipe(this._pf(e));}
+  },true);
+  r.domElement.addEventListener('pointerup',e=>{if(this._wipeDrag){this._wipeDrag=false;e.stopPropagation();}},true);
   r.domElement.addEventListener('pointerdown',e=>{this._pd=[e.clientX,e.clientY];this._emitAct();});
   r.domElement.addEventListener('wheel',()=>this._emitAct(),{passive:true});
   r.domElement.addEventListener('pointerup',e=>{if(this._pd){const dx=e.clientX-this._pd[0],dy=e.clientY-this._pd[1];if(dx*dx+dy*dy<25)this._pick(e);this._pd=null;}});
-  r.domElement.addEventListener('pointermove',e=>{this._hovEvt=this._pd?null:e;});
+  r.domElement.addEventListener('pointermove',e=>{this._hovEvt=(this._pd||this._wipeDrag)?null:e;});
   r.domElement.addEventListener('pointerleave',()=>{this._hovEvt=null;this._setHover(null);});
   const dl=new T.DirectionalLight(0xffffff,0.8);dl.position.set(3,5,2);this.scene.add(dl);
   this.scene.add(new T.AmbientLight(0xffffff,0.25));
@@ -105,6 +125,7 @@ class NovaViewer extends HTMLElement{
    const vert=(bx.y/2)/Math.tan(fovV/2);
    dist=Math.max(horiz,vert)*1.15+Math.max(bx.x,bx.z)*0.18+this._target()*0.6;
   }
+  dist*=(parseFloat(this._attr('fit'))||1);   // <1 pulls the camera in (tighter crop)
   const dir=this.camera.position.clone().sub(this.controls.target);
   if(dir.lengthSq()<1e-9)dir.set(0.55,0.35,0.75);
   dir.normalize();
@@ -124,17 +145,21 @@ class NovaViewer extends HTMLElement{
   this._load.style.opacity='1';this._load.style.display='';
   const {T,GLTFLoader}=await libs();
   if(this._root){this.scene.remove(this._root);this._root.traverse(o=>{if(o.geometry)o.geometry.dispose()});this._root=null;}
-  this._movers=[];this._meshes=[];this._orig=new Map();this._mgroup=new Map();this._hl=null;this._hlSet=null;this._manual=false;this._introDone=false;this._clearPick();this._setHover(null);
+  this._movers=[];this._meshes=[];this._orig=new Map();this._mgroup=new Map();this._hl=null;this._hlSet=null;this._manual=false;this._introDone=false;this._pinMode=false;this._compareRoots=null;this._cmpT0=null;this._pinSpec=null;this._fade=null;this._cmpMats=null;this._clearPick();this._setHover(null);
   this._labels.forEach(L=>{L.el.remove();L.line.remove();L.dot.remove()});this._labels=[];
+  if(this._cmpBadge){this._cmpBadge.remove();this._cmpBadge=null;}
+  ['_divLine','_divHandle','_tagA','_tagB'].forEach(k=>{if(this[k]){this[k].remove();this[k]=null;}});
+  this._wipeMode=false;this._wipeDrag=false;this._planeA=null;this._planeB=null;
+  if(this.controls)this.controls.enabled=true;this.style.cursor='';
   let gltf=null;
   try{gltf=await new GLTFLoader().loadAsync(src);}catch(e){this._load.innerHTML='<div>could not load asset</div>';return;}
   if(!gltf||id!==this._loadId)return;
   const root=gltf.scene;
-  const box=new T.Box3().setFromObject(root);
-  const size=box.getSize(new T.Vector3()),c=box.getCenter(new T.Vector3());
-  const s=2/Math.max(size.x,size.y,size.z,1e-6);
-  root.scale.setScalar(s);
-  root.position.set(-c.x*s,-c.y*s,-c.z*s);
+  const _cs=this._attr('compare-src');
+  if(_cs){await this._setupCompare(src,_cs,root,id);return;}  // both models are pre-aligned; keep raw
+  const na=this._normOf(root);
+  root.scale.setScalar(na.s);
+  root.position.set(-na.c.x*na.s,-na.c.y*na.s,-na.c.z*na.s);
   this.scene.add(root);this._root=root;
   root.updateMatrixWorld(true);
   let gr=null;root.traverse(n=>{if(!gr&&/_root$/i.test(n.name||''))gr=n;});
@@ -174,11 +199,143 @@ class NovaViewer extends HTMLElement{
    this._labels.push({el,line,dot,anchor:g,local:g.worldToLocal(gc.clone())});
   });
   this._counts=(function build(list){return list.map(g=>{let n=0;g.traverse(o=>{if(o.isMesh)n++});return{name:g.name,count:n,children:build(g.children.filter(hasMesh))}})})(groups);
+  // Custom pins: label ONLY the named parts with live leader lines (same
+  // tracking as the auto group labels), overriding auto labels when present.
+  // Format: "match1:label1;match2:label2" — anchors to the combined bbox of
+  // every mesh whose name contains `match`, so it works across model versions.
+  const pinsAttr=this.getAttribute('pins');
+  if(pinsAttr){
+   const spec=pinsAttr.split(';').map(x=>x.trim()).filter(Boolean).map(x=>{const i=x.indexOf(':');return{match:x.slice(0,i),text:x.slice(i+1)}}).filter(p=>p.match);
+   if(spec.length){
+    this._labels.forEach(L=>{L.el.remove();L.line.remove();L.dot.remove()});this._labels=[];
+    spec.forEach(pin=>{
+     const bb=new T.Box3();let found=false;
+     root.traverse(o=>{if(o.isMesh&&o.name&&o.name.indexOf(pin.match)>=0){bb.expandByObject(o);found=true}});
+     if(!found)return;
+     const c=bb.getCenter(new T.Vector3());
+     const el=document.createElement('div');el.textContent=pin.text;
+     el.style.cssText='position:absolute;left:0;top:0;font-family:"Pixelify Sans",monospace;font-size:12.5px;color:#ffd23e;background:#221d18;border-radius:999px;padding:2px 11px;white-space:nowrap;opacity:0;transition:opacity .35s;box-shadow:2px 2px 0 rgba(34,29,24,.22)';
+     this._lab.appendChild(el);
+     const line=document.createElementNS(SVGNS,'polyline');line.setAttribute('fill','none');line.setAttribute('stroke','#c76a86');line.setAttribute('stroke-width','1.5');line.style.transition='opacity .35s';line.style.opacity='0';
+     const dot=document.createElementNS(SVGNS,'circle');dot.setAttribute('r','3.8');dot.setAttribute('fill','#f47fb0');dot.setAttribute('stroke','#221d18');dot.setAttribute('stroke-width','1.3');dot.style.transition='opacity .35s';dot.style.opacity='0';
+     this._svg.appendChild(line);this._svg.appendChild(dot);
+     this._labels.push({el,line,dot,anchor:root,local:root.worldToLocal(c.clone())});
+    });
+    this._pinMode=this._labels.length>0;
+   }
+  }
   this._applyMats();
   this._load.style.opacity='0';const ld=this._load;setTimeout(()=>{if(id===this._loadId)ld.style.display='none'},350);
   this._t0=performance.now();this._lastT=this._t0;this._baseRot=root.rotation.y;
   this._frame();
   this.dispatchEvent(new CustomEvent('nova-ready',{bubbles:true,composed:true,detail:{src,root:gr.name||'root',parts:this._meshes.length,groups:this._counts}}));
+ }
+ // Normalize a model for the view. With `body-match`, scale/center by the bbox
+ // of meshes whose name contains that string (e.g. "Pig_Body_Shell") so two
+ // model versions line up on the shared part and only the edits differ.
+ _normOf(root){
+  const T=this.T,bm=this._attr('body-match');
+  let box=null;
+  if(bm){box=new T.Box3();root.traverse(o=>{if(o.isMesh&&o.name&&o.name.indexOf(bm)>=0)box.expandByObject(o)});if(box.isEmpty())box=null;}
+  if(!box)box=new T.Box3().setFromObject(root);
+  const size=box.getSize(new T.Vector3()),c=box.getCenter(new T.Vector3());
+  const target=bm?1.7:2;
+  return{s:target/Math.max(size.x,size.y,size.z,1e-6),c};
+ }
+ // Compare mode: a WIPE slider. Both models render at once, split by a vertical
+ // clipping plane — the original on the left of the divider, the edit on the
+ // right. The divider is draggable and also auto-sweeps. Because both models are
+ // pre-aligned and viewed head-on, the shared parts line up across the seam and
+ // only the real differences (wings, nameplate) straddle it.
+ async _setupCompare(src,compareSrc,rootA,id){
+  const {T,GLTFLoader}=await libs();
+  let g2=null;try{g2=await new GLTFLoader().loadAsync(compareSrc);}catch(e){}
+  if(id!==this._loadId)return;
+  const container=new T.Group();container.add(rootA);
+  let rootB=null;
+  if(g2){rootB=g2.scene;container.add(rootB);}
+  this.scene.add(container);this._root=container;container.updateMatrixWorld(true);
+  this._compareRoots=rootB?[rootA,rootB]:[rootA];
+  rootA.traverse(o=>{if(o.isMesh){this._meshes.push(o);this._orig.set(o,o.material);}});
+  const _matsOf=r=>{const s=new Set();r.traverse(o=>{if(o.isMesh){(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>{if(m)s.add(m)})}});return[...s];};
+  this._cmpMats=[_matsOf(rootA),rootB?_matsOf(rootB):[]];
+  // world-X clipping planes: A keeps x<=divider (left), B keeps x>=divider (right)
+  this.renderer.localClippingEnabled=true;
+  this._planeA=new T.Plane(new T.Vector3(-1,0,0),0);
+  this._planeB=new T.Plane(new T.Vector3(1,0,0),0);
+  this._cmpMats[0].forEach(m=>{m.clippingPlanes=[this._planeA];m.needsUpdate=true;});
+  this._cmpMats[1].forEach(m=>{m.clippingPlanes=[this._planeB];m.needsUpdate=true;});
+  // divider line + handle
+  this._divLine=document.createElement('div');
+  this._divLine.style.cssText='position:absolute;top:0;bottom:0;width:2.5px;margin-left:-1.25px;background:#221d18;z-index:3;pointer-events:none';
+  this._divHandle=document.createElement('div');
+  this._divHandle.style.cssText='position:absolute;top:50%;margin-top:-19px;margin-left:-19px;width:38px;height:38px;border-radius:50%;background:#fff;border:2px solid #221d18;box-shadow:2px 2px 0 rgba(34,29,24,.22);display:grid;place-items:center;z-index:4;font-family:monospace;font-size:16px;color:#221d18;pointer-events:none';
+  this._divHandle.textContent='⇆';
+  this._lab.appendChild(this._divLine);this._lab.appendChild(this._divHandle);
+  const mkTag=(txt,side)=>{const d=document.createElement('div');d.textContent=txt;d.style.cssText='position:absolute;top:12px;'+side+':12px;font-family:"Pixelify Sans",monospace;font-size:12px;color:#ffd23e;background:#221d18;border-radius:999px;padding:2px 12px;z-index:4;box-shadow:2px 2px 0 rgba(34,29,24,.2);pointer-events:none';this._lab.appendChild(d);return d;};
+  this._tagA=mkTag(this._attr('compare-label-a')||'original','left');
+  this._tagB=mkTag(this._attr('compare-label-b')||'edited','right');
+  this._wipeMode=true;this._wipe=0.5;this._wipeAuto=true;this._wipeDrag=false;this._wipeT0=null;
+  this._applyMats();
+  this._load.style.opacity='0';const ld=this._load;setTimeout(()=>{if(id===this._loadId)ld.style.display='none'},350);
+  this._t0=performance.now();this._lastT=this._t0;this._baseRot=container.rotation.y;
+  this._frame();this._applyCamAngle();this._setWipe(0.5);
+  this.dispatchEvent(new CustomEvent('nova-ready',{bubbles:true,composed:true,detail:{src,root:'compare',parts:this._meshes.length,groups:[]}}));
+ }
+ _pf(e){const r=this.getBoundingClientRect();return (e.clientX-r.left)/Math.max(1,r.width);}
+ _setWipe(f){
+  f=Math.max(0.03,Math.min(0.97,f));this._wipe=f;
+  if(this._divLine){this._divLine.style.left=(f*100)+'%';this._divHandle.style.left=(f*100)+'%';}
+  this._updWipePlanes();
+ }
+ // Keep the split aligned to the SCREEN: the clip planes are rebuilt from the
+ // camera's right-vector every frame, so the seam stays a vertical line on
+ // screen no matter how the model is orbited.
+ _updWipePlanes(){
+  if(!this._planeA||!this._planeB||!this.T||!this.camera)return;
+  const T=this.T,cam=this.camera;
+  cam.updateMatrixWorld();
+  const right=new T.Vector3().setFromMatrixColumn(cam.matrixWorld,0).normalize();
+  const tgt=this.controls?this.controls.target:new T.Vector3();
+  const dist=cam.position.distanceTo(tgt)||5;
+  const halfH=Math.tan((cam.fov*Math.PI/180)/2)*dist;
+  const halfW=halfH*(cam.aspect||1);
+  const P=tgt.clone().addScaledVector(right,(this._wipe-0.5)*2*halfW);
+  const d=right.dot(P);
+  this._planeA.normal.copy(right).negate();this._planeA.constant=d;
+  this._planeB.normal.copy(right);this._planeB.constant=-d;
+ }
+ // Re-assert the configured load angle around the current target (guarantees a
+ // consistent front-on framing even if the element was re-mounted).
+ _applyCamAngle(){
+  const cy=this._attr('cam-yaw'),cp=this._attr('cam-pitch');
+  if(cy==null&&cp==null)return;
+  const yaw=parseFloat(cy)||0,pitch=(cp!=null?parseFloat(cp):0.15);
+  const t=this.controls?this.controls.target:new this.T.Vector3();
+  const d=this.camera.position.distanceTo(t)||5;
+  this.camera.position.set(t.x+Math.sin(yaw)*Math.cos(pitch)*d,t.y+Math.sin(pitch)*d,t.z+Math.cos(yaw)*Math.cos(pitch)*d);
+  this.camera.lookAt(t);
+ }
+ _buildPins(){
+  this._labels.forEach(L=>{L.el.remove();L.line.remove();L.dot.remove()});this._labels=[];
+  (this._pinSpec||[]).forEach(pin=>{
+   const el=document.createElement('div');el.textContent=pin.text;
+   el.style.cssText='position:absolute;left:0;top:0;font-family:"Pixelify Sans",monospace;font-size:12.5px;color:#ffd23e;background:#221d18;border-radius:999px;padding:2px 11px;white-space:nowrap;opacity:0;transition:opacity .35s;box-shadow:2px 2px 0 rgba(34,29,24,.22)';
+   this._lab.appendChild(el);
+   const line=document.createElementNS(SVGNS,'polyline');line.setAttribute('fill','none');line.setAttribute('stroke','#c76a86');line.setAttribute('stroke-width','1.5');line.style.transition='opacity .35s';line.style.opacity='0';
+   const dot=document.createElementNS(SVGNS,'circle');dot.setAttribute('r','3.8');dot.setAttribute('fill','#f47fb0');dot.setAttribute('stroke','#221d18');dot.setAttribute('stroke-width','1.3');dot.style.transition='opacity .35s';dot.style.opacity='0';
+   this._svg.appendChild(line);this._svg.appendChild(dot);
+   this._labels.push({el,line,dot,anchor:this._root,local:new this.T.Vector3(),spec:pin});
+  });
+ }
+ _repin(model){
+  const T=this.T;
+  this._labels.forEach(L=>{
+   if(!L.spec)return;
+   const bb=new T.Box3();let found=false;
+   model.traverse(o=>{if(o.isMesh&&o.name&&o.name.indexOf(L.spec.match)>=0){bb.expandByObject(o);found=true}});
+   if(found){const c=bb.getCenter(new T.Vector3());L.anchor=this._root;L.local=this._root.worldToLocal(c.clone());}
+  });
  }
  _target(){return Math.max(0,Math.min(1,this._num('explode',42)/100))}
  _setExplode(f){this._f=f;this._movers.forEach(m=>{m.obj.position.copy(m.base).addScaledVector(m.dir,f*m.dist)})}
@@ -188,13 +345,25 @@ class NovaViewer extends HTMLElement{
   const now=performance.now();
   const dt=Math.min(0.05,(now-(this._lastT||now))/1000);this._lastT=now;
   this.controls.update();
+  if(this._wipeMode&&this._wipeAuto){
+   const HOLD=1.5,SWEEP=1.15,LO=0.2,HI=0.8,PER=HOLD+SWEEP+HOLD+SWEEP;
+   if(this._wipeT0==null)this._wipeT0=now;
+   const ct=((now-this._wipeT0)/1000)%PER;
+   let f;
+   if(ct<HOLD)f=LO;
+   else if(ct<HOLD+SWEEP)f=LO+(HI-LO)*easeIO((ct-HOLD)/SWEEP);
+   else if(ct<HOLD+SWEEP+HOLD)f=HI;
+   else f=HI-(HI-LO)*easeIO((ct-HOLD-SWEEP-HOLD)/SWEEP);
+   this._setWipe(f);
+  }
+  if(this._wipeMode)this._updWipePlanes();
   if(this._root){
    const t=(now-this._t0)/1000;
    const spinD=this._num('spin',2.2);
    this._introDone=t>=spinD;
    let f=0;
    if(t<spinD){
-    this._root.rotation.y=this._baseRot+easeIO(Math.min(1,t/spinD))*Math.PI*2;
+    this._root.rotation.y=this._baseRot+easeIO(Math.min(1,t/spinD))*Math.PI*2*this._num('spins',1);
    }else{
     this._root.rotation.y+=dt*this._num('rot',0.3);
     if(this._manual){f=this._target();}
@@ -275,7 +444,7 @@ class NovaViewer extends HTMLElement{
   // group callouts: faintly visible at rest (after the intro spin), full during explode
   const rest=this._introDone?0.55:0;
   const expA=this._f>0.1?Math.min(1,(this._f-0.1)/0.18):0;
-  const alpha=this._on('labels')?Math.max(rest,expA):0;
+  const alpha=this._pinMode?1:(this._on('labels')?Math.max(rest,expA):0);
   this._labels.forEach(L=>{
    const v=L.anchor.localToWorld(L.local.clone()).project(this.camera);
    L.px=(v.x*0.5+0.5)*w;L.py=(-v.y*0.5+0.5)*h;L.behind=v.z>1;
