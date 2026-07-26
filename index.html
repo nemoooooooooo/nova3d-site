@@ -562,7 +562,7 @@ h1{letter-spacing:-.025em !important}
         <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);margin:0 0 12px">This is the downloadable file, moving. Nobody rigged it — the wheels turn because the kart already knows where its own axles are. <span style="color:var(--ink);font-weight:700">Grab a slider and drive it.</span></div>
       </sc-if>
       <sc-if value="{{ isRigRobot }}" hint-placeholder-val="{{ false }}">
-        <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);margin:0 0 12px">This is the downloadable file, walking. Each slider stops exactly where the asset says that joint stops. <span style="color:var(--ink);font-weight:700">Move one — everything else keeps going.</span></div>
+        <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);margin:0 0 12px">This is the downloadable file, walking. Nobody rigged it either — the code that built it already declared every joint's axis and how far it may turn, so these sliders came for free. <span style="color:var(--ink);font-weight:700">Move one — everything else keeps going.</span></div>
       </sc-if>
       <div class="studio-chips rig-chips {{ chipsCls }}" style="display:flex;gap:6px;margin:0 0 12px;font-size:11.5px;font-weight:600">
         <span onClick="{{ pickRigRobot }}" class="{{ rigRobotCls }}" style="cursor:pointer;border:1.5px solid var(--line);border-radius:8px;padding:4px 12px;background:var(--paper)">{{ rigRobotMark }} 🤖 eye robot</span>
