@@ -103,6 +103,7 @@
 import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {DRACOLoader} from 'three/addons/loaders/DRACOLoader.js';   // site copy: the model here is Draco-compressed
 import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
 import {WAVES, Spine, Face, buildAxes} from './wave.js';
 
@@ -139,7 +140,13 @@ const fsweep = {};                 // key -> {target, t0}
 const clock = new THREE.Clock();
 let simT = 0, lastHeadZ = null, lastLead = 0;
 
-new GLTFLoader().load('./sushi_dragon.glb', gltf=>{
+// Site copy only: this GLB is the same model Draco-compressed (5.8 MB -> 1.2 MB)
+// because the page loads slowly on modest connections. Everything else on this
+// page is untouched; ~/sushi_dragon holds the uncompressed original.
+const _dl = new DRACOLoader();
+_dl.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.7/');
+const _gl = new GLTFLoader(); _gl.setDRACOLoader(_dl);
+_gl.load('./sushi_dragon.glb', gltf=>{
   dragon = gltf.scene;
   flyer = new THREE.Group(); flyer.add(dragon); scene.add(flyer);
   spine = new Spine(dragon);

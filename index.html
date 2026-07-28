@@ -898,6 +898,12 @@ class Component extends DCLogic {
     this._editReady = Date.now();
     this._rigSince = Date.now();
     this._bump = () => { this._act = Date.now(); this._exAct = Date.now(); };
+    // focus moving into the embedded dragon page counts as using it
+    this._winBlur = () => {
+      const f = document.querySelector('.dragon-frame');
+      if (f && document.activeElement === f) this._bump();
+    };
+    window.addEventListener('blur', this._winBlur);
     document.addEventListener('nova-interact', this._bump);
     document.addEventListener('pointerdown', this._bump, true);
     // Rig camera distance by layout band. Only fires on a band CHANGE, so a
@@ -951,6 +957,13 @@ class Component extends DCLogic {
         // the two assets never swapped while anyone was actually looking.
         this._toolsView = false;
         this._toolVis = new IntersectionObserver((es) => es.forEach((x) => {
+          // Start the dragon's model on approach. It lives in an embedded page
+          // that only boots when its tab is opened, so without this the whole
+          // download begins at the moment someone clicks the chip.
+          if (x.isIntersecting && !this._pfDragon) {
+            this._pfDragon = 1;
+            try { fetch('assets/dragon/sushi_dragon.glb').catch(() => {}); } catch (e) {}
+          }
           // Arriving at the tab restarts the dwell. The rig model is armed on
           // approach, so its "ready" stamp can be minutes older than the moment
           // anyone actually sees it — without this the asset on screen when you
@@ -1003,7 +1016,9 @@ class Component extends DCLogic {
     // finished loading, so a cold first load still gets its full turn on screen
     // rather than spending part of it downloading. Checked four times a second:
     // a 1s tick made the same 6s land anywhere between 6.0 and 6.7.
-    const RIG_DWELL = { kart: 6000, robot: 9000, dragon: 9000 };
+    // The dragon is a whole instrument — four functions and ten sliders — so
+    // it gets far longer before the rotation moves on.
+    const RIG_DWELL = { kart: 6000, robot: 9000, dragon: 40000 };
     const RIG_ORDER = ['robot', 'kart', 'dragon'];
     this._rigCyc = setInterval(() => {
       if (document.visibilityState !== 'visible' || !this._toolsView) return;
@@ -1011,6 +1026,12 @@ class Component extends DCLogic {
       const cur = this.state.rigEx || this._initialRig();
       const since = Math.max(this._rigReady || 0, this._rigSince || 0);
       if (Date.now() - since < (RIG_DWELL[cur] || 6000)) return;
+      // Pointer and key events inside an iframe never reach this document, so
+      // playing with the dragon's own controls would otherwise look like an
+      // idle page and the rotation would pull it away mid-drag. If the frame
+      // holds focus, treat that as interaction.
+      const f = document.querySelector('.dragon-frame');
+      if (f && document.activeElement === f) { this._act = Date.now(); return; }
       if (Date.now() - this._act < INTERACT_GRACE_MS) return;
       this._rigSwap(RIG_ORDER[(RIG_ORDER.indexOf(cur) + 1) % RIG_ORDER.length]);
     }, 250);
@@ -1033,6 +1054,7 @@ class Component extends DCLogic {
     }, 1000);
   }
   componentWillUnmount() {
+    window.removeEventListener('blur', this._winBlur);
     document.removeEventListener('nova-ready', this._ready);
     document.removeEventListener('nova-pick', this._picked);
     document.removeEventListener('nova-interact', this._bump);
