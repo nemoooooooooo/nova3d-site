@@ -78,93 +78,8 @@ class LegIK{
   return this.solve(this.F.x+u.x*(-dy)+pv.x*0,this.F.y+u.y*(-dy)+pv.y*0);
  }
 }
-// ── The dragon: a body driven by a plotted function ────────────────────────
-// Every Segment_## empty sits at a known distance s along a straight spine, so
-// the whole creature is one scalar field: offset(s,t) = f(s,t,params). Nothing
-// is baked — these run every frame and re-place 25 rigid pieces. Ported from
-// the asset's own wave.js so the page and that demo evaluate the same maths.
-const WAVES={
- sine:{label:'sine',eq:'y = A · sin(k·s + ω·t + φ)',
-  src:'(s, t, p) => p.A * Math.sin(p.k*s + p.w*t + p.phi)',
-  params:[{k:'A',label:'amplitude',min:0,max:0.5,step:0.005,val:0.22,unit:'m'},
-          {k:'k',label:'wavenumber',min:0.5,max:14,step:0.1,val:5.2,unit:'rad/m'},
-          {k:'w',label:'speed ω',min:0,max:10,step:0.05,val:3.1,unit:'rad/s'}],
-  fn:(s,t,p)=>p.A*Math.sin(p.k*s+p.w*t+p.phi)},
- damped:{label:'damped (whip)',eq:'y = A · e^(−λ·s) · sin(k·s + ω·t + φ)',
-  src:'(s, t, p) => p.A * Math.exp(-p.lam*s) * Math.sin(p.k*s + p.w*t + p.phi)',
-  params:[{k:'A',label:'amplitude',min:0,max:0.8,step:0.005,val:0.42,unit:'m'},
-          {k:'lam',label:'damping λ',min:-2.5,max:2.5,step:0.02,val:1.35,unit:'1/m'},
-          {k:'k',label:'wavenumber',min:0.5,max:14,step:0.1,val:6.4,unit:'rad/m'},
-          {k:'w',label:'speed ω',min:0,max:12,step:0.05,val:4.2,unit:'rad/s'}],
-  fn:(s,t,p)=>p.A*Math.exp(-p.lam*s)*Math.sin(p.k*s+p.w*t+p.phi)},
- pulse:{label:'travelling pulse',eq:'y = A · exp( −(s + v·t)² / 2σ² )',
-  src:'(s, t, p) => {\n  const x = ((s + p.v*t) % p.reps + p.reps) % p.reps - p.reps/2;\n  return p.A * Math.exp(-(x*x) / (2*p.sig*p.sig));\n}',
-  params:[{k:'A',label:'amplitude',min:0,max:0.6,step:0.005,val:0.3,unit:'m'},
-          {k:'sig',label:'width σ',min:0.03,max:0.6,step:0.005,val:0.16,unit:'m'},
-          {k:'v',label:'speed v',min:-2.5,max:2.5,step:0.02,val:0.9,unit:'m/s'},
-          {k:'reps',label:'repeat every',min:0.6,max:4,step:0.05,val:2.2,unit:'m'}],
-  fn:(s,t,p)=>{const x=((s+p.v*t)%p.reps+p.reps)%p.reps-p.reps/2;return p.A*Math.exp(-(x*x)/(2*p.sig*p.sig));}},
- square:{label:'square (tanh)',eq:'y = A · tanh( β · sin(k·s + ω·t + φ) )',
-  src:'(s, t, p) => p.A * Math.tanh(p.beta * Math.sin(p.k*s + p.w*t + p.phi))',
-  params:[{k:'A',label:'amplitude',min:0,max:0.45,step:0.005,val:0.18,unit:'m'},
-          {k:'beta',label:'sharpness β',min:1,max:40,step:0.5,val:14,unit:''},
-          {k:'k',label:'wavenumber',min:0.5,max:12,step:0.1,val:4.0,unit:'rad/m'},
-          {k:'w',label:'speed ω',min:0,max:10,step:0.05,val:2.6,unit:'rad/s'}],
-  fn:(s,t,p)=>p.A*Math.tanh(p.beta*Math.sin(p.k*s+p.w*t+p.phi))},
-};
-class Spine{
- constructor(T,root,samples){
-  this.T=T;this.samples=samples||300;this.nodes=[];
-  root.updateWorldMatrix(true,true);
-  const segs=[];root.traverse(o=>{if(/^Segment_\d+$/.test(o.name))segs.push(o)});
-  if(!segs.length)throw new Error('no spine');
-  segs.sort((a,b)=>a.name.localeCompare(b.name));
-  const head=root.getObjectByName('Head_Joint');
-  const p0=segs[0].getWorldPosition(new T.Vector3());
-  this.origin=p0.clone();
-  for(const o of segs){const w=o.getWorldPosition(new T.Vector3());this.nodes.push({obj:o,s:w.x-p0.x});}
-  if(head){const w=head.getWorldPosition(new T.Vector3());this.nodes.push({obj:head,s:w.x-p0.x});}
-  this.length=Math.max.apply(null,this.nodes.map(n=>n.s));
-  for(const n of this.nodes)n.parentInv=new T.Matrix4().copy(n.obj.parent.matrixWorld).invert();
-  this._pts=[];for(let i=0;i<this.samples;i++)this._pts.push(new T.Vector3());
-  this._cum=new Float64Array(this.samples);
-  this._m=new T.Matrix4();this._q=new T.Quaternion();this._q2=new T.Quaternion();
-  this._sc=new T.Vector3(1,1,1);this._ax=new T.Vector3(1,0,0);
- }
- update(wave,p,t,opt){
-  const T=this.T,o=opt||{},lateral=o.lateral==null?1:o.lateral,vertical=o.vertical||0;
-  const helix=o.helix==null?Math.PI/2:o.helix,bank=o.bank==null?0.6:o.bank;
-  const N=this.samples,L=this.length;
-  for(let i=0;i<N;i++){
-   const s=L*(1-i/(N-1));
-   const yz=wave.fn(s,t,p);
-   const yv=vertical?wave.fn(s,t,Object.assign({},p,{phi:(p.phi||0)+helix})):0;
-   this._pts[i].set(this.origin.x+s,this.origin.y+yv*vertical,this.origin.z+yz*lateral);
-  }
-  this._cum[0]=0;
-  for(let i=1;i<N;i++)this._cum[i]=this._cum[i-1]+this._pts[i].distanceTo(this._pts[i-1]);
-  const total=this._cum[N-1];
-  for(const n of this.nodes){
-   const want=Math.min(L-n.s,total);
-   let i=1;while(i<N-1&&this._cum[i]<want)i++;
-   const seg=(this._cum[i]-this._cum[i-1])||1e-9;
-   const f=(want-this._cum[i-1])/seg;
-   const a=this._pts[i-1],b=this._pts[i];
-   const pos=a.clone().lerp(b,f);
-   const tan=b.clone().sub(a).multiplyScalar(-1).normalize();
-   this._q.setFromUnitVectors(this._ax,tan);
-   if(bank){
-    const curv=(i>1&&i<N-1)?(this._pts[i+1].z-2*this._pts[i].z+this._pts[i-1].z):0;
-    this._q.multiply(this._q2.setFromAxisAngle(this._ax,Math.max(-0.9,Math.min(0.9,curv*900*bank))));
-   }
-   this._m.compose(pos,this._q,this._sc);
-   this._m.premultiply(n.parentInv);
-   this._m.decompose(n.obj.position,n.obj.quaternion,new T.Vector3());
-  }
- }
-}
 class NovaViewer extends HTMLElement{
- static get observedAttributes(){return['src','wireframe','normals','labels','explode','spin','rig','clip','joints','wave','wave-params']}
+ static get observedAttributes(){return['src','wireframe','normals','labels','explode','spin','rig','clip','joints']}
  constructor(){super();this._movers=[];this._labels=[];this._meshes=[];this._orig=new Map();this._mgroup=new Map();this._hl=null;this._hlSet=null;this._loadId=0;this._f=0;this._manual=false;this._hover=null;this._pickObj=null;this._introDone=false;}
  _on(n){const v=this.getAttribute(n);return v!=null&&v!=='false'&&v!=='0'}
  _num(n,d){const v=parseFloat(this.getAttribute(n));return isNaN(v)?d:v}
@@ -304,8 +219,6 @@ class NovaViewer extends HTMLElement{
   if(n==='src'&&this.renderer&&v){if(this._near)this._pendingSrc=v;else this._loadSrc(v);}
   if(n==='clip'&&v)this._playClip(v);
   if(n==='joints'){this._jointSpec=undefined;}
-  if(n==='wave'){this._waveP=undefined;}
-  if(n==='wave-params'){this._waveOver=undefined;}
   if((n==='wireframe'||n==='normals')&&this.renderer)this._applyMats();
   if(n==='explode'&&this._root&&o!=null)this._manual=true;
  }
@@ -473,23 +386,8 @@ class NovaViewer extends HTMLElement{
   if(this._ctrl['CTRL_Leg_FL_Hip']){
    try{this._legIK=['FL','FR','BR','BL'].map(l=>new LegIK(T,root,l));}catch(e){this._legIK=null;}
   }
-  // A body that is a plotted function: 25 Segment_## empties re-placed each
-  // frame from offset(s,t). Only built when the file actually has that spine.
-  this._spine=null;this._waves=WAVES;
-  try{this._spine=new Spine(T,root,300);}catch(e){this._spine=null;}
-  if(this._spine){
-   this._face={jaw:root.getObjectByName('Head_Jaw'),
-               lids:['Eye_Lid_L','Eye_Lid_R'].map(n=>root.getObjectByName(n)).filter(Boolean)};
-   this._faceRest=new Map();
-   if(this._face.jaw)this._faceRest.set(this._face.jaw,this._face.jaw.quaternion.clone());
-   this._face.lids.forEach(o=>this._faceRest.set(o,o.scale.clone()));
-   this._blinkNext=2+Math.random()*3;this._blinkAt=-9;
-  }
   const controls=Object.keys(this._ctrl).map(k=>({name:k,min:this._ctrl[k].min,max:this._ctrl[k].max,purpose:this._ctrl[k].purpose}));
-  // hand the wave library out so the page can build its picker and sliders
-  // from the same definitions the spine is actually evaluating
-  const waves=this._spine?Object.keys(WAVES).map(k=>({key:k,label:WAVES[k].label,eq:WAVES[k].eq,src:WAVES[k].src,params:WAVES[k].params})):[];
-  this.dispatchEvent(new CustomEvent('nova-ready',{bubbles:true,composed:true,detail:{src,root:gr.name||'root',parts:this._meshes.length,groups:this._counts,flat:this._flat,clips:this._clips,controls,waves}}));
+  this.dispatchEvent(new CustomEvent('nova-ready',{bubbles:true,composed:true,detail:{src,root:gr.name||'root',parts:this._meshes.length,groups:this._counts,flat:this._flat,clips:this._clips,controls}}));
  }
  // Normalize a model for the view. With `body-match`, scale/center by the bbox
  // of meshes whose name contains that string (e.g. "Pig_Body_Shell") so two
@@ -749,40 +647,9 @@ class NovaViewer extends HTMLElement{
    if(this._rig)this._rigTick(dt,now);
   }
   if(this._ctrl)this._applyJoints();   // live joints win over clip AND turntable
-  if(this._spine)this._spineTick(now/1000);
   this._procHover();
   this._updateLabels();
   this.renderer.render(this.scene,this.camera);
- }
- _spineTick(t){
-  const key=this._attr('wave')||'sine';
-  const w=this._waves[key]||this._waves.sine;
-  let p=this._waveP;
-  if(p===undefined||this._waveKey!==key){
-   p={};w.params.forEach(x=>{p[x.k]=x.val});p.phi=0;
-   this._waveKey=key;this._waveP=p;
-  }
-  let over=this._waveOver;
-  if(over===undefined){
-   try{over=JSON.parse(this._attr('wave-params')||'{}')}catch(e){over={}}
-   this._waveOver=over;
-  }
-  const live=Object.assign({},p,over);
-  if(live.phi==null)live.phi=0;
-  try{this._spine.update(w,live,t,{lateral:1,vertical:0.35,bank:0.6});}catch(e){}
-  // idle face: an occasional blink and a slow breath through the jaw
-  const F=this._face;
-  if(F){
-   if(F.jaw&&this._faceRest.has(F.jaw)){
-    if(!this._jq){this._jq=new this.T.Quaternion();this._jaxis=new this.T.Vector3(0,0,1);}
-    const open=(0.5+0.5*Math.sin(t*0.9))*0.10;      // slow breath; the hinge opens about Z
-    this._jq.setFromAxisAngle(this._jaxis,-open);
-    F.jaw.quaternion.copy(this._faceRest.get(F.jaw)).multiply(this._jq);
-   }
-   if(t>this._blinkNext){this._blinkAt=t;this._blinkNext=t+2.2+Math.random()*3.5;}
-   const b=Math.max(0,1-Math.abs(t-this._blinkAt)/0.09);
-   F.lids.forEach(o=>{const r=this._faceRest.get(o);if(r)o.scale.set(r.x,r.y*(1-0.92*b),r.z);});
-  }
  }
  _emitAct(){this.dispatchEvent(new CustomEvent('nova-interact',{bubbles:true,composed:true}))}
  // Crossfade to a named clip. Unknown names are ignored so a stale attribute

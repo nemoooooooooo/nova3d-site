@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sushi Dragon — a function you can fly</title>
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&family=Space+Mono:wght@400;700&family=Outfit:wght@300..800&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#fbf7f0;--paper:#fff;--ink:#221d18;--muted:#6b6152;--soft:#a09685;--line:#e8dfd2;--edge:#221d18;
+        --pink:#ff9ec7;--pinkdeep:#c76a86;--yellow:#ffd23e;--mint:#a8ecc1;--lav:#c9a6ea;
+        --codebg:#1d1a24;--codetx:#e8dced;--salmon:#f7a486;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Outfit',system-ui,sans-serif}
+  .wrap{max-width:1340px;margin:0 auto;padding:20px 18px 34px}
+  h1{font-size:23px;margin:0 0 3px;letter-spacing:-.5px}
+  .sub{font-family:'Space Mono',monospace;font-size:11.5px;color:var(--muted);margin-bottom:14px}
+  .win{background:var(--paper);border:1.5px solid var(--edge);border-radius:14px;box-shadow:6px 6px 0 rgba(34,29,24,.14);overflow:hidden}
+  .bar{display:flex;align-items:center;gap:8px;padding:9px 14px;border-bottom:1.5px solid var(--edge);
+       background:color-mix(in oklab,var(--salmon) 30%,var(--paper))}
+  .dot{width:11px;height:11px;border-radius:50%;border:1.5px solid var(--edge)}
+  .title{font-family:'Space Mono',monospace;font-size:11.5px;margin-left:6px}
+  .waves{margin-left:auto;display:flex;gap:5px;flex-wrap:wrap}
+  .wv{cursor:pointer;font-family:'Pixelify Sans',monospace;font-size:12.5px;padding:3px 11px;background:var(--paper);
+      border:1.5px solid var(--edge);border-radius:9px;box-shadow:2px 2px 0 var(--edge)}
+  .wv:hover{transform:translate(-1px,-1px);box-shadow:3px 3px 0 var(--edge)}
+  .wv.on{background:var(--yellow)}
+  .body{display:grid;grid-template-columns:1fr 296px}
+  @media(max-width:980px){.body{grid-template-columns:1fr}}
+  #stage{position:relative;height:468px;background:linear-gradient(#bfe0f2 0%,#dceef7 55%,#f6f0e2 100%)}
+  #stage canvas{display:block}
+  .eqbadge{position:absolute;left:14px;top:12px;font-family:'Space Mono',monospace;font-size:12.5px;font-weight:700;
+      background:color-mix(in oklab,var(--paper) 88%,transparent);border:1.5px solid var(--edge);border-radius:9px;
+      padding:4px 12px;box-shadow:2px 2px 0 var(--edge)}
+  .blurb{position:absolute;left:14px;top:46px;font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);
+      background:color-mix(in oklab,var(--paper) 78%,transparent);border-radius:7px;padding:2px 9px;max-width:60%}
+  .side{border-left:1.5px solid var(--line);padding:11px;overflow:auto;height:468px;background:var(--paper)}
+  .side h2{font-family:'Pixelify Sans',monospace;font-size:12.5px;color:var(--pinkdeep);letter-spacing:1px;margin:0 0 6px}
+  .ctl{margin-bottom:7px}
+  .ctl label{display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:10px;margin-bottom:1px}
+  .ctl .v{color:var(--pinkdeep);font-weight:700}
+  .ctl.sweeping{background:color-mix(in oklab,var(--yellow) 26%,transparent);border-radius:8px;padding:3px 5px;margin-left:-5px}
+  .ctl input[type=range]{width:100%;accent-color:#f7a486;margin:0}
+  .btns{display:flex;flex-wrap:wrap;gap:5px;margin:6px 0 10px}
+  .btn{cursor:pointer;font-family:'Pixelify Sans',monospace;font-size:12px;padding:3px 10px;background:var(--paper);
+       border:1.5px solid var(--edge);border-radius:8px}
+  .btn:hover{background:var(--mint)}
+  .btn.on{background:var(--yellow)}
+  .lower{display:grid;grid-template-columns:1fr 1fr;border-top:1.5px solid var(--edge)}
+  @media(max-width:980px){.lower{grid-template-columns:1fr}}
+  .graphbox{position:relative;background:var(--paper);border-right:1.5px solid var(--line)}
+  #graph{display:block;width:100%;height:212px}
+  .glabel{position:absolute;left:10px;top:8px;font-family:'Pixelify Sans',monospace;font-size:11.5px;color:var(--pinkdeep)}
+  .code{background:var(--codebg);color:var(--codetx);font-family:'Space Mono',monospace;font-size:11px;
+        padding:10px 14px;height:212px;overflow:auto;line-height:1.62;white-space:pre-wrap}
+  .code .c{color:#8d81a0}.code .k{color:#ffd23e}.code .n{color:#a8ecc1}.code .s{color:#f7a486}
+  .code b{color:#ff9ec7}
+  .foot{display:flex;flex-wrap:wrap;gap:14px;padding:8px 15px;border-top:1.5px solid var(--edge);
+        background:var(--bg);font-family:'Space Mono',monospace;font-size:10px;color:var(--muted)}
+  .foot b{color:var(--pinkdeep)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Sushi Dragon — 25 rolls riding a function</h1>
+  <div class="sub">every piece is placed by evaluating f(s,t) each frame · nothing is baked · change the maths, change the animal</div>
+
+  <div class="win">
+    <div class="bar">
+      <span class="dot" style="background:#ff9ec7"></span>
+      <span class="dot" style="background:#ffd23e"></span>
+      <span class="dot" style="background:#a8ecc1"></span>
+      <span class="title">sushi_dragon.glb</span>
+      <div class="waves" id="waves"></div>
+    </div>
+    <div class="body">
+      <div id="stage">
+        <div class="eqbadge" id="eq">—</div>
+        <div class="blurb" id="blurb"></div>
+      </div>
+      <div class="side" id="side"></div>
+    </div>
+    <div class="lower">
+      <div class="graphbox">
+        <canvas id="graph"></canvas>
+        <div class="glabel">░ THE WAVE, LIVE — dots are the 25 segments</div>
+      </div>
+      <div class="code" id="code"></div>
+    </div>
+    <div class="foot">
+      <span id="stat">loading…</span>
+      <span>spine <b id="len">–</b></span>
+      <span>fps <b id="fps">–</b></span>
+      <span style="margin-left:auto">arc-length placement keeps the spacing at any amplitude</span>
+    </div>
+  </div>
+</div>
+
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+            "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"}}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
+import {WAVES, Spine, Face, buildAxes} from './wave.js';
+
+const stage = document.getElementById('stage');
+const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,1.75));
+renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.08;
+stage.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(42, 1, 0.02, 200);
+const orbit = new OrbitControls(camera, renderer.domElement);
+orbit.enableDamping = true; orbit.dampingFactor = .06; orbit.enablePan = false;
+scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), .04).texture;
+const sun = new THREE.DirectionalLight(0xfff4e2, 2.4); sun.position.set(3,6,4); scene.add(sun);
+scene.add(new THREE.HemisphereLight(0xdff0ff, 0xf7e6cf, 1.2));
+
+// drifting clouds so it reads as flying, not swimming in a void
+const cloudG = new THREE.Group(); scene.add(cloudG);
+for (let i=0;i<14;i++){
+  const m = new THREE.Mesh(new THREE.SphereGeometry(THREE.MathUtils.randFloat(.5,1.4), 12, 9),
+    new THREE.MeshBasicMaterial({color:0xffffff, transparent:true, opacity:.42}));
+  m.position.set(THREE.MathUtils.randFloatSpread(16), THREE.MathUtils.randFloat(-3.2,2.4), THREE.MathUtils.randFloatSpread(14)-4);
+  m.scale.y = .55; cloudG.add(m);
+}
+
+scene.add(buildAxes(THREE));
+let dragon=null, spine=null, face=null, flyer=null, current='sine', params={}, opts={lateral:1, vertical:0.35, helix:Math.PI/2, bank:0.7};
+let running=true, tScale=1;
+const fp={jaw:0.15, blink:0, look:0, flourish:0.9, autoBlink:true};
+// A face slider you let go of keeps sweeping 0 <-> where you left it, for ever.
+const SWEEP_SECS = 2.0;
+const fsweep = {};                 // key -> {target, t0}
+const clock = new THREE.Clock();
+let simT = 0, lastHeadZ = null, lastLead = 0;
+
+new GLTFLoader().load('./sushi_dragon.glb', gltf=>{
+  dragon = gltf.scene;
+  flyer = new THREE.Group(); flyer.add(dragon); scene.add(flyer);
+  spine = new Spine(dragon);
+  face  = new Face(dragon);
+
+  const box=new THREE.Box3().setFromObject(dragon), s=box.getSize(new THREE.Vector3());
+  orbit.target.set(0.88, 0.02, 0);
+  camera.position.set(0.88, 0.52, 2.55);   // broadside, the whole 1.7 m in frame
+  orbit.update();
+
+  let meshes=0; dragon.traverse(o=>{if(o.isMesh)meshes++;});
+  document.getElementById('stat').textContent = `${meshes} meshes · ${spine.nodes.length} driven nodes (25 segments + head)`;
+  document.getElementById('len').textContent = spine.length.toFixed(2)+' m';
+  buildWaveButtons(); pick('sine'); resize();
+});
+
+// ── UI ──────────────────────────────────────────────────────────────────────
+function buildWaveButtons(){
+  const bar=document.getElementById('waves'); bar.innerHTML='';
+  for(const [key,w] of Object.entries(WAVES)){
+    const b=document.createElement('span'); b.className='wv'; b.innerHTML=`${w.label}<span style="display:block;font-family:'Space Mono',monospace;font-size:8.5px;opacity:.62;font-weight:400">${w.eq}</span>`; b.dataset.k=key;
+    b.onclick=()=>pick(key); bar.append(b);
+  }
+}
+function pick(key){
+  current=key; const w=WAVES[key];
+  params={}; for(const p of w.params) params[p.k]=p.val;
+  if(params.phi===undefined) params.phi=0;
+  document.querySelectorAll('.wv').forEach(b=>b.classList.toggle('on', b.dataset.k===key));
+  document.getElementById('eq').textContent = w.eq;
+  document.getElementById('blurb').textContent = w.blurb;
+  buildSliders();
+}
+function buildSliders(){
+  const w=WAVES[current], side=document.getElementById('side'); side.innerHTML='';
+  const h=document.createElement('h2'); h.textContent='░ '+w.label.toUpperCase(); side.append(h);
+  for(const p of w.params){
+    const wrap=document.createElement('div'); wrap.className='ctl';
+    const lab=document.createElement('label');
+    lab.innerHTML=`<b>${p.label}</b><span class="v">${fmt(params[p.k])}${p.unit?' '+p.unit:''}</span>`;
+    const inp=document.createElement('input');
+    inp.type='range'; inp.min=p.min; inp.max=p.max; inp.step=p.step; inp.value=params[p.k];
+    inp.oninput=()=>{ params[p.k]=+inp.value;
+      lab.querySelector('.v').textContent=fmt(+inp.value)+(p.unit?' '+p.unit:''); };
+    wrap.append(lab,inp); side.append(wrap);
+    inp.dataset.p = p.k;
+  }
+  const h2=document.createElement('h2'); h2.textContent='░ HOW IT FLIES'; h2.style.marginTop='10px'; side.append(h2);
+  addOpt(side,'corkscrew','vertical',0,1.3,opts.vertical);
+  addOpt(side,'bank into turns','bank',0,1.6,opts.bank);
+  const h3=document.createElement('h2'); h3.textContent='░ FACE'; h3.style.marginTop='10px'; side.append(h3);
+  const tip=document.createElement('div');
+  tip.style.cssText="font-family:'Space Mono',monospace;font-size:8.5px;color:var(--soft);line-height:1.5;margin:-2px 0 6px";
+  tip.textContent='drag one and let go — it keeps sweeping 0 ↔ your value on its own';
+  side.append(tip);
+  addFace(side,'jaw','jaw',0,1);
+  addFace(side,'blink','blink',0,1);
+  addFace(side,'look around','look',0,1);
+  addFace(side,'whiskers · fins · horns','flourish',0,2);
+  const btns=document.createElement('div'); btns.className='btns';
+  const ab=document.createElement('span'); ab.className='btn on'; ab.textContent='auto-blink';
+  ab.onclick=()=>{ fp.autoBlink=!fp.autoBlink; ab.classList.toggle('on',fp.autoBlink); };
+  const rb=document.createElement('span'); rb.className='btn'; rb.textContent='roar';
+  rb.onclick=()=>{ fp.jaw=1; fp.horn=2; setTimeout(()=>{fp.jaw=0.15; fp.horn=0.6;},900); };
+  btns.append(ab,rb);
+  const pb=document.createElement('span'); pb.className='btn on'; pb.textContent='⏸ pause';
+  pb.onclick=()=>{ running=!running; pb.classList.toggle('on',running); pb.textContent = running?'⏸ pause':'▶ play'; };
+  const sb=document.createElement('span'); sb.className='btn'; sb.textContent='½ slow';
+  sb.onclick=()=>{ tScale = tScale===1?0.25:1; sb.classList.toggle('on',tScale!==1); sb.textContent = tScale===1?'½ slow':'1× speed'; };
+  btns.append(pb,sb); side.append(btns);
+}
+function addFace(side,label,key,min,max){
+  const wrap=document.createElement('div'); wrap.className='ctl';
+  const lab=document.createElement('label');
+  lab.innerHTML=`<b>${label}</b><span class="v">${fmt(fp[key])}</span>`;
+  const inp=document.createElement('input');
+  inp.type='range'; inp.min=min; inp.max=max; inp.step=0.01; inp.value=fp[key];
+  inp.oninput =()=>{ delete fsweep[key];                       // held: follow exactly
+                     fp[key]=+inp.value; lab.querySelector('.v').textContent=fmt(+inp.value); };
+  const go = ()=>{ if(+inp.value<=0.001){ delete fsweep[key]; return; }
+                   fsweep[key]={target:+inp.value, t0:simT}; wrap.classList.add('sweeping'); };
+  inp.onchange=go; inp.onpointerup=go;
+  wrap.append(lab,inp); side.append(wrap);
+  FACE_UI[key]={inp, lab:lab.querySelector('.v'), wrap};
+}
+const FACE_UI={};
+function addOpt(side,label,key,min,max,val){
+  const wrap=document.createElement('div'); wrap.className='ctl';
+  const lab=document.createElement('label');
+  lab.innerHTML=`<b>${label}</b><span class="v">${fmt(val)}</span>`;
+  const inp=document.createElement('input');
+  inp.type='range'; inp.min=min; inp.max=max; inp.step=0.01; inp.value=val;
+  inp.oninput=()=>{ opts[key]=+inp.value; lab.querySelector('.v').textContent=fmt(+inp.value); };
+  wrap.append(lab,inp); side.append(wrap);
+}
+const fmt = v => (Math.abs(v)>=10 ? v.toFixed(1) : v.toFixed(2));
+
+// ── the live graph ──────────────────────────────────────────────────────────
+const gc = document.getElementById('graph'), gx = gc.getContext('2d');
+function drawGraph(w,p,t){
+  const W=gc.width, H=gc.height, L=spine.length;
+  gx.clearRect(0,0,W,H);
+  gx.fillStyle='#fff'; gx.fillRect(0,0,W,H);
+  const pts = Spine.curve(w,p,t,L,220);
+  let amp = 0.001; for(const [,y] of pts) amp=Math.max(amp,Math.abs(y));
+  amp = Math.max(amp, 0.05)*1.25;
+  const X = s => 34 + (s/L)*(W-52), Y = y => H/2 - (y/amp)*(H/2-26);
+  // axes
+  gx.strokeStyle='#e8dfd2'; gx.lineWidth=1;
+  gx.beginPath(); gx.moveTo(34,H/2); gx.lineTo(W-18,H/2); gx.stroke();
+  gx.beginPath(); gx.moveTo(34,18); gx.lineTo(34,H-18); gx.stroke();
+  gx.fillStyle='#a09685'; gx.font='9px "Space Mono",monospace';
+  gx.fillText('+A',6,26); gx.fillText('0',22,H/2+3); gx.fillText('−A',6,H-16);
+  gx.fillText('tail',30,H-6); gx.fillText('s (m) →',W/2-16,H-6); gx.fillText('head',W-44,H-6);
+  // the curve
+  gx.strokeStyle='#c76a86'; gx.lineWidth=2; gx.beginPath();
+  pts.forEach(([s,y],i)=> i?gx.lineTo(X(s),Y(y)):gx.moveTo(X(s),Y(y)));
+  gx.stroke();
+  // the 25 segments, sitting on the curve
+  for(const n of spine.nodes){
+    const y = w.fn(n.s,t,p);
+    gx.fillStyle = n.isHead ? '#221d18' : '#f7a486';
+    gx.beginPath(); gx.arc(X(n.s), Y(y), n.isHead?4.5:3.1, 0, 6.283); gx.fill();
+    if(n.isHead){ gx.strokeStyle='#221d18'; gx.lineWidth=1; gx.stroke(); }
+  }
+}
+
+// ── the live code panel ─────────────────────────────────────────────────────
+const codeEl = document.getElementById('code');
+let lastCode = '';
+function drawCode(w,p,t){
+  const src = w.fn.toString()
+    .replace(/</g,'&lt;')
+    .replace(/\bp\.(\w+)/g, (m,k)=>`<b>p.${k}</b>`)
+    .replace(/\b(Math\.\w+)/g,'<span class="n">$1</span>')
+    .replace(/(\/\/[^\n]*)/g,'<span class="c">$1</span>');
+  const vals = Object.entries(p).map(([k,v])=>`<b>${k}</b>=<span class="k">${fmt(v)}</span>`).join('  ');
+  const sample = spine ? spine.nodes[12] : null;
+  const y = sample ? w.fn(sample.s, t, p) : 0;
+  const html =
+`<span class="c">// this is the function running right now — printed from fn.toString()</span>
+<span class="s">f</span> = ${src}
+
+<span class="c">// live parameters</span>
+p = { ${vals} }   <b>t</b>=<span class="k">${t.toFixed(2)}</span>s
+
+<span class="c">// evaluated once per segment, every frame</span>
+<span class="s">Segment_12</span>: s=<span class="k">${sample?sample.s.toFixed(3):'–'}</span>  →  f(s,t) = <span class="k">${y.toFixed(4)}</span> m
+<span class="c">// then the piece is placed at arc length ${(spine?spine.length - (sample?sample.s:0):0).toFixed(2)} m back
+// from the head and rotated onto the curve's tangent</span>
+
+<span class="c">// facial rig — same idea, driven every frame</span>
+face = { ${['jaw','blink','look','flourish'].map(k=>{
+    const sw = fsweep[k] ? ` <span class="c">↔${fmt(fsweep[k].target)}</span>` : '';
+    return `<b>${k}</b>=<span class="k">${fmt(fp[k])}</span>${sw}`;
+  }).join('  ')} }
+<span class="s">Head_Jaw</span>.rotation.z      = <span class="k">${(-fp.jaw*0.55).toFixed(3)}</span> rad
+<span class="s">Eye_*</span>.scale.y          = <span class="k">${(1-0.92*fp.blink).toFixed(3)}</span>
+<span class="s">Whisker_L_Pivot</span>.rot.y  = trails the head at <span class="k">${fmt(lastLead)}</span> rad/frame`;
+  if(html!==lastCode){ codeEl.innerHTML = html; lastCode = html; }
+}
+
+// ── frame ───────────────────────────────────────────────────────────────────
+let fpsT=0, frames=0;
+renderer.setAnimationLoop(()=>{
+  const dt = Math.min(clock.getDelta(), 0.05);
+  if(running) simT += dt*tScale;
+  if(spine){
+    const w = WAVES[current];
+    spine.update(w, params, simT, opts);
+    const hn = spine.nodes[spine.nodes.length-1];
+    const lead = (hn.obj.position.z - (lastHeadZ ?? hn.obj.position.z));
+    lastHeadZ = hn.obj.position.z; lastLead = THREE.MathUtils.clamp(lead*14,-1,1);
+    for(const [k,sw] of Object.entries(fsweep)){
+      const u = 0.5 - 0.5*Math.cos((simT - sw.t0) * 2*Math.PI / SWEEP_SECS);
+      fp[k] = sw.target * u;
+      const ui = FACE_UI[k];
+      if(ui){ ui.inp.value = fp[k]; ui.lab.textContent = fmt(fp[k]); }
+    }
+    if(face) face.update(simT, {
+        jaw: fp.jaw, blink: fp.blink, autoBlink: fp.autoBlink,
+        lookX: fp.look, lookY: fp.look*0.45,
+        whisker: fp.flourish, fin: fp.flourish, horn: fp.flourish*0.7
+      }, THREE.MathUtils.clamp(lead*14, -1, 1));
+
+    // Haku flight: a slow arc with the whole body banking into it
+    flyer.position.y = Math.sin(simT*0.42)*0.16;
+    flyer.rotation.y = Math.sin(simT*0.21)*0.20;
+    flyer.rotation.z = -Math.cos(simT*0.21)*0.16;
+    cloudG.position.x = (cloudG.position.x - dt*1.15) % 18;   // stream past toward the tail
+
+    drawGraph(w, params, simT);
+    drawCode(w, params, simT);
+  }
+  frames++; fpsT+=dt;
+  if(fpsT>0.5){ document.getElementById('fps').textContent=Math.round(frames/fpsT); frames=0; fpsT=0; }
+  orbit.update();
+  renderer.render(scene,camera);
+});
+
+function resize(){
+  const w=stage.clientWidth,h=stage.clientHeight;
+  renderer.setSize(w,h); camera.aspect=w/h; camera.updateProjectionMatrix();
+  const r=Math.min(devicePixelRatio,2);
+  gc.width=gc.clientWidth*r; gc.height=212*r; gx.scale(1,1);
+}
+addEventListener('resize', resize);
+
+// test hooks
+window.__scene=scene; window.__THREE=THREE;
+window.__pick=k=>pick(k);
+window.__set=(k,v)=>{ params[k]=v; };
+window.__opt=(k,v)=>{ opts[k]=v; };
+window.__params=()=>({...params});
+window.__seg=i=>{ const n=spine.nodes[i]; n.obj.updateWorldMatrix(true,false);
+  return n.obj.getWorldPosition(new THREE.Vector3()).toArray().map(v=>+v.toFixed(4)); };
+window.__gaps=()=>{ const g=[];
+  for(let i=1;i<25;i++){ const a=new THREE.Vector3(), b=new THREE.Vector3();
+    spine.nodes[i-1].obj.getWorldPosition(a); spine.nodes[i].obj.getWorldPosition(b);
+    g.push(+a.distanceTo(b).toFixed(4)); } return g; };
+window.__face=()=>fp;
+window.__headcam=()=>{ const h=spine.nodes[spine.nodes.length-1].obj;
+  h.updateWorldMatrix(true,false); const p=h.getWorldPosition(new THREE.Vector3());
+  orbit.target.copy(p); camera.position.set(p.x+0.10, p.y+0.06, p.z+0.34); orbit.update(); };
+window.__freeze=()=>{ running=false; };
+window.__pivots=()=>{ const out={};
+  for(const n of ['Head_Jaw','Whisker_L_Pivot','Horn_L_Pivot','Fin_L0_Pivot','Eye_Iris_L','Eye_Ball_L']){
+    const o=scene.getObjectByName(n); if(!o) {out[n]=null; continue;}
+    o.updateWorldMatrix(true,false);
+    const wp=o.getWorldPosition(new THREE.Vector3());
+    const b=new THREE.Box3().setFromObject(o); const c=b.getCenter(new THREE.Vector3());
+    out[n]={pivot:wp.toArray().map(v=>+v.toFixed(3)), geomCentre:c.toArray().map(v=>+v.toFixed(3)),
+            size:b.getSize(new THREE.Vector3()).toArray().map(v=>+v.toFixed(3)),
+            offset:+wp.distanceTo(c).toFixed(3)};
+  } return out; };
+window.__t=()=>simT;
+window.__step=(n)=>{ for(let i=0;i<n;i++){ simT+=1/60; spine.update(WAVES[current],params,simT,opts);} return simT; };
+</script>
+</body>
+</html>

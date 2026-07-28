@@ -242,6 +242,10 @@ h2{font-size:26px !important;line-height:1.12;letter-spacing:-.02em}
 .edit-bar{flex-wrap:wrap;gap:5px !important;padding:9px 12px !important}
 .edit-note{margin-left:0 !important;text-align:left !important;width:100%;font-size:9.5px !important}
 
+/* the dragon demo is its own page in a frame; give it room on a phone and
+   let it scroll inside rather than squashing its layout */
+.dragon-frame{height:760px !important}
+
 /* ══ SHIP IT ════════════════════════════════════════════════════════════ */
 .ship-grid{grid-template-columns:1fr !important;gap:20px !important}
 .ship-grid pre{font-size:10.5px !important;white-space:pre-wrap !important;word-break:break-word}
@@ -639,41 +643,19 @@ h1{letter-spacing:-.025em !important}
       </sc-if>
 
       <sc-if value="{{ isRigDragon }}" hint-placeholder-val="{{ false }}">
-      <div class="rig-grid" style="display:grid;grid-template-columns:1fr 322px;gap:14px;opacity:{{ rigOpacity }};transition:opacity .26s ease">
+      <div style="opacity:{{ rigOpacity }};transition:opacity .26s ease">
         <div style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;overflow:hidden;box-shadow:3px 3px 0 rgba(34,29,24,.1)">
           <div style="display:flex;align-items:center;gap:8px;padding:7px 12px;border-bottom:1.5px solid var(--edge);background:color-mix(in oklab, var(--pink) 20%, var(--paper))">
             <span style="width:10px;height:10px;border-radius:50%;background:var(--pink);border:1.5px solid var(--edge)"></span>
             <span style="width:10px;height:10px;border-radius:50%;background:var(--yellow);border:1.5px solid var(--edge)"></span>
             <span style="width:10px;height:10px;border-radius:50%;background:var(--mint);border:1.5px solid var(--edge)"></span>
             <span style="font-family:'Space Mono',monospace;font-size:11px;margin-left:4px">🐉 sushi_dragon.glb · 25 pieces on one equation</span>
+            <a href="assets/dragon/dragon.html" target="_blank" style="margin-left:auto;font-family:'Pixelify Sans',monospace;font-size:11.5px;color:var(--pinkdeep)">open full screen ↗</a>
           </div>
-          <div class="rig-viewer" style="position:relative;height:430px;background:conic-gradient(var(--paper) 90deg,var(--bg) 90deg 180deg,var(--paper) 180deg 270deg,var(--bg) 270deg) 0 0/24px 24px">
-            <x-import component-from-global-scope="nova-viewer" from="./nova-viewer.js" src="assets/sushi-dragon.glb" wave="{{ waveKey }}" wave-params="{{ waveParamsJson }}" labels="false" explode="0" spin="0.01" rot="0" cam-yaw="0.333" cam-pitch="0.192" fit="0.62" min-h="0" hint-size="100%,430px" style="position:absolute;inset:0"></x-import>
-            <div style="position:absolute;left:12px;bottom:10px;z-index:3;font-family:'Space Mono',monospace;font-size:10px;color:var(--soft);background:color-mix(in oklab, var(--paper) 78%, transparent);border:1.5px solid var(--line);border-radius:8px;padding:3px 10px;pointer-events:none"><span class="hv">hover a part for its name · drag to orbit</span><span class="tp">tap a part to name it · drag to orbit</span></div>
-          </div>
-          <div class="rig-bar" style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:9px 14px;border-top:1.5px solid var(--edge);background:var(--bg)">
-            <span style="font-family:'Space Mono',monospace;font-size:10.5px;color:var(--muted);flex:none">f(s,t)</span>
-            <sc-for list="{{ waveBtns }}" as="w" hint-placeholder-count="4">
-              <span onClick="{{ w.go }}" style="cursor:pointer;border:1.5px solid var(--edge);border-radius:8px;padding:2px 10px;background:{{ w.bg }};color:{{ w.col }};font-family:'Pixelify Sans',monospace;font-size:12px;box-shadow:{{ w.sh }};white-space:nowrap">{{ w.label }}</span>
-            </sc-for>
-          </div>
-          <div class="rig-bar" style="display:flex;align-items:center;gap:13px;flex-wrap:wrap;padding:10px 14px;border-top:1.5px solid var(--line);background:var(--bg)">
-            <sc-for list="{{ waveRows }}" as="r" hint-placeholder-count="4">
-              <span style="display:flex;align-items:center;gap:6px;font-family:'Space Mono',monospace;font-size:10.5px;color:var(--muted)">{{ r.label }}
-                <input type="range" min="{{ r.min }}" max="{{ r.max }}" step="{{ r.step }}" value="{{ r.val }}" onChange="{{ r.set }}" style="width:84px;vertical-align:middle">
-                <span style="color:var(--pinkdeep);font-size:9.5px;min-width:38px">{{ r.txt }}</span>
-              </span>
-            </sc-for>
-            <span onClick="{{ onWaveReset }}" style="cursor:pointer;margin-left:auto;border:1.5px solid var(--line);border-radius:8px;padding:2px 11px;background:var(--paper);font-family:'Pixelify Sans',monospace;font-size:12.5px;color:var(--ink);flex:none">↻ auto</span>
-          </div>
-        </div>
-        <div class="rig-side" style="display:flex;flex-direction:column;gap:12px">
-          <div style="flex:1;background:var(--codebg);border:1.5px solid var(--edge);border-radius:12px;padding:13px 15px;box-shadow:3px 3px 0 rgba(34,29,24,.1)">
-            <div style="display:flex;align-items:center;gap:7px;font-family:'Space Mono',monospace;font-size:10px;color:#a09685;margin-bottom:9px"><span style="width:7px;height:7px;border-radius:50%;background:#f4b8c8"></span>this is the function running right now</div>
-            <div style="font-family:'Space Mono',monospace;font-size:11px;line-height:1.9;color:#ffd23e;white-space:pre-wrap;word-break:break-word">{{ waveEq }}</div>
-            <div style="font-family:'Space Mono',monospace;font-size:11px;line-height:1.9;color:var(--codetx);white-space:pre-wrap;word-break:break-word;margin-top:8px">{{ waveSrc }}</div>
-            <div style="font-family:'Space Mono',monospace;font-size:11px;line-height:1.9;color:#8d819c;white-space:pre-wrap;word-break:break-word;margin-top:8px">{{ waveVals }}</div>
-          </div>
+          <!-- the dragon demo, embedded exactly as it was built: its own axes,
+               its own plot, its own controls. Nothing about it is re-implemented
+               here, so it behaves identically to the standalone page. -->
+          <iframe class="dragon-frame" src="assets/dragon/dragon.html" title="sushi dragon — a body driven by a plotted function" loading="lazy" style="display:block;width:100%;height:900px;border:0;background:var(--paper)"></iframe>
         </div>
       </div>
       </sc-if>
@@ -753,7 +735,7 @@ h1{letter-spacing:-.025em !important}
       <span style="font-family:'Space Mono',monospace;font-size:11.5px;margin-left:6px">world_experiment.mp4 — field recording</span>
       <span style="margin-left:auto;font-family:'Pixelify Sans',monospace;font-size:12px;color:var(--pinkdeep)">● rec</span>
     </div>
-    <video id="wt-vid" muted="muted" loop="loop" autoplay playsinline preload="metadata" style="display:block;width:100%;aspect-ratio:16/9;object-fit:cover;background:#dfeef2"><source src="./assets/world-teaser.webm" type="video/webm"><source src="./assets/world-teaser.mp4" type="video/mp4"></video>
+    <video id="wt-vid" src="./assets/world-teaser.mp4" muted="muted" loop="loop" autoplay playsinline preload="metadata" style="display:block;width:100%;aspect-ratio:16/9;object-fit:cover;background:#dfeef2"></video>
     <div style="padding:7px 14px;border-top:1.5px solid var(--edge);background:var(--bg);font-family:'Space Mono',monospace;font-size:10.5px;color:var(--muted)">
       <span>somewhere in the lab, generated assets are already driving around a world of their own</span>
     </div>
@@ -786,7 +768,7 @@ class Component extends DCLogic {
   state = { asset: null, tab: 'viewer', feat: 'rig', live: {}, wf: false, normals: false, labels: true, explode: null, groups: [], flat: false, parts: 0, hidden: {}, expanded: {}, rootName: '', dark: false, flash: null, picked: null, editEx: 'rabbit', tabsTouched: false, chipsTouched: false, rigArmed: false, rigThr: 0, rigSteer: 0, rigManual: false, rigFit: 0.72,
     // Articulate/animate tab: which asset, which baked clip, and any joints
     // the visitor has taken over. rigCtrls/rigClips are read off the GLB.
-    rigEx: null, rigFade: false, rigLog: null, kartLog: null, rigClip: null, rigWaves: [], rigWave: null, rigWaveP: {}, rigJoints: {}, rigCtrls: [], rigClips: [] };
+    rigEx: null, rigFade: false, rigLog: null, kartLog: null, rigClip: null, rigJoints: {}, rigCtrls: [], rigClips: [] };
   // Which asset the studio opens on before the visitor picks one. Every screen
   // size opens on the same one and walks assetOrder from there, so the preview
   // tells the same story in the same order everywhere — phones used to start on
@@ -811,7 +793,9 @@ class Component extends DCLogic {
       // GLB parse), so a fixed-length fade just exposed "assembling parts…".
       // The safety timer means a model that never loads cannot leave it blank.
       clearTimeout(this._rigFadeT);
-      this._rigFadeT = setTimeout(() => this.setState({ rigFade: false }), 2500);
+      // the dragon is an embedded page, not a nova-viewer, so no nova-ready
+      // will arrive to lift the fade — give it a short fixed one
+      this._rigFadeT = setTimeout(() => this.setState({ rigFade: false }), next === 'dragon' ? 260 : 2500);
     }, 240);
   }
 
@@ -861,7 +845,9 @@ class Component extends DCLogic {
         // warm the OTHER rig asset during this one's turn, so the hand-over
         // is a cache hit and each turn is its dwell rather than dwell+load
         this._pf = this._pf || {};
-        const NEXT = { robot: 'assets/banana-kart.glb', kart: 'assets/sushi-dragon.glb', dragon: 'assets/eye-robot.glb' };
+        // the dragon is its own embedded page and loads itself, so the
+        // look-ahead only covers the two models this viewer owns
+        const NEXT = { robot: 'assets/banana-kart.glb', dragon: 'assets/eye-robot.glb' };
         const other = NEXT[this.state.rigEx || this._initialRig()] || 'assets/banana-kart.glb';
         if (!this._pf['r:' + other]) { this._pf['r:' + other] = 1; try { fetch(other).catch(() => {}); } catch (x) {} }
       }
@@ -871,9 +857,7 @@ class Component extends DCLogic {
       // the file rather than from anything typed here.
       if (e.detail.controls && e.detail.controls.length) {
         this.setState({ rigCtrls: e.detail.controls, rigClips: e.detail.clips || [] });
-      }
-      if (e.detail.waves && e.detail.waves.length) {
-        this.setState({ rigWaves: e.detail.waves });
+
       }
       // Edit tab: once the ORIGINAL pig has actually loaded, let it spin for a
       // few turns, then swap to the edited version. Driving the swap off load
@@ -1163,35 +1147,6 @@ class Component extends DCLogic {
     const codeText = meta.text + '\n\n# ⋯ excerpt — the full ' + meta.lines + '-line program IS the asset.\n# GLB is just its compilation target.';
     // Edit-per-part sits ahead of UV maps: it's the one that sells "the asset
     // stays alive", where UV maps read as a technical footnote by comparison.
-    // ── The dragon: a body that is a plotted function ───────────────────────
-    // The wave library comes from the viewer, which reads it off the same
-    // definitions it evaluates each frame — so the picker, every slider range
-    // and the source printed on the right all describe the running function
-    // rather than a copy of it.
-    const waveKey = s.rigWave || ((s.rigWaves && s.rigWaves[0] && s.rigWaves[0].key) || 'sine');
-    const waveDef = (s.rigWaves || []).find((w) => w.key === waveKey) || null;
-    const waveP = s.rigWaveP || {};
-    const setWaveP = (k) => (e) => {
-      this._act = Date.now();
-      const v = { ...(this.state.rigWaveP || {}) };
-      v[k] = +e.target.value;
-      this.setState({ rigWaveP: v });
-    };
-    const waveBtns = (s.rigWaves || []).map((w) => {
-      const on = w.key === waveKey;
-      return { label: w.label, on,
-        go: () => { this._act = Date.now(); this.setState({ rigWave: w.key, rigWaveP: {} }); },
-        bg: on ? 'var(--yellow)' : 'var(--paper)', col: on ? '#221d18' : 'var(--muted)',
-        sh: on ? 'inset 0 -2px 0 rgba(34,29,24,.25)' : '2px 2px 0 var(--edge)' };
-    });
-    const waveRows = waveDef ? waveDef.params.map((x) => {
-      const v = waveP[x.k] ?? x.val;
-      return { label: x.label, min: x.min, max: x.max, step: x.step, val: v,
-               txt: (Math.round(v * 100) / 100) + (x.unit ? ' ' + x.unit : ''), set: setWaveP(x.k) };
-    }) : [];
-    const waveVals = waveDef
-      ? 'p = { ' + waveDef.params.map((x) => x.k + ': ' + (Math.round((waveP[x.k] ?? x.val) * 100) / 100)).join(', ') + ' }'
-      : '';
     // ── Articulate / animate tab: two assets ────────────────────────────────
     // The kart is a procedural rig (wheels derived from its own axles). The eye
     // robot ships six baked clips plus CTRL_* joints that declare their own axis
@@ -1286,11 +1241,7 @@ class Component extends DCLogic {
       rigRobotCls: rigEx === 'robot' ? 'chip' : 'chip chiphint',
       pickRigKart: () => { this._act = Date.now(); this.setState({ chipsTouched: true }); if ((s.rigEx || rigEx) !== 'kart') this._rigSwap('kart'); },
       pickRigRobot: () => { this._act = Date.now(); this.setState({ chipsTouched: true }); if ((s.rigEx || rigEx) !== 'robot') this._rigSwap('robot'); },
-      rigClipName, jointRows, waveBtns, waveRows, waveVals,
-      waveKey, waveParamsJson: JSON.stringify(s.rigWaveP || {}),
-      waveEq: waveDef ? waveDef.eq : '',
-      waveSrc: waveDef ? waveDef.src : '',
-      onWaveReset: () => { this._act = Date.now(); this.setState({ rigWaveP: {} }); },
+      rigClipName, jointRows,
       // The side panel echoes the call the slider just made, the way the
       // asset's own demo page does — the limit quoted is the one read from the
       // file, so it is the rig describing itself rather than a caption.

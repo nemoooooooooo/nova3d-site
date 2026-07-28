@@ -22,7 +22,17 @@ import re, pathlib, shutil
 root = pathlib.Path('.')
 srcs = ['index.html', 'support.js', 'nova-viewer.js']
 text = '\n'.join((root / s).read_text(encoding='utf-8', errors='ignore') for s in srcs)
-refs = sorted(set(re.findall(r'assets/[A-Za-z0-9_./-]+\.(?:glb|webp|mp4|webm|png|jpg|svg|json)', text)))
+refs = sorted(set(re.findall(r'assets/[A-Za-z0-9_./-]+\.(?:glb|webp|mp4|webm|png|jpg|svg|json|html|js)', text)))
+# the embedded dragon demo is its own little page: pull in whatever it references too
+for r in list(refs):
+    if r.endswith('.html'):
+        sub = (root / r)
+        if sub.exists():
+            t2 = sub.read_text(encoding='utf-8', errors='ignore')
+            base = str(pathlib.Path(r).parent)
+            for m in re.findall(r"['\"]\./([A-Za-z0-9_.-]+\.(?:glb|js|css|png|webp))['\"]", t2):
+                refs.append(base + '/' + m)
+refs = sorted(set(refs))
 missing, total = [], 0
 for r in refs:
     src = root / r
