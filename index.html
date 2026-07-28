@@ -242,9 +242,10 @@ h2{font-size:26px !important;line-height:1.12;letter-spacing:-.02em}
 .edit-bar{flex-wrap:wrap;gap:5px !important;padding:9px 12px !important}
 .edit-note{margin-left:0 !important;text-align:left !important;width:100%;font-size:9.5px !important}
 
-/* the dragon demo is its own page in a frame; give it room on a phone and
+/* the embedded demos are their own pages in a frame; give them room on a
+   phone and
    let it scroll inside rather than squashing its layout */
-.dragon-frame{height:760px !important}
+.demo-frame{height:760px !important}
 
 /* ══ SHIP IT ════════════════════════════════════════════════════════════ */
 .ship-grid{grid-template-columns:1fr !important;gap:20px !important}
@@ -659,7 +660,7 @@ h1{letter-spacing:-.025em !important}
           <!-- the dragon demo, embedded exactly as it was built: its own axes,
                its own plot, its own controls. Nothing about it is re-implemented
                here, so it behaves identically to the standalone page. -->
-          <iframe class="dragon-frame" src="assets/dragon/dragon.html" title="sushi dragon — a body driven by a plotted function" loading="lazy" style="display:block;width:100%;height:900px;border:0;background:var(--paper)"></iframe>
+          <iframe class="demo-frame" src="assets/dragon/dragon.html" title="sushi dragon — a body driven by a plotted function" loading="lazy" style="display:block;width:100%;height:900px;border:0;background:var(--paper)"></iframe>
         </div>
       </div>
       </sc-if>
@@ -676,7 +677,7 @@ h1{letter-spacing:-.025em !important}
           </div>
           <!-- embedded exactly as built, same as the dragon: its own shader,
                its own controls, nothing re-implemented here -->
-          <iframe class="dragon-frame" src="assets/jello/jello.html" title="alien jello — poke physics on the GPU" loading="lazy" style="display:block;width:100%;height:900px;border:0;background:var(--paper)"></iframe>
+          <iframe class="demo-frame" src="assets/jello/jello.html" title="alien jello — poke physics on the GPU" loading="lazy" style="display:block;width:100%;height:900px;border:0;background:var(--paper)"></iframe>
         </div>
       </div>
       </sc-if>
@@ -921,7 +922,7 @@ class Component extends DCLogic {
     this._bump = () => { this._act = Date.now(); this._exAct = Date.now(); };
     // focus moving into the embedded dragon page counts as using it
     this._winBlur = () => {
-      const f = document.querySelector('.dragon-frame');
+      const f = document.querySelector('.demo-frame');
       if (f && document.activeElement === f) this._bump();
     };
     window.addEventListener('blur', this._winBlur);
@@ -1040,7 +1041,7 @@ class Component extends DCLogic {
     // a 1s tick made the same 6s land anywhere between 6.0 and 6.7.
     // The dragon is a whole instrument — four functions and ten sliders — so
     // it gets far longer before the rotation moves on.
-    const RIG_DWELL = { kart: 6000, robot: 9000, dragon: 40000, jello: 40000 };
+    const RIG_DWELL = { kart: 6000, robot: 9000, dragon: 40000, jello: 15000 };
     const RIG_ORDER = ['robot', 'kart', 'dragon', 'jello'];
     this._rigCyc = setInterval(() => {
       if (document.visibilityState !== 'visible' || !this._toolsView) return;
@@ -1052,7 +1053,7 @@ class Component extends DCLogic {
       // playing with the dragon's own controls would otherwise look like an
       // idle page and the rotation would pull it away mid-drag. If the frame
       // holds focus, treat that as interaction.
-      const f = document.querySelector('.dragon-frame');
+      const f = document.querySelector('.demo-frame');
       if (f && document.activeElement === f) { this._act = Date.now(); return; }
       if (Date.now() - this._act < INTERACT_GRACE_MS) return;
       this._rigSwap(RIG_ORDER[(RIG_ORDER.indexOf(cur) + 1) % RIG_ORDER.length]);
