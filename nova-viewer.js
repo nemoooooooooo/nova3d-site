@@ -6,8 +6,23 @@ const libs=()=>libsP||(libsP=Promise.all([
  import(CDN),
  import(CDN+'/examples/jsm/loaders/GLTFLoader.js'),
  import(CDN+'/examples/jsm/controls/OrbitControls.js'),
- import(CDN+'/examples/jsm/environments/RoomEnvironment.js')
-]).then(([T,G,O,R])=>({T,GLTFLoader:G.GLTFLoader,OrbitControls:O.OrbitControls,RoomEnvironment:R.RoomEnvironment})));
+ import(CDN+'/examples/jsm/environments/RoomEnvironment.js'),
+ import(CDN+'/examples/jsm/loaders/DRACOLoader.js')
+]).then(([T,G,O,R,D])=>({T,GLTFLoader:G.GLTFLoader,OrbitControls:O.OrbitControls,RoomEnvironment:R.RoomEnvironment,DRACOLoader:D.DRACOLoader})));
+// The models ship Draco-compressed (roughly a fifth of the raw size), so the
+// loader needs the decoder. One shared instance: it spins up a worker pool,
+// and one per viewer would mean one pool per viewer.
+let dracoP=null;
+const gltfLoader=(L)=>{
+ const g=new L.GLTFLoader();
+ if(!dracoP){
+  dracoP=new L.DRACOLoader();
+  dracoP.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.7/');
+  // wasm decoder, not the js fallback: ~200KB against ~700KB, and faster
+ }
+ g.setDRACOLoader(dracoP);
+ return g;
+};
 const PAL=['#e8b73a','#6fbf8b','#f47fb0','#a986e0','#5fa8e6','#f0925e','#b8b34e','#54c4ba'];
 const SVGNS='http://www.w3.org/2000/svg';
 const easeIO=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
@@ -210,7 +225,7 @@ class NovaViewer extends HTMLElement{
  async _loadSrc(src){
   const id=++this._loadId;
   this._load.style.opacity='1';this._load.style.display='';
-  const {T,GLTFLoader}=await libs();
+  const L=await libs();const T=L.T;
   if(this._root){this.scene.remove(this._root);this._root.traverse(o=>{if(o.geometry)o.geometry.dispose()});this._root=null;}
   this._movers=[];this._meshes=[];this._orig=new Map();this._mgroup=new Map();this._hl=null;this._hlSet=null;this._manual=false;this._introDone=false;this._pinMode=false;this._compareRoots=null;this._cmpT0=null;this._pinSpec=null;this._fade=null;this._cmpMats=null;this._rig=null;this._rigLean=null;this._mixer=null;this._action=null;this._byClip=null;this._clips=null;this._ctrl=null;this._jointSpec=undefined;this._clearPick();this._setHover(null);
   this._labels.forEach(L=>{L.el.remove();L.line.remove();L.dot.remove()});this._labels=[];
@@ -219,7 +234,7 @@ class NovaViewer extends HTMLElement{
   this._wipeMode=false;this._wipeDrag=false;this._planeA=null;this._planeB=null;
   if(this.controls)this.controls.enabled=true;this.style.cursor='';
   let gltf=null;
-  try{gltf=await new GLTFLoader().loadAsync(src);}catch(e){this._load.innerHTML='<div>could not load asset</div>';return;}
+  try{gltf=await gltfLoader(await libs()).loadAsync(src);}catch(e){this._load.innerHTML='<div>could not load asset</div>';return;}
   if(!gltf||id!==this._loadId)return;
   const root=gltf.scene;
   const _cs=this._attr('compare-src');
@@ -393,7 +408,7 @@ class NovaViewer extends HTMLElement{
  // only the real differences (wings, nameplate) straddle it.
  async _setupCompare(src,compareSrc,rootA,id){
   const {T,GLTFLoader}=await libs();
-  let g2=null;try{g2=await new GLTFLoader().loadAsync(compareSrc);}catch(e){}
+  let g2=null;try{g2=await gltfLoader(await libs()).loadAsync(compareSrc);}catch(e){}
   if(id!==this._loadId)return;
   const container=new T.Group();container.add(rootA);
   let rootB=null;
