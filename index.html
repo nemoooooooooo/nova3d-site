@@ -655,7 +655,6 @@ h1{letter-spacing:-.025em !important}
             <span style="width:10px;height:10px;border-radius:50%;background:var(--yellow);border:1.5px solid var(--edge)"></span>
             <span style="width:10px;height:10px;border-radius:50%;background:var(--mint);border:1.5px solid var(--edge)"></span>
             <span style="font-family:'Space Mono',monospace;font-size:11px;margin-left:4px">🐉 sushi_dragon.glb · 25 pieces on one equation</span>
-            <a href="assets/dragon/dragon.html" target="_blank" style="margin-left:auto;font-family:'Pixelify Sans',monospace;font-size:11.5px;color:var(--pinkdeep)">open full screen ↗</a>
           </div>
           <!-- the dragon demo, embedded exactly as it was built: its own axes,
                its own plot, its own controls. Nothing about it is re-implemented
@@ -673,7 +672,6 @@ h1{letter-spacing:-.025em !important}
             <span style="width:10px;height:10px;border-radius:50%;background:var(--yellow);border:1.5px solid var(--edge)"></span>
             <span style="width:10px;height:10px;border-radius:50%;background:var(--mint);border:1.5px solid var(--edge)"></span>
             <span style="font-family:'Space Mono',monospace;font-size:11px;margin-left:4px">🫧 alien_jello.glb · one mesh, displaced on the GPU</span>
-            <a href="assets/jello/jello.html" target="_blank" style="margin-left:auto;font-family:'Pixelify Sans',monospace;font-size:11.5px;color:var(--pinkdeep)">open full screen ↗</a>
           </div>
           <!-- embedded exactly as built, same as the dragon: its own shader,
                its own controls, nothing re-implemented here -->
@@ -919,13 +917,30 @@ class Component extends DCLogic {
     this._studioReady = Date.now();
     this._editReady = Date.now();
     this._rigSince = Date.now();
-    this._bump = () => { this._act = Date.now(); this._exAct = Date.now(); };
+    // Also stamp a page-level timestamp. The embedded demos' listeners and the
+    // cycler must agree on "last touched" even if they end up talking to
+    // different instances of this logic, which is exactly what made a poke
+    // inside the jello fail to hold the rotation.
+    this._bump = () => { window.__novaAct = Date.now(); this._act = Date.now(); this._exAct = Date.now(); };
     // focus moving into the embedded dragon page counts as using it
-    this._winBlur = () => {
+    // The embedded demos are same-origin, so listen for real activity inside
+    // them. Focus alone was the wrong signal: document.activeElement stays the
+    // iframe long after the visitor has stopped touching it, so once they had
+    // clicked in once the rotation could never move on again.
+    this._wireFrame = () => {
       const f = document.querySelector('.demo-frame');
-      if (f && document.activeElement === f) this._bump();
+      if (!f) return;
+      let d = null;
+      try { d = f.contentDocument; } catch (e) { return; }   // cross-origin: skip
+      // Track the DOCUMENT, not a flag on the element. A fresh iframe hands back
+      // a throwaway about:blank first and swaps in the real document once it
+      // loads — flagging the element meant wiring the blank one and never the
+      // page, so nothing the visitor did inside it ever counted.
+      if (!d || !d.body || f._novaDoc === d) return;
+      f._novaDoc = d;
+      ['pointerdown', 'pointermove', 'wheel', 'keydown'].forEach((ev) =>
+        d.addEventListener(ev, this._bump, { passive: true, capture: true }));
     };
-    window.addEventListener('blur', this._winBlur);
     document.addEventListener('nova-interact', this._bump);
     document.addEventListener('pointerdown', this._bump, true);
     // Rig camera distance by layout band. Only fires on a band CHANGE, so a
@@ -1046,16 +1061,12 @@ class Component extends DCLogic {
     this._rigCyc = setInterval(() => {
       if (document.visibilityState !== 'visible' || !this._toolsView) return;
       if (this.state.feat !== 'rig') { this._rigSince = Date.now(); return; }
+      this._wireFrame();
       const cur = this.state.rigEx || this._initialRig();
       const since = Math.max(this._rigReady || 0, this._rigSince || 0);
       if (Date.now() - since < (RIG_DWELL[cur] || 6000)) return;
-      // Pointer and key events inside an iframe never reach this document, so
-      // playing with the dragon's own controls would otherwise look like an
-      // idle page and the rotation would pull it away mid-drag. If the frame
-      // holds focus, treat that as interaction.
-      const f = document.querySelector('.demo-frame');
-      if (f && document.activeElement === f) { this._act = Date.now(); return; }
-      if (Date.now() - this._act < INTERACT_GRACE_MS) return;
+      const lastAct = Math.max(this._act || 0, window.__novaAct || 0);
+      if (Date.now() - lastAct < INTERACT_GRACE_MS) return;
       this._rigSwap(RIG_ORDER[(RIG_ORDER.indexOf(cur) + 1) % RIG_ORDER.length]);
     }, 250);
     this._cyc = setInterval(() => {
@@ -1077,7 +1088,6 @@ class Component extends DCLogic {
     }, 1000);
   }
   componentWillUnmount() {
-    window.removeEventListener('blur', this._winBlur);
     document.removeEventListener('nova-ready', this._ready);
     document.removeEventListener('nova-pick', this._picked);
     document.removeEventListener('nova-interact', this._bump);
