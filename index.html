@@ -3,15 +3,23 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Nova3D — Code-native 3D asset generation</title>
-<meta name="description" content="Generate game-ready 3D assets from text or photos. Parts named, hierarchy real, pivots placed. Code-native: editable, programmable, alive after generation.">
-<meta name="og:title" content="Nova3D — Code-native 3D asset generation">
-<meta name="og:description" content="Type a sentence. Drop a photo. Get 3D objects assembled piece by piece — parts named, hierarchy real, pivots placed, UVs unwrapped.">
-<meta name="og:type" content="website">
-<meta name="og:image" content="https://nova3dshowcase.blob.core.windows.net/showcase/banana-kart-1784198724/model.glb">
+<title>Nova3D — 3D assets coding agents can talk to</title>
+<meta name="description" content="Type a sentence. Drop a photo. Get 3D objects assembled piece by piece — parts named, hierarchy real, pivots placed, UVs unwrapped.">
+<!-- Open Graph wants property=, not name=; and the image was pointing at a GLB,
+     which is why links unfurled with no picture. -->
+<meta property="og:site_name" content="Nova3D">
+<meta property="og:title" content="Nova3D — 3D assets coding agents can talk to">
+<meta property="og:description" content="Type a sentence. Drop a photo. Get 3D objects assembled piece by piece — parts named, hierarchy real, pivots placed, UVs unwrapped.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://nova3d.xyz/">
+<meta property="og:image" content="https://nova3d.xyz/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="A generated cat-copter with its part groups called out: Body, Ears, Face, Limbs, Rotor, Tail.">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Nova3D — Code-native 3D asset generation">
+<meta name="twitter:title" content="Nova3D — 3D assets coding agents can talk to">
 <meta name="twitter:description" content="Type a sentence. Drop a photo. Get 3D objects assembled piece by piece — parts named, hierarchy real, pivots placed, UVs unwrapped.">
+<meta name="twitter:image" content="https://nova3d.xyz/assets/og.png">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎨</text></svg>">
 <!-- Warm the model the studio opens on, before support.js is even parsed.
      Otherwise its fetch cannot start until the runtime has booted, the
@@ -582,8 +590,8 @@ h1{letter-spacing:-.025em !important}
         <span onClick="{{ pickRigRobot }}" class="{{ rigRobotCls }}" style="cursor:pointer;border:1.5px solid var(--line);border-radius:8px;padding:4px 12px;background:var(--paper)">{{ rigRobotMark }} 🤖 eye robot</span>
         <span onClick="{{ pickRigKart }}" class="{{ rigKartCls }}" style="cursor:pointer;border:1.5px solid var(--line);border-radius:8px;padding:4px 12px;background:var(--paper)">{{ rigKartMark }} 🍌 kart</span>
         <span onClick="{{ pickRigDragon }}" class="{{ rigDragonCls }}" style="cursor:pointer;border:1.5px solid var(--line);border-radius:8px;padding:4px 12px;background:var(--paper)">{{ rigDragonMark }} 🐉 sushi dragon</span>
+        <span onClick="{{ pickRigRoom }}" class="{{ rigRoomCls }}" style="cursor:pointer;border:1.5px solid var(--line);border-radius:8px;padding:4px 12px;background:var(--paper)">{{ rigRoomMark }} 🏠 house</span>
         <span onClick="{{ pickRigJello }}" class="{{ rigJelloCls }}" style="cursor:pointer;border:1.5px solid var(--line);border-radius:8px;padding:4px 12px;background:var(--paper)">{{ rigJelloMark }} 🫧 alien jello</span>
-        <span onClick="{{ pickRigRoom }}" class="{{ rigRoomCls }}" style="cursor:pointer;border:1.5px solid var(--line);border-radius:8px;padding:4px 12px;background:var(--paper)">{{ rigRoomMark }} 🔭 observatory</span>
       </div>
       <sc-if value="{{ isRigKart }}" hint-placeholder-val="{{ true }}">
       <div class="rig-grid" style="display:grid;grid-template-columns:1fr 322px;gap:14px;opacity:{{ rigOpacity }};transition:opacity .26s ease">
@@ -691,14 +699,14 @@ h1{letter-spacing:-.025em !important}
             <span style="width:10px;height:10px;border-radius:50%;background:var(--pink);border:1.5px solid var(--edge)"></span>
             <span style="width:10px;height:10px;border-radius:50%;background:var(--yellow);border:1.5px solid var(--edge)"></span>
             <span style="width:10px;height:10px;border-radius:50%;background:var(--mint);border:1.5px solid var(--edge)"></span>
-            <span style="font-family:'Space Mono',monospace;font-size:11px;margin-left:4px">🔭 observatory.glb · 953 meshes, 29 working joints</span>
+            <span style="font-family:'Space Mono',monospace;font-size:11px;margin-left:4px">🏠 observatory.glb · 953 meshes, 29 working joints</span>
           </div>
           <iframe class="demo-frame" src="assets/observatory/explore.html" title="the astronomer's study — an explorable code-native room" loading="lazy" allow="pointer-lock; fullscreen" allowfullscreen style="display:block;width:100%;height:900px;border:0;background:var(--paper)"></iframe>
         </div>
       </div>
       </sc-if>
     </sc-if>
-    <div style="margin-top:18px;padding-top:14px;border-top:1.5px solid var(--line);font-family:'Space Mono',monospace;font-size:11.5px"><a href="https://app.nova3d.xyz/showcase" target="_blank">browse all generations — live 3D, with the code that built each one ↗</a></div>
+    <div style="margin-top:18px;padding-top:14px;border-top:1.5px solid var(--line);font-family:'Space Mono',monospace;font-size:11.5px;display:flex;gap:18px;flex-wrap:wrap"><a href="https://app.nova3d.xyz/showcase" target="_blank">browse all generations — live 3D, with the code that built each one ↗</a><a href="https://arxiv.org/html/2607.22738v1" target="_blank">read the paper ↗</a></div>
     </div>
   </div>
 </section>
@@ -780,7 +788,7 @@ h1{letter-spacing:-.025em !important}
   </div>
   <div style="display:flex;gap:12px;justify-content:center">
     <a href="https://app.nova3d.xyz" style="background:var(--yellow);border:1.5px solid var(--edge);border-radius:12px;padding:12px 26px;font-weight:700;font-size:15px;color:#221d18;box-shadow:3px 3px 0 var(--edge)">Try the app →</a>
-    <a href="https://discord.gg/QEH8mzcwdR" style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;padding:12px 26px;font-weight:700;font-size:15px;color:var(--ink)">Join the Discord</a>
+    <a href="https://discord.gg/QEH8mzcwdR" style="background:var(--paper);border:1.5px solid var(--edge);border-radius:12px;padding:12px 26px;font-weight:700;font-size:15px;color:var(--ink)">Join our Discord</a>
   </div>
 </section>
 
@@ -793,6 +801,7 @@ h1{letter-spacing:-.025em !important}
     <a href="https://app.nova3d.xyz/showcase" style="color:var(--pinkdeep)">Showcase</a>
     <a href="https://discord.gg/QEH8mzcwdR" style="color:var(--pinkdeep)">Discord</a>
     <a href="https://github.com/RareSense/Nova3D" style="color:var(--pinkdeep)">GitHub</a>
+    <a href="https://arxiv.org/html/2607.22738v1" style="color:var(--pinkdeep)">Paper</a>
   </div>
   <span>© 2026 Nova3D · Rare Sense Inc.</span>
 </footer>
@@ -885,7 +894,7 @@ class Component extends DCLogic {
         this._pf = this._pf || {};
         // the dragon is its own embedded page and loads itself, so the
         // look-ahead only covers the two models this viewer owns
-        const NEXT = { robot: 'assets/banana-kart.glb', room: 'assets/eye-robot.glb' };
+        const NEXT = { robot: 'assets/banana-kart.glb', jello: 'assets/eye-robot.glb' };
         const other = NEXT[this.state.rigEx || this._initialRig()] || 'assets/banana-kart.glb';
         if (!this._pf['r:' + other]) { this._pf['r:' + other] = 1; try { fetch(other).catch(() => {}); } catch (x) {} }
       }
@@ -950,14 +959,18 @@ class Component extends DCLogic {
       if (!f) return;
       let d = null;
       try { d = f.contentDocument; } catch (e) { return; }   // cross-origin: skip
-      // Track the DOCUMENT, not a flag on the element. A fresh iframe hands back
-      // a throwaway about:blank first and swaps in the real document once it
-      // loads — flagging the element meant wiring the blank one and never the
-      // page, so nothing the visitor did inside it ever counted.
-      if (!d || !d.body || f._novaDoc === d) return;
-      f._novaDoc = d;
+      if (!d || !d.body || d.__novaWired) return;
+      d.__novaWired = 1;
+      // Stamp the timestamp ON THE DEMO'S OWN DOCUMENT. Listening from the
+      // parent turned out to be unworkable: a re-render swaps the iframe
+      // element, which loses element listeners and also fires spurious enter
+      // events under a stationary cursor — so the room was alternately never
+      // noticing a click or being kept alive by phantom ones. The document
+      // outlives all of that, and if the frame really does reload the stamp
+      // resets, which is correct: a fresh load has not been touched yet.
+      const mark = () => { d.__novaAct = Date.now(); };
       ['pointerdown', 'pointermove', 'wheel', 'keydown'].forEach((ev) =>
-        d.addEventListener(ev, this._bump, { passive: true, capture: true }));
+        d.addEventListener(ev, mark, { passive: true, capture: true }));
     };
     document.addEventListener('nova-interact', this._bump);
     document.addEventListener('pointerdown', this._bump, true);
@@ -1075,8 +1088,8 @@ class Component extends DCLogic {
     // a 1s tick made the same 6s land anywhere between 6.0 and 6.7.
     // The dragon is a whole instrument — four functions and ten sliders — so
     // it gets far longer before the rotation moves on.
-    const RIG_DWELL = { kart: 6000, robot: 9000, dragon: 40000, jello: 15000, room: 40000 };
-    const RIG_ORDER = ['robot', 'kart', 'dragon', 'jello', 'room'];
+    const RIG_DWELL = { kart: 6000, robot: 9000, dragon: 40000, jello: 15000, room: 8000 };
+    const RIG_ORDER = ['robot', 'kart', 'dragon', 'room', 'jello'];
     this._rigCyc = setInterval(() => {
       if (document.visibilityState !== 'visible' || !this._toolsView) return;
       if (this.state.feat !== 'rig') { this._rigSince = Date.now(); return; }
@@ -1084,8 +1097,18 @@ class Component extends DCLogic {
       const cur = this.state.rigEx || this._initialRig();
       const since = Math.max(this._rigReady || 0, this._rigSince || 0);
       if (Date.now() - since < (RIG_DWELL[cur] || 6000)) return;
-      const lastAct = Math.max(this._act || 0, window.__novaAct || 0);
-      if (Date.now() - lastAct < INTERACT_GRACE_MS) return;
+      let innerAct = 0;
+      try { const fr = document.querySelector('.demo-frame');
+            innerAct = (fr && fr.contentDocument && fr.contentDocument.__novaAct) || 0; } catch (e) {}
+      const lastAct = Math.max(this._act || 0, window.__novaAct || 0, innerAct);
+      // For the embedded demos the dwell IS "time without interaction", so it
+      // is also the grace — otherwise the flat 15s silently overrode a shorter
+      // one and the house sat there twice as long as asked. The two viewer-
+      // driven assets keep the standard grace, since their dwell is measured
+      // from when the model loaded rather than from the last touch.
+      const grace = ['dragon', 'jello', 'room'].indexOf(cur) >= 0
+        ? (RIG_DWELL[cur] || INTERACT_GRACE_MS) : INTERACT_GRACE_MS;
+      if (Date.now() - lastAct < grace) return;
       this._rigSwap(RIG_ORDER[(RIG_ORDER.indexOf(cur) + 1) % RIG_ORDER.length]);
     }, 250);
     this._cyc = setInterval(() => {
