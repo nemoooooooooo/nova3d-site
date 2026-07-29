@@ -30,7 +30,8 @@ for r in list(refs):
         if sub.exists():
             t2 = sub.read_text(encoding='utf-8', errors='ignore')
             base = str(pathlib.Path(r).parent)
-            for m in re.findall(r"['\"]\./([A-Za-z0-9_.-]+\.(?:glb|js|css|png|webp))['\"]", t2):
+            # allow a cache-busting query, e.g. './observatory.glb?v=4'
+            for m in re.findall(r"['\"]\./([A-Za-z0-9_.-]+\.(?:glb|js|css|png|webp))(?:\?[^'\"]*)?['\"]", t2):
                 refs.append(base + '/' + m)
 refs = sorted(set(refs))
 missing, total = [], 0

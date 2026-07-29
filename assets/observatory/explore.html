@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<title>The Astronomer's Study — walk inside</title>
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&family=Space+Mono:wght@400;700&family=Outfit:wght@300..800&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#fbf7f0;--paper:#fff;--ink:#221d18;--muted:#6b6152;--soft:#a09685;--line:#e8dfd2;--edge:#221d18;
+        --pink:#ff9ec7;--pinkdeep:#c76a86;--yellow:#ffd23e;--mint:#a8ecc1;--lav:#c9a6ea;}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);font-family:'Outfit',system-ui,sans-serif;
+            -webkit-text-size-adjust:100%}
+  .wrap{max-width:1320px;margin:0 auto;padding:18px 16px 34px}
+  h1{font-size:22px;margin:0 0 3px;letter-spacing:-.5px}
+  .sub{font-family:'Space Mono',monospace;font-size:11.5px;color:var(--muted);margin-bottom:14px}
+  .win{background:var(--paper);border:1.5px solid var(--edge);border-radius:14px;
+       box-shadow:6px 6px 0 rgba(34,29,24,.14);overflow:hidden}
+  .bar{display:flex;align-items:center;gap:7px;padding:8px 12px;border-bottom:1.5px solid var(--edge);
+       background:color-mix(in oklab,var(--pink) 16%,var(--paper));flex-wrap:wrap}
+  .dot{width:10px;height:10px;border-radius:50%;border:1.5px solid var(--edge)}
+  .title{font-family:'Space Mono',monospace;font-size:11px;margin-left:4px}
+  .modes{margin-left:auto;display:flex;gap:5px}
+  .mode{cursor:pointer;font-family:'Pixelify Sans',monospace;font-size:13px;padding:3px 12px;background:var(--paper);
+        border:1.5px solid var(--edge);border-radius:9px;user-select:none;-webkit-tap-highlight-color:transparent}
+  .mode.on{background:var(--lav)}
+  .body{display:grid;grid-template-columns:1fr 292px}
+  #stage{position:relative;height:min(72vh,640px);background:#cfe0ee;touch-action:none;overflow:hidden}
+  #stage canvas{display:block;width:100%;height:100%}
+  .side{border-left:1.5px solid var(--line);padding:11px;overflow:auto;height:min(72vh,640px);background:var(--paper)}
+  @media(max-width:900px){
+    .wrap{padding:10px 8px 26px}
+    .body{grid-template-columns:1fr}
+    #stage{height:62vh}
+    .side{border-left:none;border-top:1.5px solid var(--edge);height:auto;max-height:none}
+    h1{font-size:18px}
+  }
+  .side h2{font-family:'Pixelify Sans',monospace;font-size:12.5px;color:var(--pinkdeep);letter-spacing:1px;margin:12px 0 5px}
+  .side h2:first-child{margin-top:0}
+  .tip{font-family:'Space Mono',monospace;font-size:9px;color:var(--soft);line-height:1.55;margin-bottom:8px}
+  .ctl{margin-bottom:7px}
+  .ctl label{display:flex;justify-content:space-between;align-items:center;font-family:'Space Mono',monospace;font-size:9.5px;margin-bottom:2px}
+  .ctl label b{font-weight:700}
+  .ctl .v{color:var(--soft)}
+  .ctl input[type=range]{width:100%;accent-color:#ff9ec7;margin:0;height:22px}
+  .lim{font-family:'Space Mono',monospace;font-size:8px;color:var(--soft);text-align:right}
+  kbd{font-family:'Space Mono',monospace;font-size:9px;background:var(--bg);border:1.5px solid var(--edge);
+      border-radius:5px;padding:0 5px;margin-left:5px;font-weight:700}
+  .btns{display:flex;flex-wrap:wrap;gap:5px;margin:3px 0 8px}
+  .btn{cursor:pointer;font-family:'Pixelify Sans',monospace;font-size:12.5px;padding:4px 11px;background:var(--paper);
+       border:1.5px solid var(--edge);border-radius:8px;user-select:none;-webkit-tap-highlight-color:transparent}
+  .btn.on{background:var(--yellow)}
+  .foot{display:flex;flex-wrap:wrap;gap:12px;padding:7px 12px;border-top:1.5px solid var(--edge);
+        background:var(--bg);font-family:'Space Mono',monospace;font-size:10px;color:var(--muted)}
+  .foot b{color:var(--pinkdeep)}
+
+  #veil{position:absolute;inset:0;display:grid;place-items:center;background:rgba(34,29,24,.62);
+        color:#fff;text-align:center;padding:20px;z-index:6}
+  #veil .card{max-width:340px}
+  #vh{font-family:'Pixelify Sans',monospace;font-size:19px;margin-bottom:7px}
+  #vp{font-family:'Space Mono',monospace;font-size:11.5px;line-height:1.65;opacity:.92}
+  #vgo{margin-top:13px;display:inline-block;cursor:pointer;font-family:'Pixelify Sans',monospace;font-size:15px;
+       padding:7px 20px;background:var(--yellow);color:#221d18;border:1.5px solid #221d18;border-radius:10px}
+  #cross{position:absolute;left:50%;top:50%;width:16px;height:16px;margin:-8px 0 0 -8px;z-index:4;display:none;
+         pointer-events:none}
+  #cross:before,#cross:after{content:'';position:absolute;background:rgba(255,255,255,.85);
+        box-shadow:0 0 2px rgba(0,0,0,.6)}
+  #cross:before{left:7px;top:0;width:2px;height:16px}
+  #cross:after{top:7px;left:0;height:2px;width:16px}
+  #hud{position:absolute;left:10px;bottom:10px;z-index:4;font-family:'Space Mono',monospace;font-size:10px;
+       color:#fff;background:rgba(34,29,24,.55);border-radius:8px;padding:4px 9px;pointer-events:none;max-width:70%}
+  #keys{position:absolute;right:10px;top:10px;z-index:4;font-family:'Space Mono',monospace;font-size:9.5px;
+        color:#fff;background:rgba(34,29,24,.5);border-radius:8px;padding:6px 9px;line-height:1.75;
+        pointer-events:none;display:none}
+  #keys b{color:#ffd23e}
+  #look{position:absolute;inset:0;z-index:2;display:none;touch-action:none}
+  #stick{position:absolute;left:14px;bottom:14px;width:118px;height:118px;border-radius:50%;z-index:5;display:none;
+         background:rgba(255,255,255,.16);border:2px solid rgba(255,255,255,.5);touch-action:none}
+  #knob{position:absolute;left:50%;top:50%;width:50px;height:50px;margin:-25px 0 0 -25px;border-radius:50%;
+        background:rgba(255,255,255,.82);border:2px solid #221d18}
+  #tbtns{position:absolute;right:12px;bottom:16px;z-index:5;display:none;flex-direction:column;gap:8px}
+  #tbtns .tb{width:74px;height:46px;border-radius:12px;background:rgba(255,255,255,.86);border:2px solid #221d18;
+       font-family:'Pixelify Sans',monospace;font-size:13px;display:grid;place-items:center;user-select:none;
+       -webkit-tap-highlight-color:transparent}
+  #tbtns .tb:active{background:var(--yellow)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>The Astronomer's Study — walk inside</h1>
+  <div class="sub">one generated asset · 953 named meshes · 29 joints · collision is the building's own geometry</div>
+
+  <div class="win">
+    <div class="bar">
+      <span class="dot" style="background:#ff9ec7"></span>
+      <span class="dot" style="background:#ffd23e"></span>
+      <span class="dot" style="background:#a8ecc1"></span>
+      <span class="title">observatory.glb</span>
+      <div class="modes">
+        <span class="mode on" id="mOrbit">◱ orbit</span>
+        <span class="mode" id="mWalk">🚶 walk in</span>
+      </div>
+    </div>
+    <div class="body">
+      <div id="stage">
+        <div id="cross"></div>
+        <div id="keys"></div>
+        <div id="hud">loading…</div>
+        <div id="look"></div>
+        <div id="stick"><div id="knob"></div></div>
+        <div id="tbtns">
+          <div class="tb" id="tOpen">open</div>
+          <div class="tb" id="tLamp">lamps</div>
+          <div class="tb" id="tJump">jump</div>
+          <div class="tb" id="tExit">exit</div>
+        </div>
+        <div id="veil"><div class="card">
+          <div id="vh">loading the study…</div>
+          <div id="vp">953 meshes, then one BVH built from the building's own geometry.</div>
+        </div></div>
+      </div>
+      <div class="side" id="side"></div>
+    </div>
+    <div class="foot">
+      <span id="stat">–</span>
+      <span>collider: <b id="ctris">–</b></span>
+      <span id="where">outside</span>
+      <span style="margin-left:auto">every slider range is read from the file's own <b>extras</b></span>
+    </div>
+  </div>
+</div>
+
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+            "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"}}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
+import {buildCollider, Walker, PLAYER} from './walker.js';
+
+const TOUCH = matchMedia('(pointer:coarse)').matches;
+const stage = document.getElementById('stage');
+const renderer = new THREE.WebGLRenderer({antialias:!TOUCH, alpha:false, powerPreference:'high-performance'});
+renderer.setPixelRatio(Math.min(devicePixelRatio, TOUCH ? 1.6 : 2));
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
+renderer.shadowMap.enabled = !TOUCH;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+stage.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xcfe0ee);
+const camera = new THREE.PerspectiveCamera(TOUCH ? 68 : 60, 1, 0.05, 400);
+const orbit = new OrbitControls(camera, renderer.domElement);
+orbit.enableDamping = true; orbit.dampingFactor = .07;
+scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), .04).texture;
+
+const sun = new THREE.DirectionalLight(0xfff2dc, 2.4);
+sun.position.set(-9, 11, 7); sun.castShadow = !TOUCH;
+if (sun.shadow){ sun.shadow.mapSize.set(TOUCH?1024:2048, TOUCH?1024:2048); sun.shadow.bias = -0.0013;
+  const d=12; Object.assign(sun.shadow.camera,{left:-d,right:d,top:d,bottom:-d,near:.5,far:44}); }
+const hemi = new THREE.HemisphereLight(0xdcefff, 0xb08a5a, 1.1);
+scene.add(sun, hemi);
+const roomLight = new THREE.PointLight(0xffeccc, 14, 16, 2); roomLight.position.set(0, 2.2, 0);
+const loftLight = new THREE.PointLight(0xffeccc, 7, 12, 2);  loftLight.position.set(0, 4.0, -1.6);
+scene.add(roomLight, loftLight);
+
+// Lamp lights sit ON the lamps. Blender (x,y,z) -> three (x, z, -y):
+//   Street_Lamp_Glow (-5.19,-2.85,1.99) · Ext_Lantern_Glow (-3.98,-0.10,2.10)
+//   Lamp_Bulb, the desk lamp indoors    (-2.51,-0.30,1.21)
+const streetLight  = new THREE.PointLight(0xffb545, 0, 8, 2); streetLight.position.set(-5.19, 1.99, 2.85);
+const lanternLight = new THREE.PointLight(0xffb545, 0, 6, 2); lanternLight.position.set(-3.98, 2.10, 0.10);
+const deskLight    = new THREE.PointLight(0xffd9a0, 0, 5, 2); deskLight.position.set(-2.51, 1.21, 0.30);
+scene.add(streetLight, lanternLight, deskLight);
+
+let house=null, walker=null, collider=null, joints={}, glowMats=[], lampOn=false, night=false;
+let mode='orbit', ready=false;
+// the orbit pose to come back to — without restoring it, leaving walk mode
+// left the camera standing inside the room and read as 'esc did nothing'.
+const HOME = {pos:new THREE.Vector3(), target:new THREE.Vector3()};
+const clock = new THREE.Clock();
+
+const SPAWN = new THREE.Vector3(-4.90, -0.60, 1.10);
+// the shut front door, and the open (cutaway) gable end: Blender y=-2.30 -> z=+2.30
+const DOORWAY = new THREE.Box3(new THREE.Vector3(-3.85, -0.1, 0.40),
+                               new THREE.Vector3(-3.55, 2.30, 1.70));
+const CUTAWAY = new THREE.Box3(new THREE.Vector3(-3.45, -0.30, 2.30),
+                               new THREE.Vector3( 3.45,  8.60, 2.62));
+
+new GLTFLoader().load('./observatory.glb?v=4', gltf => {
+  house = gltf.scene;
+  house.traverse(o => {
+    if (o.isMesh){ o.castShadow = !TOUCH; o.receiveShadow = !TOUCH;
+      const m = o.material;
+      if (m && /Lamp_Glow|Glass_Lit/.test(m.name || '')) glowMats.push(m);
+    }
+    const ex = o.userData || {};
+    if (ex.joint){
+      joints[o.name] = {
+        node:o, type:ex.joint,
+        min:ex.joint_min_deg ?? ex.joint_min_m ?? 0,
+        max:ex.joint_max_deg ?? ex.joint_max_m ?? 0,
+        slider: ex.joint === 'slider',
+        axis: new THREE.Vector3(
+          ex.joint_axis === 'X' ? 1 : 0,
+          ex.joint_axis === 'Z' ? 1 : 0,        // Blender Z (up) -> three Y
+          ex.joint_axis === 'Y' ? -1 : 0),      // Blender Y      -> three -Z
+        rest: o.quaternion.clone(),
+        restPos: o.position.clone(),
+        cur: 0,
+      };
+    }
+  });
+  scene.add(house);
+
+  const box = new THREE.Box3().setFromObject(house);
+  const size = box.getSize(new THREE.Vector3()), c = box.getCenter(new THREE.Vector3());
+  orbit.target.copy(c);
+  camera.position.set(c.x - size.x*0.95, c.y + size.y*0.42, c.z + size.z*0.95);
+  orbit.update();
+  HOME.pos.copy(camera.position); HOME.target.copy(orbit.target);
+
+  const {collider:col, tris} = buildCollider(house, {onProgress:m=>setVeil('building collision…', m)});
+  collider = col; scene.add(collider);
+  walker = new Walker(camera, collider);
+  walker.spawn.copy(SPAWN);
+  walker.teleport(SPAWN.x, SPAWN.y, SPAWN.z);
+  updateDoorBlock();
+
+  document.getElementById('ctris').textContent = (tris/1000).toFixed(0)+'k tris';
+  let meshes=0; house.traverse(o=>{ if(o.isMesh) meshes++; });
+  document.getElementById('stat').textContent = `${meshes} meshes · ${Object.keys(joints).length} joints`;
+  buildUI(); resize(); ready = true;
+  setVeil(null);
+  document.getElementById('hud').textContent = TOUCH ? 'orbit: drag to turn, pinch to zoom'
+                                                     : 'orbit: drag to turn, scroll to zoom';
+}, xhr => {
+  if (xhr.total) setVeil('loading the study…', `${(xhr.loaded/1e6).toFixed(1)} / ${(xhr.total/1e6).toFixed(1)} MB`);
+});
+
+function setVeil(head, para){
+  const v = document.getElementById('veil');
+  if (head === null){ v.style.display='none'; return; }
+  v.style.display='grid';
+  document.getElementById('vh').textContent = head;
+  if (para !== undefined) document.getElementById('vp').textContent = para;
+}
+
+// ── joints ──────────────────────────────────────────────────────────────────
+function setJoint(name, val){
+  const j = joints[name]; if(!j) return;
+  j.cur = THREE.MathUtils.clamp(val, Math.min(j.min,j.max), Math.max(j.min,j.max));
+  if (j.slider) j.node.position.copy(j.restPos).addScaledVector(j.axis, j.cur);
+  else j.node.quaternion.copy(j.rest).multiply(
+    new THREE.Quaternion().setFromAxisAngle(j.axis, THREE.MathUtils.degToRad(j.cur)));
+}
+function setGroup(names, t){
+  for (const n of names){
+    const j = joints[n]; if(!j) continue;
+    const span = (Math.abs(j.max) > Math.abs(j.min)) ? j.max : j.min;
+    setJoint(n, span * t);
+  }
+  if (names.includes('Ext_Door_Leaf')) updateDoorBlock();
+}
+function updateDoorBlock(){
+  const open = Math.abs(joints['Ext_Door_Leaf']?.cur || 0) > 30;
+  // CUTAWAY is permanent: the fourth wall is missing, not open. You can walk
+  // in through the door, but not out through the diorama's cut face.
+  walker.extraColliders = open ? [CUTAWAY] : [CUTAWAY, DOORWAY];
+  return open;
+}
+
+const G = {
+  door:    ['Ext_Door_Leaf'],
+  // the fanlight over the door is deliberately NOT here — its radial bars
+  // swinging with the window slider read as the door frame coming apart.
+  windows: ['Ext_Window_Sash','Ext_Oculus_Sash','Ext_East_Vent_Sash','Ext_North_Vent_Sash',
+            'Ext_Dormer_Sash','Rose_Sash'],
+  globes:  ['Globe_Floor_Axis','Globe_Small_Axis','Armillary_Axis'],
+  mobile:  Array.from({length:11},(_,i)=>`Mobile_Hanger_${String(i+1).padStart(2,'0')}`),
+};
+
+// ── one table drives the sliders AND the keyboard ──────────────────────────
+const CONTROLS = [
+  {id:'door',  key:'F', label:'front door',         hint:'Ext_Door_Leaf · 0…100°', kind:'toggle',
+   apply:v=>setGroup(G.door, v)},
+  {id:'win',   key:'G', label:'every window',       hint:'6 sashes · from extras', kind:'toggle',
+   apply:v=>setGroup(G.windows, v)},
+  {id:'globe', key:'B', label:'globes + armillary', hint:'3 swivels · ±180°',      kind:'spin',
+   apply:v=>{ for(const n of G.globes) setJoint(n, -180 + 360*v); }},
+  {id:'tel',   key:'T', label:'telescope — azimuth',hint:'±180°',                  kind:'spin',
+   apply:v=>setJoint('Telescope_Azimuth', -180 + 360*v)},
+  {id:'orr',   key:'M', label:'orrery mobile',      hint:'11 hangers · ±180°',     kind:'spin',
+   apply:v=>G.mobile.forEach((n,i)=> setJoint(n, -180 + 360*((v + i*0.09) % 1)))},
+];
+const UI = {};
+
+function buildUI(){
+  const side=document.getElementById('side'); side.innerHTML='';
+  const t=document.createElement('div'); t.className='tip';
+  t.innerHTML = TOUCH
+    ? 'Tap <b>walk in</b>: left stick moves, drag the view to look. <b>open</b> works on whatever you face; <b>lamps</b> and <b>exit</b> are on the right.'
+    : '<b>W A S D</b> move · <b>shift</b> run · <b>space</b> jump · <b>E</b> open what you face · <b>esc</b> leave walk mode';
+  side.append(t);
+
+  let h=document.createElement('h2'); h.textContent='░ THE BUILDING'; side.append(h);
+  for (const c of CONTROLS){
+    if (c.id === 'globe'){ const h2=document.createElement('h2'); h2.textContent='░ THE INSTRUMENTS'; side.append(h2); }
+    const w=document.createElement('div'); w.className='ctl';
+    const l=document.createElement('label');
+    l.innerHTML=`<span><b>${c.label}</b><kbd>${c.key}</kbd></span><span class="v">0%</span>`;
+    const i=document.createElement('input'); i.type='range'; i.min=0; i.max=100; i.value=0;
+    i.oninput=()=>{ l.querySelector('.v').textContent=i.value+'%'; c.apply(+i.value/100); };
+    const hint=document.createElement('div'); hint.className='lim'; hint.textContent=c.hint;
+    w.append(l,i,hint); side.append(w);
+    UI[c.id]={input:i, val:l.querySelector('.v'), ctl:c};
+  }
+
+  h=document.createElement('h2'); h.textContent='░ LIGHT'; side.append(h);
+  const b=document.createElement('div'); b.className='btns';
+  const lb=document.createElement('span'); lb.className='btn'; lb.id='bLamp';
+  lb.innerHTML='💡 lamps off <kbd>L</kbd>'; lb.onclick=()=>toggleLamps();
+  const nb=document.createElement('span'); nb.className='btn'; nb.id='bNight';
+  nb.innerHTML='🌙 night <kbd>N</kbd>'; nb.onclick=()=>toggleNight();
+  b.append(lb,nb); side.append(b);
+
+  document.getElementById('keys').innerHTML =
+    CONTROLS.map(c=>`<b>${c.key}</b> ${c.label}`).join('<br>') + '<br><b>L</b> lamps<br><b>N</b> night';
+}
+
+function setControl(id, v, fromKey){
+  const u = UI[id]; if(!u) return;
+  v = Math.max(0, Math.min(1, v));
+  u.input.value = Math.round(v*100);
+  u.val.textContent = u.input.value+'%';
+  u.ctl.apply(v);
+  if (fromKey) flash(`${u.ctl.label} → ${u.input.value}%`);
+}
+function nudge(id){
+  const u = UI[id]; if(!u) return;
+  const cur = (+u.input.value)/100;
+  setControl(id, u.ctl.kind === 'toggle' ? (cur > 0.5 ? 0 : 1) : (cur + 0.25) % 1.0001, true);
+}
+function toggleLamps(){
+  lampOn = !lampOn;
+  const lb=document.getElementById('bLamp');
+  lb.classList.toggle('on',lampOn); lb.innerHTML = (lampOn?'💡 lamps on':'💡 lamps off')+' <kbd>L</kbd>';
+  for (const m of glowMats){ m.emissive = new THREE.Color(lampOn?0xffb545:0x201408);
+    m.emissiveIntensity = lampOn?2.6:0.35; }
+  streetLight.intensity = lampOn?10:0; lanternLight.intensity = lampOn?7:0; deskLight.intensity = lampOn?5:0;
+  flash(lampOn ? 'lamps on' : 'lamps off');
+}
+function toggleNight(){
+  night = !night;
+  const nb=document.getElementById('bNight');
+  nb.classList.toggle('on',night); nb.innerHTML = (night?'☀ day':'🌙 night')+' <kbd>N</kbd>';
+  sun.intensity = night?0.18:2.4; hemi.intensity = night?0.32:1.1;
+  roomLight.intensity = night?5:14; loftLight.intensity = night?3:7;
+  scene.background = new THREE.Color(night?0x1d2740:0xcfe0ee);
+  renderer.toneMappingExposure = night?1.22:1.0;
+  flash(night ? 'night' : 'day');
+}
+let flashT=0;
+function flash(msg){ document.getElementById('hud').textContent = msg; flashT = performance.now(); }
+
+// ── modes ───────────────────────────────────────────────────────────────────
+let yaw=-Math.PI/2, pitch=0;
+const input = {f:0,b:0,l:0,r:0,run:0,jump:0,ax:0,az:0};
+
+function setMode(m){
+  mode = m;
+  document.getElementById('mOrbit').classList.toggle('on', m==='orbit');
+  document.getElementById('mWalk').classList.toggle('on', m==='walk');
+  orbit.enabled = (m==='orbit');
+  document.getElementById('cross').style.display = m==='walk' ? 'block' : 'none';
+  document.getElementById('keys').style.display  = (m==='walk' && !TOUCH) ? 'block' : 'none';
+  document.getElementById('look').style.display  = (m==='walk' && TOUCH) ? 'block' : 'none';
+  document.getElementById('stick').style.display = (m==='walk' && TOUCH) ? 'block' : 'none';
+  document.getElementById('tbtns').style.display = (m==='walk' && TOUCH) ? 'flex' : 'none';
+  Object.assign(input,{f:0,b:0,l:0,r:0,run:0,jump:0,ax:0,az:0});
+  if (m==='walk'){
+    walker.teleport(SPAWN.x, SPAWN.y, SPAWN.z); yaw=-Math.PI/2; pitch=0;
+    setVeil('walk in', TOUCH
+      ? 'Left stick moves, drag the view to look. The front door is shut — face it and press OPEN. Every slider has a button in here too.'
+      : 'W A S D to move, mouse to look. The front door is shut — face it and press E. The keys listed top-right work from inside. Esc leaves.');
+    document.getElementById('vgo')?.remove();
+    const go=document.createElement('div'); go.id='vgo'; go.textContent = TOUCH ? 'start' : 'click to look';
+    go.onclick=()=>{ setVeil(null); if(!TOUCH) renderer.domElement.requestPointerLock(); };
+    document.querySelector('#veil .card').append(go);
+    flash('find the door, then the stair to the loft');
+  } else {
+    setVeil(null);
+    if (document.pointerLockElement) document.exitPointerLock();
+    camera.position.copy(HOME.pos); orbit.target.copy(HOME.target);
+    camera.lookAt(orbit.target); orbit.update();
+    document.getElementById('hud').textContent = TOUCH ? 'orbit: drag to turn, pinch to zoom'
+                                                       : 'orbit: drag to turn, scroll to zoom';
+  }
+}
+document.getElementById('mOrbit').onclick=()=>setMode('orbit');
+document.getElementById('mWalk').onclick =()=>setMode('walk');
+
+document.addEventListener('mousemove', e=>{
+  if (mode!=='walk' || document.pointerLockElement !== renderer.domElement) return;
+  yaw   -= e.movementX * 0.0022;
+  pitch  = THREE.MathUtils.clamp(pitch - e.movementY*0.0022, -1.35, 1.35);
+});
+const KEY = {KeyW:'f',ArrowUp:'f',KeyS:'b',ArrowDown:'b',KeyA:'l',ArrowLeft:'l',KeyD:'r',ArrowRight:'r'};
+const CTLKEY = Object.fromEntries(CONTROLS.map(c=>['Key'+c.key, c.id]));
+addEventListener('keydown', e=>{
+  if (e.code === 'Escape' && mode === 'walk'){ setMode('orbit'); return; }
+  if (mode!=='walk') return;
+  if (KEY[e.code]) { input[KEY[e.code]]=1; e.preventDefault(); }
+  if (e.code==='ShiftLeft'||e.code==='ShiftRight') input.run=1;
+  if (e.code==='Space'){ input.jump=1; e.preventDefault(); }
+  if (e.code==='KeyE') interact();
+  if (CTLKEY[e.code]) nudge(CTLKEY[e.code]);
+  if (e.code==='KeyL') toggleLamps();
+  if (e.code==='KeyN') toggleNight();
+});
+addEventListener('keyup', e=>{
+  if (KEY[e.code]) input[KEY[e.code]]=0;
+  if (e.code==='ShiftLeft'||e.code==='ShiftRight') input.run=0;
+  if (e.code==='Space') input.jump=0;
+});
+// esc also drops pointer lock; treat losing the lock as leaving walk mode
+document.addEventListener('pointerlockchange', ()=>{
+  // Chrome eats the Escape keydown when it releases the lock, so losing the
+  // lock IS the signal to leave walk mode.
+  if (!document.pointerLockElement && mode==='walk' && !TOUCH
+      && document.getElementById('veil').style.display === 'none') setMode('orbit');
+});
+addEventListener('keyup', e=>{ if (e.code==='Escape' && mode==='walk') setMode('orbit'); });
+
+// ── touch ───────────────────────────────────────────────────────────────────
+const look=document.getElementById('look'), stick=document.getElementById('stick'), knob=document.getElementById('knob');
+let lookId=null, lastX=0, lastY=0;
+look.addEventListener('pointerdown', e=>{ lookId=e.pointerId; lastX=e.clientX; lastY=e.clientY;
+  look.setPointerCapture(e.pointerId); });
+look.addEventListener('pointermove', e=>{
+  if (e.pointerId!==lookId) return;
+  yaw   -= (e.clientX-lastX) * 0.0045;
+  pitch  = THREE.MathUtils.clamp(pitch - (e.clientY-lastY)*0.0045, -1.35, 1.35);
+  lastX=e.clientX; lastY=e.clientY;
+});
+const endLook=e=>{ if(e.pointerId===lookId) lookId=null; };
+look.addEventListener('pointerup', endLook); look.addEventListener('pointercancel', endLook);
+
+let stickId=null; const R=44;
+stick.addEventListener('pointerdown', e=>{ stickId=e.pointerId; stick.setPointerCapture(e.pointerId); moveStick(e); });
+stick.addEventListener('pointermove', e=>{ if(e.pointerId===stickId) moveStick(e); });
+const endStick=e=>{ if(e.pointerId!==stickId) return; stickId=null; input.ax=input.az=0;
+  knob.style.transform='translate(0,0)'; };
+stick.addEventListener('pointerup', endStick); stick.addEventListener('pointercancel', endStick);
+function moveStick(e){
+  const r = stick.getBoundingClientRect();
+  let dx = e.clientX-(r.left+r.width/2), dy = e.clientY-(r.top+r.height/2);
+  const len = Math.hypot(dx,dy)||1, k = Math.min(1, len/R);
+  dx = dx/len*k*R; dy = dy/len*k*R;
+  knob.style.transform=`translate(${dx}px,${dy}px)`;
+  input.ax = dx/R; input.az = dy/R;
+}
+document.getElementById('tOpen').addEventListener('pointerdown', e=>{ e.preventDefault(); interact(); });
+document.getElementById('tLamp').addEventListener('pointerdown', e=>{ e.preventDefault(); toggleLamps(); });
+document.getElementById('tExit').addEventListener('pointerdown', e=>{ e.preventDefault(); setMode('orbit'); });
+const jb=document.getElementById('tJump');
+jb.addEventListener('pointerdown', e=>{ e.preventDefault(); input.jump=1; });
+jb.addEventListener('pointerup',   ()=>{ input.jump=0; });
+
+// ── interact ────────────────────────────────────────────────────────────────
+const ray = new THREE.Raycaster(); ray.far = 3.2;
+function interact(){
+  if (mode!=='walk' || !house) return;
+  ray.setFromCamera(new THREE.Vector2(0,0), camera);
+  for (const h of ray.intersectObject(house, true)){
+    for (let a=h.object; a; a=a.parent){
+      if (joints[a.name]){
+        const j = joints[a.name];
+        const span = (Math.abs(j.max) > Math.abs(j.min)) ? j.max : j.min;
+        const opening = Math.abs(j.cur) < Math.abs(span)*0.5;
+        setJoint(a.name, opening ? span : 0);
+        if (a.name==='Ext_Door_Leaf'){ updateDoorBlock(); syncFromJoint('door','Ext_Door_Leaf'); }
+        flash(`${opening?'opened':'shut'} ${a.name}`);
+        return;
+      }
+    }
+  }
+  flash('nothing to open here');
+}
+function syncFromJoint(id, name){
+  const u=UI[id], j=joints[name]; if(!u||!j) return;
+  const span=(Math.abs(j.max)>Math.abs(j.min))?j.max:j.min;
+  u.input.value = Math.round(100*Math.abs(j.cur)/Math.abs(span||1));
+  u.val.textContent = u.input.value+'%';
+}
+
+// ── loop ────────────────────────────────────────────────────────────────────
+const WHERE = document.getElementById('where');
+renderer.setAnimationLoop(()=>{
+  const dt = clock.getDelta();
+  if (ready && mode==='walk'){
+    camera.quaternion.setFromEuler(new THREE.Euler(pitch, yaw, 0, 'YXZ'));
+    walker.update(dt, input);
+    const p = walker.position;
+    WHERE.textContent = p.y > 2.4 ? 'on the loft' : (p.x > -3.5 ? 'inside' : 'outside');
+    if (flashT && performance.now()-flashT > 2600){ flashT=0;
+      document.getElementById('hud').textContent = 'E opens what you face · the keys top-right work in here'; }
+  } else if (ready){ orbit.update(); }
+  renderer.render(scene, camera);
+});
+
+function resize(){
+  const w = stage.clientWidth, h = stage.clientHeight;
+  renderer.setSize(w, h, false); camera.aspect = w/h; camera.updateProjectionMatrix();
+}
+addEventListener('resize', resize);
+addEventListener('orientationchange', ()=>setTimeout(resize, 250));
+
+// test hooks
+window.__scene = scene; window.__THREE = THREE; window.__camera = camera;
+window.__house = ()=>house;
+window.__view = (eye, target)=>{ mode='orbit'; orbit.enabled=true;
+  camera.position.set(eye[0],eye[1],eye[2]); orbit.target.set(target[0],target[1],target[2]);
+  camera.lookAt(orbit.target); orbit.update(); renderer.render(scene,camera); };
+window.__setMode = setMode; window.__mode = ()=>mode;
+window.__walker = ()=>walker;
+window.__tp = (x,y,z)=>walker.teleport(x,y,z);
+window.__look = (deg,p=0)=>{ yaw = THREE.MathUtils.degToRad(deg); pitch = p; };
+window.__joint = (n,v)=>setJoint(n,v);
+window.__group = (g,t)=>setGroup(G[g], t);
+window.__blocked = ()=>walker.extraColliders.includes(DOORWAY);
+window.__interact = interact;
+window.__key = (id)=>nudge(id);
+window.__ctls = ()=>CONTROLS.map(c=>c.id);
+window.__ctlvals = ()=>Object.fromEntries(Object.entries(UI).map(([k,u])=>[k, +u.input.value]));
+window.__jointval = (n)=>joints[n]?.cur;
+window.__lamps = ()=>({on:lampOn, street:streetLight.intensity, lantern:lanternLight.intensity,
+                       desk:deskLight.intensity, streetPos:streetLight.position.toArray()});
+window.__pos = ()=>walker.position.toArray().map(v=>+v.toFixed(2));
+window.__dir = ()=>{ const v=new THREE.Vector3(); camera.getWorldDirection(v); return v.toArray(); };
+window.__step = (frames, keys)=>{
+  Object.assign(input, {f:0,b:0,l:0,r:0,ax:0,az:0}, keys);
+  for(let i=0;i<frames;i++){
+    camera.quaternion.setFromEuler(new THREE.Euler(pitch, yaw, 0, 'YXZ'));
+    walker.update(1/60, input);
+  }
+  Object.assign(input,{f:0,b:0,l:0,r:0,ax:0,az:0});
+  return window.__pos();
+};
+</script>
+</body>
+</html>
