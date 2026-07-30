@@ -779,12 +779,17 @@ h1{letter-spacing:-.025em !important}
       <span style="width:11px;height:11px;border-radius:50%;background:var(--pink);border:1.5px solid var(--edge)"></span>
       <span style="width:11px;height:11px;border-radius:50%;background:var(--yellow);border:1.5px solid var(--edge)"></span>
       <span style="width:11px;height:11px;border-radius:50%;background:var(--mint);border:1.5px solid var(--edge)"></span>
-      <span style="font-family:'Space Mono',monospace;font-size:11.5px;margin-left:6px">world_experiment.mp4 — field recording</span>
-      <span style="margin-left:auto;font-family:'Pixelify Sans',monospace;font-size:12px;color:var(--pinkdeep)">● rec</span>
+      <span style="font-family:'Space Mono',monospace;font-size:11.5px;margin-left:6px">{{ vidTitle }}</span>
+      <span style="margin-left:auto;display:flex;align-items:center;gap:7px">
+        <span onClick="{{ onVidPrev }}" title="previous clip" style="cursor:pointer;border:1.5px solid var(--edge);border-radius:8px;padding:1px 9px;background:var(--paper);font-family:'Pixelify Sans',monospace;font-size:13px;color:var(--ink);box-shadow:1.5px 1.5px 0 var(--edge)">‹</span>
+        <span style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px">{{ vidDots }}</span>
+        <span onClick="{{ onVidNext }}" title="next clip" style="cursor:pointer;border:1.5px solid var(--edge);border-radius:8px;padding:1px 9px;background:var(--paper);font-family:'Pixelify Sans',monospace;font-size:13px;color:var(--ink);box-shadow:1.5px 1.5px 0 var(--edge)">›</span>
+        <span style="font-family:'Pixelify Sans',monospace;font-size:12px;color:var(--pinkdeep);margin-left:3px">● rec</span>
+      </span>
     </div>
-    <video id="wt-vid" src="./assets/world-teaser.mp4" muted="muted" loop="loop" autoplay playsinline preload="metadata" style="display:block;width:100%;aspect-ratio:16/9;object-fit:cover;background:#dfeef2"></video>
+    <video id="wt-vid" muted="muted" loop="loop" autoplay playsinline preload="metadata" style="display:block;width:100%;aspect-ratio:16/9;object-fit:cover;background:#dfeef2"></video>
     <div style="padding:7px 14px;border-top:1.5px solid var(--edge);background:var(--bg);font-family:'Space Mono',monospace;font-size:10.5px;color:var(--muted)">
-      <span>somewhere in the lab, generated assets are already driving around a world of their own</span>
+      <span>{{ vidCaption }}</span>
     </div>
   </div>
   <div style="display:flex;gap:12px;justify-content:center">
@@ -816,7 +821,7 @@ class Component extends DCLogic {
   state = { asset: null, tab: 'viewer', feat: 'rig', live: {}, wf: false, normals: false, labels: true, explode: null, groups: [], flat: false, parts: 0, hidden: {}, expanded: {}, rootName: '', dark: false, flash: null, picked: null, editEx: 'rabbit', tabsTouched: false, chipsTouched: false, rigArmed: false, rigThr: 0, rigSteer: 0, rigManual: false, rigFit: 0.72,
     // Articulate/animate tab: which asset, which baked clip, and any joints
     // the visitor has taken over. rigCtrls/rigClips are read off the GLB.
-    rigEx: null, rigFade: false, rigLog: null, kartLog: null, rigClip: null, rigJoints: {}, rigCtrls: [], rigClips: [] };
+    vid: 0, rigEx: null, rigFade: false, rigLog: null, kartLog: null, rigClip: null, rigJoints: {}, rigCtrls: [], rigClips: [] };
   // Which asset the studio opens on before the visitor picks one. Every screen
   // size opens on the same one and walks assetOrder from there, so the preview
   // tells the same story in the same order everywhere — phones used to start on
@@ -1000,6 +1005,9 @@ class Component extends DCLogic {
       if (!vid) return;
       const arm = () => { vid.muted = true; vid.loop = true; vid.playsInline = true; vid.defaultMuted = true; };
       arm();
+      // src is set here rather than bound in the markup, so the browser never
+      // requests the literal placeholder. The arrows set it the same way.
+      if (!vid.getAttribute('src')) { vid.src = this._vidSrc || './assets/world-teaser.mp4'; vid.load(); }
       vid.addEventListener('ended', () => { arm(); vid.currentTime = 0; vid.play().catch(() => {}); });
       this._vio = new IntersectionObserver((es) => es.forEach((x) => {
         if (x.isIntersecting) { arm(); if (vid.preload !== 'auto') vid.preload = 'auto'; vid.play().catch(() => {}); }
@@ -1245,6 +1253,29 @@ class Component extends DCLogic {
     const codeText = meta.text + '\n\n# ⋯ excerpt — the full ' + meta.lines + '-line program IS the asset.\n# GLB is just its compilation target.';
     // Edit-per-part sits ahead of UV maps: it's the one that sells "the asset
     // stays alive", where UV maps read as a technical footnote by comparison.
+    // ── Roadmap clips ───────────────────────────────────────────────────────
+    // Two recordings in one card, stepped through with the arrows rather than
+    // stacked into another section.
+    const CLIPS = [
+      { src: './assets/world-teaser.mp4', title: 'world_experiment.mp4 — field recording',
+        cap: 'somewhere in the lab, generated assets are already driving around a world of their own' },
+      { src: './assets/ash-wake.mp4', title: 'ash_wake.mp4 — field recording',
+        cap: 'and in another, they are the level you are playing through' },
+    ];
+    const vidI = ((s.vid || 0) % CLIPS.length + CLIPS.length) % CLIPS.length;
+    this._vidSrc = CLIPS[vidI].src;
+    const stepVid = (d) => () => {
+      this._act = Date.now();
+      this.setState({ vid: vidI + d });
+      // the element keeps its id, so swapping src needs an explicit reload;
+      // the observer that pauses it offscreen goes on working untouched
+      setTimeout(() => {
+        const v = document.getElementById('wt-vid');
+        if (!v) return;
+        v.src = CLIPS[((vidI + d) % CLIPS.length + CLIPS.length) % CLIPS.length].src;
+        v.load(); v.muted = true; v.playsInline = true; v.play().catch(() => {});
+      }, 0);
+    };
     // ── Articulate / animate tab: two assets ────────────────────────────────
     // The kart is a procedural rig (wheels derived from its own axles). The eye
     // robot ships six baked clips plus CTRL_* joints that declare their own axis
@@ -1346,6 +1377,9 @@ class Component extends DCLogic {
       pickRigKart: () => { this._act = Date.now(); this.setState({ chipsTouched: true }); if ((s.rigEx || rigEx) !== 'kart') this._rigSwap('kart'); },
       pickRigRobot: () => { this._act = Date.now(); this.setState({ chipsTouched: true }); if ((s.rigEx || rigEx) !== 'robot') this._rigSwap('robot'); },
       rigClipName, jointRows,
+      vidSrc: CLIPS[vidI].src, vidTitle: CLIPS[vidI].title, vidCaption: CLIPS[vidI].cap,
+      vidDots: CLIPS.map((c, i) => (i === vidI ? '●' : '○')).join(' '),
+      onVidPrev: stepVid(-1), onVidNext: stepVid(1),
       // The side panel echoes the call the slider just made, the way the
       // asset's own demo page does — the limit quoted is the one read from the
       // file, so it is the rig describing itself rather than a caption.
