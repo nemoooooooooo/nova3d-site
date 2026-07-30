@@ -18,7 +18,11 @@ const gltfLoader=(L)=>{
  if(!dracoP){
   dracoP=new L.DRACOLoader();
   dracoP.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.7/');
-  // wasm decoder, not the js fallback: ~200KB against ~700KB, and faster
+  // wasm decoder, not the js fallback: ~200KB against ~700KB, and faster.
+  // NOTE: DRACOLoader builds its workers from a blob: URL, so the serving CSP
+  // must allow blob: in script-src (or set worker-src). setWorkerLimit(0) is
+  // NOT an escape hatch — three then indexes an empty worker pool and nothing
+  // decodes at all, silently.
  }
  g.setDRACOLoader(dracoP);
  return g;
